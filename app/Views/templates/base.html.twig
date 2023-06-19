@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html class="h-100" lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    {% block head %}{% endblock %}
+
+    <title>
+        {% block title %}
+            {{ title }}
+        {% endblock %}
+    </title>
+
+    <link rel="stylesheet" href="{{ assets('css/app.css') }}">
+
+    <script>
+        // On page load or when changing themes, best to add inline in `head` to avoid FOUC
+        if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+    </script>
+
+</head>
+<body class="{{ getPageClass() }}">
+
+
+
+{{ include('preloader.html.twig') }}
+
+<div class="antialiased bg-gray-50 dark:bg-gray-900">
+
+
+    {% if session.user %}
+
+        <!-- Top Navigation -->
+        {% include('navigation.html.twig') %}
+
+        <!-- Sidebar -->
+        {% include('sidebar.html.twig') %}
+
+    {% endif %}
+
+
+    <main class="p-4 {% if session.user %} md:ml-48 {% endif %} h-screen pt-20">
+        {% if session.user %}
+            {% include('alerts.html.twig') %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+
+    </main>
+</div>
+
+
+
+
+<script src="{{ assets('js/app.js') }}" ></script>
+
+<script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+<script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+{% block javascripts %}{% endblock %}
+
+<script id="__bs_script__">//<![CDATA[
+    (function () {
+        try {
+            var script = document.createElement('script');
+            if ('async') {
+                script.async = true;
+            }
+            script.src = 'http://HOST:3000/browser-sync/browser-sync-client.js?v=2.29.1'.replace("HOST", location.hostname);
+            if (document.body) {
+                document.body.appendChild(script);
+            }
+        } catch (e) {
+            console.error("Browsersync: could not append script tag", e);
+        }
+    })()
+    //]]>
+</script>
+
+</body>
+</html>

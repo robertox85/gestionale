@@ -1,0 +1,113 @@
+<nav class="flex flex-col md:flex-row justify-between items-start md:items-center space-y-3 md:space-y-0 p-4"
+     aria-label="Table navigation">
+
+    {% set itemsPerPage = totalItems / totalPages %}
+    {% set startItem = (currentPage - 1) * itemsPerPage + 1 %}
+    {% set endItem = min(currentPage * itemsPerPage, totalItems) %}
+
+    <!-- round itemsPerPage up to the nearest integer -->
+    {% set itemsPerPage = itemsPerPage|round(0, 'ceil') %}
+
+    {% set startItem = startItem|round(0, 'ceil') %}
+    {% set endItem = endItem|round(0, 'ceil') %}
+
+
+    <div>
+        <label for="items-per-page"
+               class="ml-2 mb-2 text-sm font-medium text-gray-900 dark:text-white">
+            {{ 'Items per page'|trans }}
+        </label>
+        <select id="items-per-page" name="items-per-page"
+                class="form-select inline-block mt-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
+
+
+            <option value="10" {% if itemsPerPage > 0 and itemsPerPage <= 10 %}selected{% endif %}>10</option>
+            <option value="20" {% if itemsPerPage > 10 and itemsPerPage <= 20 %}selected{% endif %}>20</option>
+            <option value="50" {% if itemsPerPage > 20 and itemsPerPage <= 50 %}selected{% endif %}>50</option>
+            <option value="100" {% if itemsPerPage > 50 %}selected{% endif %}>100</option>
+        </select>
+    </div>
+
+
+    {% if totalPages > 1 %}
+        <ul class="inline-flex items-stretch -space-x-px">
+            <li>
+                <a href="{% if currentPage > 1 %}{{ url('users', {page: currentPage - 1}) }}{% else %}#{% endif %}"
+                   class="flex items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                    <span class="sr-only">Previous</span>
+                    <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd"
+                              d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                              clip-rule="evenodd"/>
+                    </svg>
+                </a>
+            </li>
+            <li>
+                {% if page == currentPage or currentPage == 1 %}
+                    <span class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-primary-600 bg-primary-50 border border-primary-300 hover:bg-primary-100 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">1</span>
+                {% else %}
+                    <a href="{{ url('users', {page: 1}) }}"
+                       class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a>
+                {% endif %}
+
+            </li>
+            {% if currentPage > 4 %}
+                <li>
+                    <a href="#"
+                       class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">...</a>
+                </li>
+            {% endif %}
+            {% for page in currentPage-2..currentPage+2 %}
+                {% if page > 1 and page < totalPages %}
+                    {% if page == currentPage %}
+                        <span class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-primary-600 bg-primary-50 border border-primary-300 hover:bg-primary-100 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{ page }}</span>
+                    {% else %}
+                        <a href="{{ url('users', {page: page}) }}"
+                           class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">{{ page }}</a>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            {% if currentPage < totalPages - 3 %}
+                <li>
+                    <a href="#"
+                       class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">...</a>
+                </li>
+            {% endif %}
+            <li>
+                {% if page == currentPage or currentPage == totalPages %}
+                    <span class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-primary-600 bg-primary-50 border border-primary-300 hover:bg-primary-100 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{ totalPages }}</span>
+                {% else %}
+                    <a href="{{ url('users', {page: totalPages}) }}"
+                       class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">{{ totalPages }}</a>
+                {% endif %}
+
+            </li>
+
+            <li>
+                <a href="{{ url('users', {page: currentPage + 1}) }}"
+                   class="flex items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                    <span class="sr-only">Next</span>
+                    <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4
+                    4a1 1 0 01-1.414 0z" clip-rule="evenodd"/>
+                    </svg>
+                </a>
+            </li>
+        </ul>
+    {% endif %}
+
+    <span class="text-sm font-normal text-gray-500 dark:text-gray-400">
+        {{ 'Showing'|trans }}
+        <span class="font-semibold text-gray-900 dark:text-white">
+            {{ startItem }}-{{ endItem }}
+        </span>
+        {{ 'of'|trans }}
+        <span class="font-semibold text-gray-900 dark:text-white">
+            {{ totalItems }}
+        </span>
+        {{ 'results'|trans }}
+    </span>
+
+</nav>

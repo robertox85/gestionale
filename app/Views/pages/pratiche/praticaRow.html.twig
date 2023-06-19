@@ -1,0 +1,116 @@
+<tr class="border-b dark:border-gray-700">
+
+    <td class="w-4 p-4">
+        <div class="flex items-center">
+            <input data-id="{{ pratica.id }}" id="checkbox-table-search-1" type="checkbox" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 dark:focus:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+            <label for="checkbox-table-search-1" class="sr-only">checkbox</label>
+        </div>
+    </td>
+
+    <th scope="row"
+        class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+        {{ pratica.id }}
+    </th>
+
+    <th scope="row"
+        class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+        {{ pratica.nome }}
+    </th>
+
+    <td class="px-4 py-3">
+        {% if pratica.stato == 'Attiva' %}
+            <span class="px-2 py-1 font-semibold leading-tight text-green-700 bg-green-100 rounded-full dark:bg-green-700 dark:text-green-100">
+                Attiva
+            </span>
+        {% endif %}
+
+        {% if pratica.stato == 'Archiviata' %}
+            <span class="px-2 py-1 font-semibold leading-tight text-yellow-700 bg-yellow-100 rounded-full dark:bg-yellow-700 dark:text-yellow-100">
+                Archiviata
+            </span>
+        {% endif %}
+
+        {% if pratica.stato == 'pending' %}
+            <span class="px-2 py-1 font-semibold leading-tight text-yellow-700 bg-yellow-100 rounded-full dark:bg-yellow-700 dark:text-yellow-100">Pending</span>
+        {% endif %}
+
+        {% if pratica.stato == 'banned' %}
+            <span class="px-2 py-1 font-semibold leading-tight text-red-700 bg-red-100 rounded-full dark:bg-red-700 dark:text-red-100">Banned</span>
+        {% endif %}
+    </td>
+
+    <td class="px-4 py-3">
+        <span class="px-2 py-1 font-semibold leading-tight">
+            {{ pratica.tipologia }}
+        </span>
+    </td>
+
+    <td class="px-4 py-3">
+        <span class="px-2 py-1 font-semibold leading-tight">
+            {{ pratica.competenza }}
+        </span>
+    </td>
+
+    <td class="px-4 py-3">
+        <span class="px-2 py-1 font-semibold leading-tight">
+            {{ pratica.prossima_scadenza }}
+        </span>
+    </td>
+
+    <td class="px-4 py-3">
+        <span class="px-2 py-1 font-semibold leading-tight">
+            {{ pratica.ruolo }}
+        </span>
+    </td>
+
+    <td class="px-4 py-3 flex items-center justify-end">
+        <button id="user-{{ pratica.id }}-dropdown-button"
+                data-dropdown-toggle="user-{{ pratica.id }}-dropdown"
+                class="inline-flex items-center p-0.5 text-sm font-medium text-center text-gray-500 hover:text-gray-800 rounded-lg focus:outline-none dark:text-gray-400 dark:hover:text-gray-100"
+                type="button">
+            <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20"
+                 xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 10a2 2 0 11-4 0 2 2 0 014 0zM12 10a2 2 0 11-4 0 2 2 0 014 0zM16 12a2 2 0 100-4 2 2 0 000 4z"/>
+            </svg>
+        </button>
+        <div id="user-{{ pratica.id }}-dropdown"
+             class="hidden z-10 w-44 bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700 dark:divide-gray-600">
+            <ul class="py-1 text-sm text-gray-700 dark:text-gray-200"
+                aria-labelledby="user-{{ pratica.id }}-dropdown-button">
+                <li>
+                    <a data-modal-target="defaultModal" data-modal-toggle="defaultModal" href="#"
+                       class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                        {{ 'Show'|trans }}
+                    </a>
+                </li>
+                <li>
+                    <a href="#"
+                       data-modal-target="updateUserModal"
+                       data-modal-toggle="updateUserModal"
+                       data-modal-data='{
+                            "id": "{{ pratica.id }}",
+                            "username": "{{ pratica.username }}",
+                            "email": "{{ pratica.email }}",
+                            "status": "{{ pratica.status }}",
+                            "role": "{{ pratica.role }}"
+                        }'
+
+                       class="block py-2 px-4 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                        {{ 'Edit'|trans }}
+                    </a>
+                </li>
+            </ul>
+            <div class="py-1">
+                <a href="#"
+                    {% if pratica.id != session.pratica.id %}
+                        data-modal-target="deleteUserModal"
+                        data-modal-toggle="deleteUserModal"
+                        data-modal-data='{"id": "{{ pratica.id }}"}'
+                    {% endif %}
+                   class="{% if pratica.id == session.pratica.id %} cursor-not-allowed opacity-20 {% endif %} block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">
+                    {{ 'Delete'|trans }}
+                </a>
+            </div>
+        </div>
+    </td>
+</tr>

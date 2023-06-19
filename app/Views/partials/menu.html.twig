@@ -1,0 +1,105 @@
+<ul class="space-y-2">
+    <li>
+        <a href="{{url('/')}}"  class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <!-- overview icon -->
+            <ion-icon name="stats-chart" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+
+            <span class="ml-3">Overview</span>
+        </a>
+    </li>
+
+
+    <li>
+        <a href="{{url('/assistiti')}}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="person" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Assistiti</span>
+        </a>
+    </li>
+
+
+    <li>
+        <a href="{{url('/controparti')}}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="people" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Controparti</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{url('/pratiche')}}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="document-text" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Pratiche</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ url('/gruppi') }}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="people" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Gruppi</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{ url('/sottogruppi') }}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="people" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">
+                Sottogruppi
+            </span>
+        </a>
+    </li>
+
+<!--
+
+    <li>
+        <a href="{{url('/collaboratori')}}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="people" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Collaboratori</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{url('/search')}}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="search" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Ricerca</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{url('/users')}}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="people" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Utenti</span>
+        </a>
+    </li>
+
+
+    <li>
+        <a href="{{url('/archivio')}}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="archive" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Archivio</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{url('/programmi')}}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="archive" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Programmi</span>
+        </a>
+    </li>
+
+    <li>
+        <a href="{{url('/utente')}}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="archive" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Utente</span>
+        </a>
+    </li>
+-->
+
+    <li>
+        <a href="{{url('/impostazioni')}}" class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+            <ion-icon name="settings" class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+            <span class="ml-3">Impostazioni</span>
+        </a>
+    </li>
+
+
+
+</ul>

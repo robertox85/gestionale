@@ -1,0 +1,372 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ 'Create a new practice'|trans }}
+{% endblock %}
+
+{% block content %}
+    <section class="bg-white dark:bg-gray-900">
+        <div class="py-8 px-4 mx-auto w-full lg:py-16">
+
+            <div class=" flex justify-between w-full items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ 'Create a new practice'|trans }}
+                </h2>
+            </div>
+
+            <form action="{{ url('pratiche/crea') }} " method="post" class="w-full">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token('crea-pratica') }}">
+                <div class="grid sm:grid-cols-3 md:gap-24">
+                    <div class="grid sm:col-span-2 sm:grid-cols-2 gap-4 sm:gap-6">
+
+                        <!-- Testo: Nome pratica -->
+                        <div>
+                            <label for="nome_pratica" >
+                                {{ 'Practice name'|trans }}
+                            </label>
+                            <input type="text" name="nome_pratica" id="nome_pratica" placeholder="{{ 'Type practice name'|trans }}">
+                        </div>
+                        <!-- Testo: Tipologia -->
+                        <div >
+                            <label for="tipologia" >
+                                {{ 'Typology'|trans }}
+                            </label>
+                            <input type="text" name="tipologia" id="tipologia" placeholder="{{ 'Type typology'|trans }}" >
+                        </div>
+
+                        <!-- Testo: Avvocato -->
+                        <div >
+                            <label for="avvocato" >
+                                {{ 'Lawyer'|trans }}
+                            </label>
+                            <input type="text" name="avvocato" id="avvocato" placeholder="{{ 'Type lawyer name'|trans }}" >
+                        </div>
+                        <!-- Testo: Referente -->
+                        <div >
+                            <label for="referente" >
+                                {{ 'Referent'|trans }}
+                            </label>
+                            <input type="text" name="referente" id="referente" placeholder="{{ 'Type referent name'|trans }}">
+                        </div>
+                        <!-- Testo: Competenza -->
+                        <div >
+                            <label for="competenza" >
+                                {{ 'Competence'|trans }}
+                            </label>
+                            <input type="text" name="competenza" id="competenza"   placeholder="{{ 'Type competence'|trans }}">
+                        </div>
+                        <!-- Testo: Ruolo generale -->
+                        <div >
+                            <label for="ruolo_generale" >
+                                {{ 'General role'|trans }}
+                            </label>
+                            <input type="text" name="ruolo_generale" id="ruolo_generale" placeholder="{{ 'Type general role'|trans }}"
+                                   >
+                        </div>
+                        <!-- Testo: Giudice -->
+                        <div >
+                            <label for="giudice" >
+                                {{ 'Judge'|trans }}
+                            </label>
+                            <input type="text" name="giudice" id="giudice" placeholder="{{ 'Type judge name'|trans }}" >
+                        </div>
+
+
+
+
+                        <div x-data="{ assistiti: [] }"
+                             class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2 rounded">
+                            <label >
+                                {{ 'Assisted'|trans }}
+                            </label>
+                            <template x-for="(assistito, index) in assistiti" :key="index">
+                                <div class="flex mt-2 w-full gap-2">
+                                    <!-- select -->
+                                    <select x-model="assistito.tipo" >
+                                        <option value="persona_fisica">Persona Fisica</option>
+                                        <option value="societa">Società</option>
+                                    </select>
+                                    <input x-model="assistito.nome" type="text" placeholder="Nome" >
+                                    <input x-model="assistito.cognome" type="text" placeholder="Cognome" >
+                                    <button type="button" x-on:click="assistiti.splice(index, 1)"
+                                            class="text-white bg-red-500 px-2 py-1 rounded flex items-center">
+                                        <ion-icon name="trash"></ion-icon>
+                                    </button>
+                                </div>
+                            </template>
+
+                            <button x-on:click="assistiti.push({ nome: '', cognome: '', tipo: 'persona_fisica' })"
+                                    class="text-blue-500 flex items-center mt-4" type="button">
+                                <ion-icon name="add-outline"></ion-icon>
+                                {{ 'Add assisted'|trans }}
+                            </button>
+                        </div>
+
+
+                        <!-- Form Controparti -->
+                        <!-- Select: Persona fisica|Società -->
+                        <!-- Testo: Cognome -->
+                        <!-- Testo: Nome -->
+
+                        <div x-data="{ controparti: [] }"
+                             class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
+                            <label >
+                                {{ 'Counterparties'|trans }}
+                            </label>
+                            <template x-for="(controparte, index) in controparti" :key="index">
+                                <div class="flex mt-2 w-full gap-2">
+                                    <!-- select -->
+                                    <select x-model="controparte.tipo" >
+                                        <option value="persona_fisica">Persona Fisica</option>
+                                        <option value="societa">Società</option>
+                                    </select>
+                                    <input x-model="controparte.nome" type="text" placeholder="Nome" >
+                                    <input x-model="controparte.cognome" type="text" placeholder="Cognome" >
+                                    <button type="button" x-on:click="controparti.splice(index, 1)"
+                                            class="text-white bg-red-500 px-2 py-1 rounded flex items-center">
+                                        <ion-icon name="trash"></ion-icon>
+                                    </button>
+                                </div>
+                            </template>
+
+                            <button x-on:click="controparti.push({ nome: '', cognome: '', tipo: 'persona_fisica' })"
+                                    class="text-blue-500 flex items-center mt-4" type="button">
+                                <ion-icon name="add-outline"></ion-icon>
+                                {{ 'Add counterparty'|trans }}
+                            </button>
+                        </div>
+
+
+                        <!-- Form Scadenza della pratica -->
+                        <!-- Datetime: Scadenza -->
+                        <!-- Testo: Motivo della scadenza -->
+
+                        <div x-data="{ scadenze: [] }"
+                             class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
+                            <label >
+                                {{ 'Deadlines'|trans }}
+                            </label>
+                            <template x-for="(scadenza, index) in scadenze" :key="index">
+                                <div class="flex mt-2 w-full gap-2">
+                                    <!-- select -->
+                                    <div class="relative w-full">
+                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                            <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400"
+                                                 fill="currentColor" viewBox="0 0 20 20"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd"
+                                                      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                      clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                        <input datepicker x-model="scadenza.data" type="text"
+                                               placeholder="Select date">
+                                    </div>
+                                    <input x-model="scadenza.motivo" type="text" placeholder="Motivo" >
+                                    <button type="button" x-on:click="scadenze.splice(index, 1)"
+                                            class="text-white bg-red-500 px-2 py-1 rounded flex items-center">
+                                        <ion-icon name="trash"></ion-icon>
+                                    </button>
+                                </div>
+                            </template>
+
+                            <button x-on:click="scadenze.push({ data: '', motivo: '' }); initDatePicker()"
+                                    class="text-blue-500 flex items-center mt-4" type="button">
+                                <ion-icon name="add-outline"></ion-icon>
+                                {{ 'Add deadline'|trans }}
+                            </button>
+                        </div>
+
+                        <!-- Form Calcolatore scadenza -->
+                        <!-- Datetime: Data iniziale -->
+                        <!-- Numero: Giorni -->
+                        <!-- Select: Prima/Dopo -->
+                        <!-- Checkbox: Sospensione dei termini processuali -->
+
+
+                        <!-- Form Registro udienze -->
+                        <!-- Testo: Tipo udienza -->
+                        <!-- Datetime: Data udienza -->
+
+                        <div x-data="{ udienze: [] }"  class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
+                            <label >
+                                {{ 'Hearings'|trans }}
+                            </label>
+                            <template x-for="(udienza, index) in udienze" :key="index">
+                                <div class="flex mt-2 w-full gap-2">
+                                    <!-- select -->
+                                    <input x-model="udienza.tipo" type="text" placeholder="Tipo" >
+
+                                    <div class="relative w-full">
+                                        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                            <svg aria-hidden="true" class="w-5 h-5 text-gray-500 dark:text-gray-400"
+                                                 fill="currentColor" viewBox="0 0 20 20"
+                                                 xmlns="http://www.w3.org/2000/svg">
+                                                <path fill-rule="evenodd"
+                                                      d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+                                                      clip-rule="evenodd"></path>
+                                            </svg>
+                                        </div>
+                                        <input datepicker x-model="udienza.data" type="text"
+                                               placeholder="Select date">
+                                    </div>
+                                    <button type="button" x-on:click="udienze.splice(index, 1)"
+                                            class="text-white bg-red-500 px-2 py-1 rounded flex items-center">
+                                        <ion-icon name="trash"></ion-icon>
+                                    </button>
+                                </div>
+                            </template>
+                            <button x-on:click="udienze.push({ tipo: '', data: '' }); initDatePicker()"
+                                    class="text-blue-500 flex items-center mt-4" type="button">
+                                <ion-icon name="add-outline"></ion-icon>
+                                {{ 'Add hearing'|trans }}
+                            </button>
+                        </div>
+
+
+                    </div>
+
+                    <div class="flex flex-col gap-4 sm:gap-6">
+
+                        <!-- Select: Stato -->
+                        <div >
+                            <label for="stato" >
+                                {{ 'Practice status'|trans }}
+                            </label>
+                            <select id="stato" >
+                                <option selected="">{{ 'Status'|trans }}</option>
+                                <option value="TV">TV/Monitors</option>
+                                <option value="PC">PC</option>
+                                <option value="GA">Gaming/Console</option>
+                                <option value="PH">Phones</option>
+                            </select>
+                        </div>
+
+                        <!-- Multi Select: Assegna gruppo -->
+                        <div >
+                            <label for="assign_group" >
+                                {{ 'Select a group'|trans }}
+                            </label>
+                            <select id="assign_group" name="assign_group[]" >
+                                <option selected="">{{ 'Select a group'|trans }}</option>
+                                <option value="TV">Gruppo 1</option>
+                                <option value="PC">Gruppo 2</option>
+                                <option value="GA">Gruppo 3</option>
+                                <option value="PH">Gruppo 4</option>
+                            </select>
+                        </div>
+
+                        <!-- Multi Select: Assegna sotto-gruppo -->
+                        <div class="sm:col-span-2">
+                            <label for="assign_group" >
+                                {{ 'Assign to a subgroup'|trans }}
+                            </label>
+                            <select id="assign_group" name="assign_group[]" >
+                                <option selected="">{{ 'Select a subgroup'|trans }}</option>
+                                <option value="TV">Sotto Gruppo 1</option>
+                                <option value="PC">Sotto Gruppo 2</option>
+                                <option value="GA">Sotto Gruppo 3</option>
+                                <option value="PH">Sotto Gruppo 4</option>
+                            </select>
+                        </div>
+
+                        <!-- Form Registro contabile -->
+                        <!-- Area di Testo: Annotazioni private -->
+
+                        <div x-data="{ notes: [], isOpen: [],dragging: null, dragAndDrop(index) {
+    const draggedNote = this.notes[this.dragging];
+    this.notes.splice(this.dragging, 1);
+    this.notes.splice(index, 0, draggedNote);
+} }" class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
+                            <label >
+                                {{ 'Notes'|trans }}
+                            </label>
+                            <template x-for="(note, index) in notes" :key="index">
+                                <div class="mt-4"
+                                     x-ref="noteContainer" :class="{ 'dragging': dragging === index }""
+                                >
+                                    <div class="border rounded-lg p-4"
+                                         :class="{ 'cursor-move': dragging !== null }"
+                                         draggable="true"
+                                         @dragstart="dragging = index"
+                                         @dragend="dragging = null"
+                                         @dragover.prevent
+                                         @drop="dragAndDrop(index)"
+                                    >
+                                        <div class="flex justify-between items-center">
+                                            <button type="button" @click="isOpen[index] = !isOpen[index]" class="flex items-center text-blue-500">
+                                                <svg x-bind:class="{'transform rotate-180': isOpen[index]}" class="w-4 h-4 mr-2 text-gray-700 dark:text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path x-show="!isOpen[index]" fill-rule="evenodd" clip-rule="evenodd" d="M6 8.586L10 12.586L14 8.586L15.414 10L10 15.414L4.586 10L6 8.586Z" />
+                                                    <path x-show="isOpen[index]" fill-rule="evenodd" clip-rule="evenodd" d="M14 11.414L10 15.414L6 11.414L4.586 13L10 18.414L15.414 13L14 11.414Z" />
+                                                </svg>
+                                                <span class="font-medium text-gray-900 dark:text-white" x-text="note.tipologia_nota" ></span>
+                                                <span class="text-gray-500 dark:text-gray-400">- <span x-text="note.visibilita"></span></span>
+                                            </button>
+                                            <button type="button" @click="notes.splice(index, 1)" class="text-red-500 ml-2">
+                                                <ion-icon name="trash"></ion-icon>
+                                            </button>
+                                        </div>
+                                        <div
+
+                                                x-show="isOpen[index]" class="mt-4">
+                                            <div>
+                                                <label :for="'tipologia_nota_' + index" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                                    {{ 'Note Type'|trans }}
+                                                </label>
+                                                <select x-model="note.tipologia_nota" :id="'tipologia_nota_' + index" class="w-full">
+                                                    <option value="registro_contabile">Registro Contabile</option>
+                                                    <option value="annotazioni">Annotazioni</option>
+                                                </select>
+                                            </div>
+                                            <div class="mt-2">
+                                                <label :for="'nota_' + index" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                                    {{ 'Note'|trans }}
+                                                </label>
+                                                <textarea x-model="note.nota" :id="'nota_' + index" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Write your thoughts here..."></textarea>
+                                            </div>
+                                            <div class="mt-2">
+                                                <label :for="'visibilita_' + index" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                                    {{ 'Visibility'|trans }}
+                                                </label>
+                                                <select x-model="note.visibilita" :id="'visibilita_' + index" class="w-full">
+                                                    <option value="privata">Private</option>
+                                                    <option value="pubblica">Public</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </template>
+                            <button type="button" @click="notes.push({ tipologia_nota: 'regitro_contabile', nota: '', visibilita: 'privata' }); isOpen.push(true)" class="text-blue-500 flex items-center mt-4"><ion-icon name="add-outline"></ion-icon>
+                                {{ 'Add Note'|trans }}</button>
+                        </div>
+
+                        <div class="sm:col-span-2 text-right">
+
+
+                            <!-- Button: Salva -->
+
+                            <div class="fixed right-6 bottom-6 group ">
+                                <button type="submit" >
+                                    <!-- Save icon -->
+                                    {{ 'Save'|trans }}
+                                </button>
+                            </div>
+
+                        </div>
+
+
+                    </div>
+                </div>
+
+
+            </form>
+        </div>
+    </section>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+
+    </script>
+{% endblock %}

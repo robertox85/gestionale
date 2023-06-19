@@ -1,0 +1,43 @@
+{
+  "name": "gestlex",
+  "version": "1.0.0",
+  "description": "",
+  "main": "webpack.config.js",
+  "dependencies": {
+    "alpinejs": "^3.12.0",
+    "flowbite": "^1.6.5",
+    "flowbite-datepicker": "^1.2.2",
+    "ionicons": "^7.1.0",
+    "jquery": "^3.6.4",
+    "select2": "^4.1.0-rc.0",
+    "toastr": "^2.1.4"
+  },
+  "devDependencies": {
+    "@alpinejs/persist": "^3.12.0",
+    "@tailwindcss/forms": "^0.5.3",
+    "autoprefixer": "^10.4.14",
+    "browser-sync": "^2.29.1",
+    "browser-sync-webpack-plugin": "^2.3.0",
+    "concurrently": "^8.0.1",
+    "css-loader": "^6.7.3",
+    "mini-css-extract-plugin": "^2.7.5",
+    "postcss": "^8.4.23",
+    "postcss-import": "^15.1.0",
+    "postcss-loader": "^7.2.4",
+    "postcss-nesting": "^11.2.2",
+    "style-loader": "^3.3.2",
+    "tailwindcss": "^3.3.1",
+    "webpack": "^5.80.0",
+    "webpack-cli": "^5.0.1",
+    "webpack-dev-server": "^4.13.3"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "webpack --mode production",
+    "watch": "webpack --mode development --watch",
+    "start": "webpack serve --mode development --open",
+    "watch-php": "concurrently \"php -S localhost:8000 -t public\" \"npm run watch\""
+  },
+  "author": "",
+  "license": "ISC"
+}
