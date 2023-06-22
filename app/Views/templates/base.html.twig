@@ -32,7 +32,7 @@
 <div class="antialiased bg-gray-50 dark:bg-gray-900">
 
 
-    {% if session.user %}
+    {% if session.utente %}
 
         <!-- Top Navigation -->
         {% include('navigation.html.twig') %}
@@ -43,8 +43,8 @@
     {% endif %}
 
 
-    <main class="p-4 {% if session.user %} md:ml-48 {% endif %} h-screen pt-20">
-        {% if session.user %}
+    <main class="p-4 {% if session.utente %} md:ml-48 {% endif %} h-screen pt-20">
+        {% if session.utente %}
             {% include('alerts.html.twig') %}
         {% endif %}
 

@@ -157,22 +157,35 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\GruppiController', 'gruppiView']
     ]);
 
-
     $middlewareStack = new MiddlewareStack();
-
     $middlewareStack->add(new AuthenticationMiddleware(['amministratore','dominus']));
-    $middlewareStack->add(new AuthorizationMiddleware('crea_gruppo'));
+    $middlewareStack->add(new AuthorizationMiddleware(['crea_gruppo','visualizza_gruppi','modifica_gruppo','elimina_gruppo']));
+
+    $r->addRoute('GET', '/gruppi/crea', [
+        'middleware' => $middlewareStack,
+        'handler' => ['App\Controllers\GruppiController', 'creaGruppoView']
+    ]);
 
     $r->addRoute('POST', '/gruppi/crea', [
         'middleware' => $middlewareStack,
-        'handler' => ['App\Controllers\GruppiController', 'createGruppo']
+        'handler' => ['App\Controllers\GruppiController', 'creaGruppo']
+    ]);
+
+    $r->addRoute('GET', '/gruppi/delete/{id:\d+}', [
+        'middleware' => $middlewareStack,
+        'handler' => ['App\Controllers\GruppiController', 'deleteGruppo']
     ]);
 
 
     // gruppo
-    $r->addRoute('GET', '/gruppo/{id:\d+}', [
+    $r->addRoute('GET', '/gruppi/edit/{id:\d+}', [
         'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\GruppiController', 'gruppoView']
+        'handler' => ['App\Controllers\GruppiController', 'editGruppoView']
+    ]);
+
+    $r->addRoute('POST', '/gruppi/edit', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\GruppiController', 'editGruppo']
     ]);
 
     $middlewareStack = new MiddlewareStack();

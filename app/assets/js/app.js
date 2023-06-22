@@ -12,7 +12,7 @@ import * as Toastr from 'toastr';
 // import 'toastr/build/toastr.css'; //You need style and css loader installed and set
 
 // init jquery
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     window.$ = window.jQuery = $;
     Alpine.plugin(persist)
     window.Alpine = Alpine;
@@ -66,18 +66,42 @@ document.addEventListener('alpine:init', () => {
         addUtente(sottogruppo) {
             sottogruppo.utenti.push();
         },
+
         init() {
             this.utenti = JSON.parse(this.$el.dataset.utenti);
             this.sottogruppi = JSON.parse(this.$el.dataset.sottogruppi);
-
             // init first sottogruppo
-            if (this.sottogruppi.length === 0) {
+            if (this.sottogruppi != null && this.sottogruppi.length === 0) {
                 this.addSottoGruppo({
                     id: 0,
                     nome: '',
                     utenti: this.utenti,
                 });
             }
+
+            // if there are utenti in the sottogruppi, init utentiSelezionati
+            if(this.sottogruppi != null && this.sottogruppi.length > 0) {
+                this.sottogruppi.forEach((sottogruppo, index) => {
+                    if (sottogruppo.utenti.length > 0) {
+                        // get the select and init select2
+                        setTimeout(() => {
+                            $(`#select2-${index}`).select2({
+                                placeholder: 'Seleziona gli utenti da aggiungere al team',
+                            }).val(sottogruppo.utenti.map(utente => utente.id_utente)).trigger('change');
+                        }, 100);
+                    }
+                });
+            } else {
+                // init select2 for the new sottogruppo
+                setTimeout(() => {
+                    $(`#select2-0`).select2({
+                        placeholder: 'Seleziona gli utenti da aggiungere al team',
+                    });
+                }, 100);
+            }
+
+
+
         }
     }));
 
@@ -85,11 +109,10 @@ document.addEventListener('alpine:init', () => {
 
 document.addEventListener('alpine:initialized', () => {
     // Init select2
-    $('.select2').select2({
+    /*$('.select2').select2({
         placeholder: 'Seleziona un utente',
-    });
+    });*/
 })
-
 
 
 var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
@@ -231,10 +254,10 @@ togglePassword.forEach(function (button) {
 var checkboxAllSearch = document.getElementById('checkbox-all-search');
 var checkboxes = document.querySelectorAll('input[type="checkbox"]');
 
-var bulkDeleteUsers = document.getElementById('bulk-delete-users');
-var bulkActivateUsers = document.getElementById('bulk-activate-users');
-var bulkDeleteUsersButton = document.getElementById('bulk-delete-users-button');
-var bulkActivateUsersButton = document.getElementById('bulk-activate-users-button');
+var bulkDeleteUsers = document.getElementById('bulk-delete-utenti');
+var bulkActivateUsers = document.getElementById('bulk-activate-utenti');
+var bulkDeleteUsersButton = document.getElementById('bulk-delete-utenti-button');
+var bulkActivateUsersButton = document.getElementById('bulk-activate-utenti-button');
 if (checkboxAllSearch) {
     checkboxAllSearch.addEventListener('click', function () {
         // if checked
@@ -248,7 +271,7 @@ if (checkboxAllSearch) {
                     bulkActivateUsers.value += checkbox.dataset.id + ',';
                 }
             });
-            // remove disabled class from #bulk-delete-users-button
+            // remove disabled class from #bulk-delete-utenti-button
             bulkDeleteUsersButton.classList.remove('disabled');
             bulkDeleteUsersButton.classList.remove('opacity-20');
             bulkDeleteUsersButton.classList.remove('cursor-not-allowed');
@@ -269,7 +292,7 @@ if (checkboxAllSearch) {
                     bulkActivateUsers.value = bulkActivateUsers.value.replace(checkbox.dataset.id + ',', '');
                 }
             });
-            // add disabled class to #bulk-delete-users-button
+            // add disabled class to #bulk-delete-utenti-button
             bulkDeleteUsersButton.classList.add('disabled');
             bulkDeleteUsersButton.classList.add('opacity-20');
             bulkDeleteUsersButton.classList.add('cursor-not-allowed');
@@ -304,7 +327,7 @@ checkboxes.forEach(function (checkbox) {
 
         // if there are no checkboxes checked
         if (bulkDeleteUsers.value === '') {
-            // add disabled class to #bulk-delete-users-button
+            // add disabled class to #bulk-delete-utenti-button
             bulkDeleteUsersButton.classList.add('disabled');
             bulkDeleteUsersButton.classList.add('opacity-20');
             bulkDeleteUsersButton.classList.add('cursor-not-allowed');
@@ -313,7 +336,7 @@ checkboxes.forEach(function (checkbox) {
             bulkActivateUsersButton.classList.add('opacity-20');
             bulkActivateUsersButton.classList.add('cursor-not-allowed');
         } else {
-            // remove disabled class from #bulk-delete-users-button
+            // remove disabled class from #bulk-delete-utenti-button
             bulkDeleteUsersButton.classList.remove('disabled');
             bulkDeleteUsersButton.classList.remove('opacity-20');
             bulkDeleteUsersButton.classList.remove('cursor-not-allowed');
@@ -325,7 +348,7 @@ checkboxes.forEach(function (checkbox) {
     });
 });
 
-// #bulk-delete-users-button
+// #bulk-delete-utenti-button
 if (bulkDeleteUsersButton) {
     // if clicked and has class disabled, return false
     bulkDeleteUsersButton.addEventListener('click', function (e) {
@@ -346,9 +369,9 @@ if (bulkActivateUsersButton) {
     });
 }
 
-// add actions buttons to #users table
+// add actions buttons to #utenti table
 /*document.addEventListener('DOMContentLoaded', function () {
-    new DataTables('#users', {
+    new DataTables('#utenti', {
         "language": {
             "url": "//cdn.datatables.net/plug-ins/1.10.25/i18n/Italian.json"
         },

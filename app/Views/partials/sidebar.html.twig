@@ -5,7 +5,7 @@
 >
     <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
 
-        {% if session.user %}
+        {% if session.utente %}
             {% include ('search.html.twig') with { 'class': 'md:hidden mb-2' } %}
 
             {% include ('menu.html.twig') %}
@@ -13,7 +13,7 @@
             <!-- include ('helperMenu.html.twig') -->
         {% endif %}
 
-        {% if session.user is null %}
+        {% if session.utente is null %}
             <div class="flex flex-col items-center justify-center h-full">
                 <div class="flex flex-col items-center justify-center mt-8">
 

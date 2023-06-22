@@ -4,7 +4,7 @@ namespace App\Middleware;
 
 use App\Libraries\Helper;
 use App\Models\Ruolo;
-use App\Models\User;
+use App\Models\Utente;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
@@ -23,7 +23,7 @@ class AuthenticationMiddleware
         if (empty($roles)) {
             $roles = Ruolo::getAll();
             $roles = array_map(function ($role) {
-                return $role->getName();
+                return strtolower($role->nome_ruolo);
             }, $roles);
         }
 
@@ -51,17 +51,22 @@ class AuthenticationMiddleware
         // Aggiungi qui la logica per verificare se l'utente è autenticato
         // Puoi utilizzare qualsiasi metodo di autenticazione tu abbia implementato nel tuo sistema
         // Restituisci true se l'utente è autenticato, altrimenti false
-        return isset($_SESSION['user']);
+        return isset($_SESSION['utente']);
     }
 
     private function hasRequiredRole()
     {
 
-        // Aggiungi qui la logica per verificare se l'utente ha almeno uno dei ruoli consentiti
-        // Puoi utilizzare il ruolo dell'utente memorizzato nella sessione o nel database
-        // Restituisci true se l'utente ha il ruolo corretto, altrimenti false
-        $user = User::findByIdUtente($_SESSION['user']['id']);
-        $userRole = Ruolo::getById($user->getRuoloId())->getName();
+
+        //$user = Utente::findByIdUtente($_SESSION['utente']['id']);
+        $user = new Utente($_SESSION['utente']['id']);
+        $ruolo = $user->getRuolo();
+        if ($ruolo !== null) {
+            $nomeRuolo = $ruolo->getNomeRuolo();
+            $userRole = strtolower(str_replace(' ', '_', $nomeRuolo));
+        } else {
+            // Gestione quando l'oggetto ruolo è nullo
+        }
 
         return in_array($userRole, $this->roles);
     }

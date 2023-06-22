@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\User;
+use App\Models\Utente;
 
 class AuthenticationService
 {
@@ -39,7 +39,7 @@ class AuthenticationService
 
         // Effettua la logica di autenticazione specifica del tuo sistema
         // Ad esempio, verifica le credenziali nel database degli utenti
-        $user = User::findByEmail($email);
+        $user = Utente::getByPropertyName('email', $email);
 
         if (!$user) {
             return false; // L'autenticazione non ha avuto successo
@@ -69,7 +69,7 @@ class AuthenticationService
         // Carica l'utente dalla sessione, se presente
         if (isset($_SESSION['user_id'])) {
             $userId = $_SESSION['user_id'];
-            $this->user = User::findByIdUtente($userId);
+            $this->user = Utente::getById($userId);
         }
     }
 

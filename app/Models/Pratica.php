@@ -2,6 +2,6 @@
 
 namespace App\Models;
 
-class Practice
+class Pratica
 {
 }

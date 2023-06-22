@@ -2,8 +2,8 @@
 
 namespace App\Controllers;
 
-use App\Models\User;
-use App\Models\Practice;
+use App\Models\Utente;
+use App\Models\Pratica;
 
 class PracticeController extends BaseController
 {
@@ -13,7 +13,7 @@ class PracticeController extends BaseController
     public function __construct()
     {
         parent::__construct();
-        $this->praticaModel = new Practice();
+        $this->praticaModel = new Pratica();
     }
 
     public function praticheView()
@@ -187,7 +187,7 @@ class PracticeController extends BaseController
 
         // Creare un'istanza del modello Pratica e assegnare i valori
         /*
-        $pratica = new Practice();
+        $pratica = new Pratica();
         $pratica->setNrPratica($nr_pratica);
         $pratica->setTitolo($titolo);
         $pratica->setNome($nome);

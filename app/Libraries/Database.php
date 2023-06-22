@@ -35,6 +35,11 @@ class Database
         }
     }
 
+    public static function beginTransaction()
+    {
+        self::getInstance()->db->beginTransaction();
+    }
+
     public static function getInstance(): Database
     {
         if (self::$instance === null) {
@@ -42,6 +47,16 @@ class Database
         }
 
         return self::$instance;
+    }
+
+    public static function rollBack()
+    {
+        self::getInstance()->db->rollBack();
+    }
+
+    public static function commit()
+    {
+        self::getInstance()->db->commit();
     }
 
     public function getConnection(): PDO
@@ -148,13 +163,13 @@ class Database
         try {
             $this->db->exec("USE {$this->db_name}");
 
-            // DELETE FROM codici_backup WHERE user_id IN (SELECT id FROM users);
-            $this->db->exec("DELETE FROM codici_backup WHERE user_id IN (SELECT id FROM users)");
+            // DELETE FROM codici_backup WHERE user_id IN (SELECT id FROM utenti);
+            $this->db->exec("DELETE FROM codici_backup WHERE user_id IN (SELECT id FROM utenti)");
 
-            $this->db->exec("DELETE FROM users");
+            $this->db->exec("DELETE FROM utenti");
 
             return $this->query([
-                'query' => "INSERT INTO users (username, email, password, role, status) VALUES (:username, :email, :password, :role, :status)",
+                'query' => "INSERT INTO utenti (username, email, password, role, status) VALUES (:username, :email, :password, :role, :status)",
                 'params' => [
                     'username' => 'admin',
                     'email' => 'admin@admin.com',
@@ -251,5 +266,10 @@ class Database
             $errorHandler = ErrorHandler::getInstance();
             $errorHandler->handleException($e);
         }
+    }
+
+    public function lastInsertId()
+    {
+        return $this->db->lastInsertId();
     }
 }

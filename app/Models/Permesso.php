@@ -6,17 +6,42 @@ use App\Libraries\Database;
 
 class Permesso extends BaseModel
 {
-    private $id;
-    private $name;
-    private $description;
+    protected int $id_permesso;
+    protected string $nome_permesso;
+    protected string $descrizione_permesso;
 
-    public function __construct($id, $name, $description = null)
+    // getter and setter
+    public function getIdPermesso()
     {
-        $this->id = $id;
-        $this->name = $name;
-        $this->description = $description;
+        return $this->id_permesso;
     }
 
+    public function setIdPermesso($id_permesso)
+    {
+        $this->id_permesso = $id_permesso;
+    }
+
+    public function getNomepermesso()
+    {
+        return $this->nome_permesso;
+    }
+
+    public function setNomepermesso($nome_permesso)
+    {
+        $this->nome_permesso = $nome_permesso;
+    }
+
+    public function getDescrizionepermesso()
+    {
+        return $this->descrizione_permesso;
+    }
+
+    public function setDescrizionepermesso($descrizione_permesso)
+    {
+        $this->descrizione_permesso = $descrizione_permesso;
+    }
+
+    // methods
     public static function getByUri($uri)
     {
         // Recupera i permessi corrispondenti all'URI
@@ -34,31 +59,17 @@ class Permesso extends BaseModel
         ];
     }
 
-    public static function getByRole(mixed $id)
+    public static function getByRuoloId(mixed $ruolo_id)
     {
         $db = Database::getInstance();
         // recupera ruolo_permesso con ruolo_id = $id e poi recupera i permessi con id in (id dei permessi trovati)
-        $sql = "SELECT * FROM Permessi WHERE id_permesso IN (SELECT permesso_id FROM Ruoli_Permessi WHERE ruolo_id = :id)";
+        $sql = "SELECT * FROM Permessi WHERE id_permesso IN (SELECT permesso_id FROM Permessi_Ruoli WHERE ruolo_id = :id)";
         $options = [];
         $options['query'] = $sql;
-        $options['params'] = [':id' => $id];
+        $options['params'] = [':id' => $ruolo_id];
 
         return $db->query($options);
     }
 
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    public function getName()
-    {
-        return strtolower($this->name);
-    }
-
-    public function getDescription()
-    {
-        return $this->description;
-    }
 
 }

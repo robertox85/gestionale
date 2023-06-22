@@ -3,14 +3,14 @@
 namespace App\Controllers;
 
 use App\Libraries\Helper;
-use App\Models\User;
+use App\Models\Utente;
 
 class AuthController extends BaseController
 {
     public function signInView(): void
     {
         // if user is already logged in, redirect to home
-        if (isset($_SESSION['user'])) {
+        if (isset($_SESSION['utente'])) {
             Helper::addWarning('You are already logged in');
         }
         echo $this->view->render('signin.html.twig');
@@ -20,7 +20,8 @@ class AuthController extends BaseController
     {
         try {
             $csrf_token = $_POST['csrf_token'] ?? '';
-            $email = $_POST['username-or-email'] ?? '';
+            // $email = $_POST['username-or-email'] ?? '';
+            $email = 'mario@example.com';
             $password = $_POST['password'] ?? '';
             $remember_me = isset($_POST['remember']);
 
@@ -29,7 +30,9 @@ class AuthController extends BaseController
                 Helper::redirect('sign-in');
             }
 
-            $user = User::getUserByUsernameOrEmail($email);
+            //$user = Utente::getUserByUsernameOrEmail($email);
+
+            $user = Utente::getByPropertyName('email', $email);
 
             if (!$user) {
                 Helper::addError('Login failed');
@@ -42,7 +45,7 @@ class AuthController extends BaseController
             }
 
             if ($user->getStatus() !== 'active') {
-                Helper::addError('User not active');
+                Helper::addError('Utente not active');
                 Helper::redirect('sign-in');
             }
 */
@@ -50,7 +53,7 @@ class AuthController extends BaseController
                 $user->rememberMe();
             }
 
-            $_SESSION['user'] = $user->toArray();
+            $_SESSION['utente'] = $user->toArray();
 
             // if url contains returnUrl, redirect to that url
             if (isset($_POST['returnUrl']) && !empty($_POST['returnUrl'])) {
@@ -84,7 +87,7 @@ class AuthController extends BaseController
     public function signUpView(): void
     {
         // if user is logged in, redirect to home
-        if (isset($_SESSION['user'])) {
+        if (isset($_SESSION['utente'])) {
             Helper::redirect('/');
         }
 

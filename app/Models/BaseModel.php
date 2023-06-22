@@ -6,17 +6,97 @@ use App\Libraries\Database;
 
 class BaseModel
 {
-
-    protected static $table;
-
-    public function __construct($table = null)
+    public function __construct($id = null)
     {
-        if ($table !== null) {
-            static::$table = $table;
-        } else {
-            static::$table = static::class;
+        if ($id !== null) {
+            $this->load([':id' => $id]);
         }
     }
+
+
+    // Load by id
+    public function load($params = [])
+    {
+
+        $db = Database::getInstance();
+        $className = static::class;
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = self::getPluralName($shortClassName);
+
+        $sql = "SELECT * FROM " . $tableName . " WHERE id_" . strtolower($shortClassName) . " = :id";
+        $options = [
+            'query' => $sql,
+            'params' => $params
+        ];
+        $result = $db->query($options);
+        if (isset($result[0])) {
+            foreach ($result[0] as $property => $value) {
+                /*if (property_exists($this, $property)) {
+                    $this->$property = $value;
+                }*/
+                $getterMethod = 'set' . ucfirst(str_replace('_','',$property));
+                if (method_exists($this, $getterMethod)) {
+                    $this->$getterMethod($value);
+                } else {
+                    $this->$property = $value;
+                }
+            }
+        }
+    }
+
+    // delete
+    public function delete()
+    {
+        $db = Database::getInstance();
+        $className = static::class;
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = self::getPluralName($shortClassName);
+        $sql = "DELETE FROM " . $tableName . " WHERE id_" . $shortClassName . " = :id";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id' => $this->getId()];
+        $result = $db->query($options);
+        return $result;
+    }
+
+    // save
+    public function save()
+    {
+        $db = Database::getInstance();
+        $className = static::class;
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = self::getPluralName($shortClassName);
+        $sql = "INSERT INTO " . $tableName . " (";
+        $sql .= implode(',', array_keys($this->getProperties()));
+        $sql .= ") VALUES (";
+        $sql .= implode(',', array_map(fn($key) => ':' . $key, array_keys($this->getProperties())));
+        $sql .= ")";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = $this->getProperties();
+        $db->query($options);
+        $this->setId($db->lastInsertId());
+        return $this;
+    }
+
+
+    // update
+    public function update()
+    {
+        $db = Database::getInstance();
+        $className = static::class;
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = self::getPluralName($shortClassName);
+        $sql = "UPDATE " . $tableName . " SET ";
+        $sql .= implode(',', array_map(fn($key) => $key . ' = :' . $key, array_keys($this->getProperties())));
+        $sql .= " WHERE id_" . $shortClassName . " = :id";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = $this->getProperties();
+        $db->query($options);
+        return $this;
+    }
+
 
     public static function getAll()
     {
@@ -29,28 +109,6 @@ class BaseModel
         $options['query'] = $sql;
 
         $result = $db->query($options);
-
-        // if is Ruolo, find permissions too
-        if ($shortClassName === 'Ruolo') {
-            $result = array_map(function ($role) {
-                $permissions = Permesso::getByRole($role->id_ruolo);
-                /*$permissions = array_map(function ($permission) {
-                    return $permission->nome_permesso;
-                }, $permissions);*/
-                return new Ruolo($role->id_ruolo, $role->nome_ruolo, $permissions);
-            }, $result);
-        }
-
-        // if is Gruppo, find SottoGruppi too
-        if ($shortClassName === 'Gruppo') {
-            $result = array_map(function ($gruppo) {
-
-                $sottogruppi = SottoGruppo::getByGroup($gruppo->id_gruppo);
-
-                return new Gruppo($gruppo->id_gruppo, $gruppo->nome_gruppo, $sottogruppi);
-
-            }, $result);
-        }
 
         return $result;
     }
@@ -109,43 +167,30 @@ class BaseModel
 
         $result = $db->query($options);
 
-
-        // if is Ruolo, find permissions too
-        if ($shortClassName === 'Ruolo') {
-            if (count($result) === 1) {
-                $role = $result[0];
-                // convert stdclass to array
-                $role = json_decode(json_encode($role), true);
-                $permissions = Permesso::getByRole($role['id_ruolo']);
-                /*$permissions = array_map(function ($permission) {
-                    return $permission->nome_permesso;
-                }, $permissions);*/
-
-                return new Ruolo($role['id_ruolo'], $role['nome_ruolo'], $permissions);
-            } else {
-                return null;
-            }
+        if (isset($result[0])) {
+            return new $className($result[0]->{'id_' . $singularLower});
+        } else {
+            return null;
         }
+    }
 
-        // if is Gruppo, find SottoGruppi too
-        if ($shortClassName === 'Gruppo') {
-            if (count($result) === 1) {
-                $gruppo = $result[0];
-                // convert stdclass to array
-                $gruppo = json_decode(json_encode($gruppo), true);
-                $sottogruppi = SottoGruppo::getByGroup($gruppo['id_gruppo']);
+    // getByPropertyName
+    public static function getByPropertyName($property, $value)
+    {
+        $db = Database::getInstance();
+        $className = static::class;
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = self::getPluralName($shortClassName);
+        $singularLower = strtolower($shortClassName);
+        $sql = "SELECT * FROM " . $tableName . " WHERE " . $property . " = :" . $property;
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':' . $property => $value];
 
-                return new Gruppo($gruppo['id_gruppo'], $gruppo['nome_gruppo'], $sottogruppi);
-            } else {
-                return null;
-            }
-        }
+        $result = $db->query($options);
 
-        if (count($result) === 1) {
-            $object = $result[0];
-            // convert stdclass to array
-            $object = json_decode(json_encode($object), true);
-            return new $className($object);
+        if (isset($result[0])) {
+            return new $className($result[0]->{'id_' . $singularLower});
         } else {
             return null;
         }
@@ -161,15 +206,12 @@ class BaseModel
         return $array;
     }
 
-
-    // GetProperty
-    public function __get($name)
+    private function getProperties()
     {
         $array = get_object_vars($this);
-        if (array_key_exists($name, $array)) {
-            return $array[$name];
-        } else {
-            return null;
+        if (array_key_exists('id_utente', $array)) {
+            unset($array['id_utente']);
         }
+        return $array;
     }
 }

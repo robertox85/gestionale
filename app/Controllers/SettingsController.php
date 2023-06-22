@@ -10,11 +10,17 @@ class SettingsController extends BaseController
     public function impostazioniView()
     {
         $ruoli = Ruolo::getAll();
+        // add permessi to each ruolo
+        $ruoli = array_map(function ($ruolo) {
+            $permessi = Permesso::getByRuoloId($ruolo->id_ruolo);
+            $ruolo->permessi = $permessi;
+            return $ruolo;
+        }, $ruoli);
         $permessi = Permesso::getAll();
         $ruoloId = (isset($_GET['ruolo'])) ? (int) $_GET['ruolo'] : null;
         $ruoloSelezionato = null;
         foreach ($ruoli as $ruolo) {
-            if ($ruolo->getId() === $ruoloId) {
+            if ($ruolo->id_ruolo === $ruoloId) {
                 $ruoloSelezionato = $ruolo;
                 break;
             }
@@ -38,10 +44,10 @@ class SettingsController extends BaseController
                 return;
             }
 
-            $ruolo->removeAllPermissions();
+            $ruolo->eliminaPermessi();
 
             foreach ($permessi as $permesso_id) {
-                $ruolo->setPermissionsToRole($permesso_id);
+                $ruolo->setPermessoRuolo($permesso_id);
             }
 
             $ruolo->update();

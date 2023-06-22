@@ -11,19 +11,14 @@ class SottoGruppoController extends BaseController
 {
     public function sottogruppiView( $id = null )
     {
-        $sottogruppi = ( $id !== null ) ? SottoGruppo::getByGroup($id) : SottoGruppo::getAll();
-        // add NomeGruppo to the result
-        $sottogruppi = array_map(function ($sottogruppo) {
-            $sottogruppo->nome_gruppo = Gruppo::getNomeGruppoById($sottogruppo->id_gruppo);
-            return $sottogruppo;
-        }, $sottogruppi);
+        // $sottogruppi = ( $id !== null ) ? SottoGruppo::getByGroup($id) : SottoGruppo::getAll();
+        $sottogruppi = SottoGruppo::getAll();
 
-        $sottogruppi = array_map(function ($sottogruppo) {
-            $utenti = SottoGruppo::getUtentiInSottogruppo($sottogruppo->id_sottogruppo);
-            return new SottoGruppo($sottogruppo->id_sottogruppo, $sottogruppo->nome_sottogruppo, $sottogruppo->id_gruppo, Gruppo::getNomeGruppoById($sottogruppo->id_gruppo), $utenti);
-        }, $sottogruppi);
-
-        echo $this->view->render('sottogruppi.html.twig', ['sottogruppi' => $sottogruppi ]);
+        echo $this->view->render('sottogruppi.html.twig',
+            [
+                'sottogruppi' => $sottogruppi
+            ]
+        );
         exit;
     }
 

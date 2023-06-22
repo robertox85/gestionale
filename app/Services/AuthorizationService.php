@@ -3,17 +3,17 @@
 namespace App\Services;
 
 use App\Models\Permesso;
-use App\Models\User;
+use App\Models\Utente;
 use App\Models\Ruolo;
 
 class AuthorizationService
 {
-    public function checkAccess(User $user, $uri)
+    public function checkAccess(Utente $user, $uri)
     {
         // Implementa la logica di autorizzazione qui
         // Puoi utilizzare ruoli, permessi o altre regole di autorizzazione definite nel tuo sistema
 
-        // Recupera i ruoli dell'utente
+        // Recupera il ruolo dell'utente
         $roles = $user->getRoles();
 
         // Recupera i permessi corrispondenti all'URI
@@ -33,7 +33,7 @@ class AuthorizationService
     {
         // Verifica se il ruolo ha almeno uno dei permessi consentiti
         foreach ($permissions as $permission) {
-            if ($role->hasPermission($permission)) {
+            if ($role->possiedePermesso($permission)) {
                 return true; // Il ruolo ha accesso consentito
             }
         }

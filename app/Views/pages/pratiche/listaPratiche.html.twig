@@ -30,7 +30,7 @@
                     </div>
                     <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
 
-                        <form action="{{ url('admin/users/export') }}" method="POST">
+                        <form action="{{ url('admin/utenti/export') }}" method="POST">
 
                             <input type="hidden" name="csrf_token" value="{{ csrf_token('export') }}">
                             <input type="hidden" name="format" value="csv">
@@ -51,7 +51,7 @@
                                 <path clip-rule="evenodd" fill-rule="evenodd"
                                       d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"/>
                             </svg>
-                            {{ 'Add new Practice'|trans }}
+                            {{ 'Add new Pratica'|trans }}
                         </a>
 
                         <div class="flex items-center space-x-3 w-full md:w-auto">
@@ -71,9 +71,9 @@
                                 <ul class="py-1 text-sm text-gray-700 dark:text-gray-200"
                                     aria-labelledby="actionsDropdownButton">
                                     <li>
-                                        <form action="{{ url('admin/users/activate') }}" method="POST" class="">
+                                        <form action="{{ url('admin/utenti/activate') }}" method="POST" class="">
                                             <input type="hidden" name="csrf_token"
-                                                   value="{{ csrf_token('bulk-activate-users') }}">
+                                                   value="{{ csrf_token('bulk-activate-utenti') }}">
                                             <input type="hidden" name="users" id="bulk-activate-users" value="">
 
                                             <button type="submit"
@@ -87,9 +87,9 @@
                                 <div class="py-1">
 
 
-                                    <form action="{{ url('admin/users/delete') }}" method="POST" class="">
+                                    <form action="{{ url('admin/utenti/delete') }}" method="POST" class="">
                                         <input type="hidden" name="csrf_token"
-                                               value="{{ csrf_token('bulk-delete-users') }}">
+                                               value="{{ csrf_token('bulk-delete-utenti') }}">
                                         <input type="hidden" name="users" id="bulk-delete-users" value="">
 
                                         <button type="submit"
@@ -119,12 +119,12 @@
                                 </div>
                             </th>
                             <th scope="col" class="px-4 py-3">
-                                <a href="{{ url('users', {'sort': 'id', 'direction': getSortDirection('id')}) }}">
+                                <a href="{{ url('utenti', {'sort': 'id', 'direction': getSortDirection('id')}) }}">
                                     Nr.
                                 </a>
                             </th>
                             <th scope="col" class="px-4 py-3">
-                                <a href="{{ url('users', {'sort': 'username', 'direction': getSortDirection('username')}) }}">
+                                <a href="{{ url('utenti', {'sort': 'username', 'direction': getSortDirection('username')}) }}">
                                     Nome
 
                                     {% set direction = getQueryParams('direction') %}
@@ -140,7 +140,7 @@
                                 </a>
                             </th>
                             <th scope="col" class="px-4 py-3">
-                                <a href="{{ url('users', {'sort': 'email', 'direction': getSortDirection('email')}) }}">
+                                <a href="{{ url('utenti', {'sort': 'email', 'direction': getSortDirection('email')}) }}">
                                     Stato
 
                                     {% set direction = getQueryParams('direction') %}
@@ -156,7 +156,7 @@
                                 </a>
                             </th>
                             <th scope="col" class="px-4 py-3">
-                                <a href="{{ url('users', {'sort': 'status', 'direction': getSortDirection('status')}) }}">
+                                <a href="{{ url('utenti', {'sort': 'status', 'direction': getSortDirection('status')}) }}">
                                     Tipologia
 
                                     {% set direction = getQueryParams('direction') %}
@@ -172,7 +172,7 @@
                             </th>
 
                             <th scope="col" class="px-4 py-3">
-                                <a href="{{ url('users', {'sort': 'status', 'direction': getSortDirection('status')}) }}">
+                                <a href="{{ url('utenti', {'sort': 'status', 'direction': getSortDirection('status')}) }}">
                                     Competenza
 
                                     {% set direction = getQueryParams('direction') %}
@@ -188,7 +188,7 @@
                             </th>
 
                             <th scope="col" class="px-4 py-3">
-                                <a href="{{ url('users', {'sort': 'status', 'direction': getSortDirection('status')}) }}">
+                                <a href="{{ url('utenti', {'sort': 'status', 'direction': getSortDirection('status')}) }}">
                                     Prossima scadenza
 
                                     {% set direction = getQueryParams('direction') %}
@@ -204,7 +204,7 @@
                             </th>
 
                             <th scope="col" class="px-4 py-3">
-                                <a href="{{ url('users', {'sort': 'status', 'direction': getSortDirection('status')}) }}">
+                                <a href="{{ url('utenti', {'sort': 'status', 'direction': getSortDirection('status')}) }}">
                                     Ruolo
 
                                     {% set direction = getQueryParams('direction') %}
