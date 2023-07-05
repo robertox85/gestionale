@@ -6,35 +6,22 @@ namespace App\Models;
 class Utente extends BaseModel
 {
     protected int $id_utente;
-    protected string $nome;
-    protected string $cognome;
     protected string $email;
     protected string $password;
     protected int $id_ruolo;
 
-    protected string $ruolo;
+
+    private string $ruolo;
 
     public function setRuolo($ruolo)
     {
         $this->ruolo = $ruolo;
     }
 
-
-
    // constructor
     public function getId()
     {
         return $this->id_utente;
-    }
-
-    public function getNome()
-    {
-        return $this->nome;
-    }
-
-    public function getCognome()
-    {
-        return $this->cognome;
     }
 
     public function getEmail()
@@ -58,16 +45,6 @@ class Utente extends BaseModel
         $this->id_utente = $id_utente;
     }
 
-    public function setNome($nome)
-    {
-        $this->nome = $nome;
-    }
-
-    public function setCognome($cognome)
-    {
-        $this->cognome = $cognome;
-    }
-
     public function setEmail($email)
     {
         $this->email = $email;
@@ -78,9 +55,14 @@ class Utente extends BaseModel
         $this->password = $password;
     }
 
-    public function setRuoloId($id_ruolo)
+    public function setIdRuolo($id_ruolo)
     {
         $this->id_ruolo = $id_ruolo;
+    }
+
+    public function getIdRuolo()
+    {
+        return $this->id_ruolo;
     }
 
 
@@ -106,6 +88,11 @@ class Utente extends BaseModel
         return Ruolo::getById($this->getRuoloId());
     }
 
+    public function getAnagrafica()
+    {
+        return Anagrafica::getByUserId($this->getId());
+    }
+
     public static function getPermessiUtente(int $id_utente = null): array
     {
         if ($id_utente === null) {
@@ -122,7 +109,30 @@ class Utente extends BaseModel
         $permessi = $role->getPermessiRuolo();
 
         return array_map(function ($permission) {
-            return $permission->getNomePermesso();
+            return $permission->getNome();
         }, $permessi);
     }
+
+    // isValidPassword
+    public static function isValidPassword($password)
+    {
+        if (strlen($password) < 8) {
+            return false;
+        }
+
+        if (!preg_match('/[A-Z]/', $password)) {
+            return false;
+        }
+
+        if (!preg_match('/[a-z]/', $password)) {
+            return false;
+        }
+
+        if (!preg_match('/[0-9]/', $password)) {
+            return false;
+        }
+
+        return true;
+    }
+
 }

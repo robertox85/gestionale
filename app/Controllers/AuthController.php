@@ -53,7 +53,8 @@ class AuthController extends BaseController
                 $user->rememberMe();
             }
 
-            $_SESSION['utente'] = $user->toArray();
+            $_SESSION['utente'] = array_merge($user->toArray(),$user->getAnagrafica()->toArray());
+            $_SESSION['utente']['id'] = $user->getId();
 
             // if url contains returnUrl, redirect to that url
             if (isset($_POST['returnUrl']) && !empty($_POST['returnUrl'])) {

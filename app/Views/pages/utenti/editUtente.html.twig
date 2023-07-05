@@ -1,0 +1,193 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ 'Edit User'|trans }}
+{% endblock %}
+
+{% block content %}
+    <section class="bg-white dark:bg-gray-900">
+        <div class="py-8 px-4 mx-auto w-full lg:py-16">
+
+            <div class=" flex justify-between w-full items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    {{ 'Edit User'|trans }}
+                </h2>
+            </div>
+
+            <form action="{{ url('utenti/edit') }} " method="post" class="w-full">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token('edit-user') }}">
+                <input type="hidden" name="id_utente" value="{{ utente.getId() }}">
+
+                <h3 class="sm:col-span-2 mt-4 mb-4 sm:mb-0 text-xl font-bold text-gray-900 dark:text-white">
+                    {{ 'Account Data'|trans }}
+                </h3>
+
+                <div class="grid sm:grid-cols-2 gap-4 sm:gap-6 mt-4">
+                    <!-- Email, password, role -->
+
+
+                    <div class="mb-4">
+                        <label for="email" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Email'|trans }}
+                        </label>
+                        <input type="email" name="email" id="email" value="{{ utente.email }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="ruolo" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Role'|trans }}
+                        </label>
+
+                        <select name="ruolo" id="ruolo"
+                                class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                            {% for ruolo in ruoli %}
+                                <option value="{{ ruolo.id }}" {% if utente.getIdRuolo == ruolo.id %}selected{% endif %}>
+                                    {{ ruolo.nome|trans }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Password'|trans }}
+                        </label>
+                        <input type="password" name="password" id="password" value=""
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="password_confirm" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Confirm Password'|trans }}
+                        </label>
+                        <input type="password" name="password_confirm" id="password_confirm" value=""
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+
+                </div>
+
+                <hr class="my-6">
+
+                <h3 class="sm:col-span-2 sm:mb-0 text-xl font-bold text-gray-900 dark:text-white">
+                    {{ 'Personal Data'|trans }}
+                </h3>
+                <div class="grid sm:grid-cols-2 gap-4 sm:gap-6 mt-4 ">
+                    <!--- Nome, Cognome, Indirizzo, Cap, città, provincia, telefono, cellulare, pec, codice_fiscale, partita_iva, note -->
+                    <div class="mb-4">
+                        <label for="nome" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Name'|trans }}
+                        </label>
+                        <input type="text"
+
+                               name="nome" id="nome" value="{{ utente.getAnagrafica().getNome() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="cognome" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Surname'|trans }}
+                        </label>
+                        <input type="text" name="cognome" id="cognome" value="{{ utente.getAnagrafica().getCognome() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="indirizzo" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Address'|trans }}
+                        </label>
+                        <input type="text" name="indirizzo" id="indirizzo" value="{{ utente.getAnagrafica().getIndirizzo() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="cap" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Postal Code'|trans }}
+                        </label>
+                        <input
+                                type="text"
+                                pattern="[0-9]{5}"
+                                maxlength="5"
+                                name="cap" id="cap" value="{{ utente.getAnagrafica().getCap() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="citta" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'City'|trans }}
+                        </label>
+                        <input type="text" name="citta" id="citta" value="{{ utente.getAnagrafica().getCitta() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="provincia" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Province'|trans }}
+                        </label>
+                        <input type="text" name="provincia" id="provincia" value="{{ utente.getAnagrafica().getProvincia() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="telefono" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Phone'|trans }}
+                        </label>
+                        <input type="text" name="telefono" id="telefono" value="{{ utente.getAnagrafica().getTelefono() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="cellulare" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Mobile'|trans }}
+                        </label>
+                        <input type="text" name="cellulare" id="cellulare" value="{{ utente.getAnagrafica().getCellulare() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="pec" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Certified Email'|trans }}
+                        </label>
+                        <input type="text" name="pec" id="pec" value="{{ utente.getAnagrafica().getPec() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="codice_fiscale" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Tax Code'|trans }}
+                        </label>
+                        <input type="text" name="codice_fiscale" id="codice_fiscale" value="{{ utente.getAnagrafica().getCodiceFiscale() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none" >
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="partita_iva" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'VAT Number'|trans }}
+                        </label>
+                        <input type="text" name="partita_iva" id="partita_iva" value="{{ utente.getAnagrafica().getPartitaIva() }}"
+                               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none" >
+                    </div>
+
+                    <div class="mb-4 sm:col-span-2">
+                        <label for="note" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ 'Note'|trans }}
+                        </label>
+                        <textarea name="note" id="note" rows="4"
+                                  class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">{{ utente.getAnagrafica().getNote() }}</textarea>
+                    </div>
+
+
+                </div>
+
+                <div class="fixed right-6 bottom-6 group ">
+                    <button type="submit"
+                            class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+                        {{ 'Save'|trans }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endblock %}
+

@@ -26,37 +26,48 @@ try {
     //TODO: Devo rinominare gli id delle tabelle da id_tabella a id perchè altrimenti non funziona il load dei dati
 
     $pdo->exec("
+    
         -- Creazione della tabella Ruoli
         CREATE TABLE IF NOT EXISTS Ruoli (
-          id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-          nome_ruolo VARCHAR(50)
+          id INT AUTO_INCREMENT PRIMARY KEY,
+          nome VARCHAR(50)
         );
         
         -- Creazione della tabella Utenti
         CREATE TABLE IF NOT EXISTS Utenti (
           id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-          nome VARCHAR(50),
-          cognome VARCHAR(50),
           email VARCHAR(100),
           password VARCHAR(100),
-          id_ruolo INT UNSIGNED,
+          id_ruolo INT,
           FOREIGN KEY (id_ruolo) REFERENCES Ruoli(id)
+        );
+        
+        -- Creazione della tabella Anagrafica
+        CREATE TABLE IF NOT EXISTS Anagrafica (
+          id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+          nome VARCHAR(50),
+          cognome VARCHAR(50),
+          indirizzo VARCHAR(100),
+          cap VARCHAR(10),
+          citta VARCHAR(50),
+          provincia VARCHAR(50),
+          telefono VARCHAR(50),
+          cellulare VARCHAR(50),
+          pec VARCHAR(100),
+          codice_fiscale VARCHAR(50),
+          partita_iva VARCHAR(50),
+          note VARCHAR(500),
+          id_utente INT,
+            FOREIGN KEY (id_utente) REFERENCES Utenti(id)
         );
         
         -- Creazione della tabella Gruppi
         CREATE TABLE IF NOT EXISTS Gruppi (
           id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-          nome_gruppo VARCHAR(50)
+          nome VARCHAR(50)
         );
         
-        -- Creazione della tabella Sottogruppi
-        CREATE TABLE IF NOT EXISTS Sottogruppi (
-          id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-          nome_sottogruppo VARCHAR(50),
-          id_gruppo INT,
-          FOREIGN KEY (id_gruppo) REFERENCES Gruppi(id) ON DELETE CASCADE
-        );
-       
+        
         
         -- Creazione della tabella Controparti
         CREATE TABLE IF NOT EXISTS Controparti (
@@ -77,8 +88,8 @@ try {
           competenza VARCHAR(50),
           ruolo_generale VARCHAR(50),
           giudice VARCHAR(50),
-          id_sottogruppo INT,
-          FOREIGN KEY (id_sottogruppo) REFERENCES Sottogruppi(id)
+          id_gruppo INT,
+          FOREIGN KEY (id_gruppo) REFERENCES Gruppi(id)
         );
         
         -- Creazione della tabella Scadenze
@@ -111,32 +122,35 @@ try {
         
         -- Creazione della tabella Permessi
         CREATE TABLE IF NOT EXISTS Permessi (
-            `id` INT(11) UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-            `nome_permesso` VARCHAR(50) NOT NULL,
-            `descrizione_permesso` VARCHAR(255)
+            `id` INT(11) AUTO_INCREMENT PRIMARY KEY NOT NULL,
+            `nome` VARCHAR(50) NOT NULL,
+            `descrizione` VARCHAR(255)
         );
 
        
         CREATE TABLE IF NOT EXISTS Ruoli_Permessi (
-          id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY NOT NULL,
-          ruolo_id INT UNSIGNED NOT NULL,
-          permesso_id INT UNSIGNED NOT NULL,
+          id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
+          ruolo_id INT NOT NULL,
+          permesso_id INT NOT NULL,
           FOREIGN KEY (ruolo_id) REFERENCES Ruoli(id),
           FOREIGN KEY (permesso_id) REFERENCES Permessi(id)
         );
         
-        CREATE TABLE IF NOT EXISTS Utenti_Sottogruppi (
+        
+        
+      CREATE TABLE IF NOT EXISTS Utenti_Gruppi (
           id_utente INT,
-          id_sottogruppo INT,
+          id_gruppo INT,
           FOREIGN KEY (id_utente) REFERENCES Utenti(id),
-          FOREIGN KEY (id_sottogruppo) REFERENCES Sottogruppi(id),
-          PRIMARY KEY (id_utente, id_sottogruppo)
+          FOREIGN KEY (id_gruppo) REFERENCES Gruppi(id),
+          PRIMARY KEY (id_utente, id_gruppo)
         );
+      
             ");
 
 
     $pdo->exec("
-    INSERT IGNORE INTO Ruoli (id, nome_ruolo) VALUES
+    INSERT IGNORE INTO Ruoli (id, nome) VALUES
   (1, 'Amministratore'),
   (2, 'Dominus'),
   (3, 'Referente'),
@@ -144,13 +158,19 @@ try {
   (5, 'Cliente');
 
 -- Inserimento di dati nella tabella Utente
-INSERT IGNORE INTO Utenti (id, nome, cognome, email, password, id_ruolo) VALUES
-  (1, 'Mario', 'Rossi', 'mario@example.com', 'password123', 1), /* Amministratore  */ 
-  (2, 'Luca', 'Bianchi', 'luca@example.com', 'password456', 3), /* Referente  */ 
-  (3, 'Laura', 'Verdi', 'laura@example.com', 'password789', 5); /* Cliente */ 
+INSERT IGNORE INTO Utenti (id, email, password, id_ruolo) VALUES
+  (1, 'mario@example.com', 'password123', 1), /* Amministratore  */ 
+  (2, 'luca@example.com', 'password456', 3), /* Referente  */ 
+  (3, 'laura@example.com', 'password789', 5); /* Cliente */ 
+  
+-- Inserimento di dati nella tabella Anagrafica
+INSERT IGNORE INTO Anagrafiche (id, nome, cognome, indirizzo, cap, citta, provincia, telefono, cellulare, pec, codice_fiscale, partita_iva, note, id_utente) VALUES
+  (1, 'Mario', 'Rossi', 'Via Roma 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', 'mario.rossi@pec.it', '','','', 1),
+  (2, 'Luca', 'Bianchi', 'Via Milano 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 2),
+  (3, 'Laura', 'Verdi', 'Via Napoli 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 3);
 
 -- Inserimento di dati nella tabella Permessi
-INSERT IGNORE INTO Permessi (id, nome_permesso, descrizione_permesso) VALUES
+INSERT IGNORE INTO Permessi (id, nome, descrizione) VALUES
   (1, 'visualizza_pratiche', 'Visualizza le pratiche'),
   (2, 'modifica_pratiche', 'Modifica le pratiche'),
   (3, 'elimina_pratiche', 'Elimina le pratiche'),
@@ -247,16 +267,14 @@ INSERT IGNORE  INTO Ruoli_Permessi (id, ruolo_id, permesso_id) VALUES
     $pdo->exec("
 
 -- Inserimento di un gruppo
-INSERT IGNORE INTO Gruppi (id, nome_gruppo) VALUES (1, 'Gruppo A');
+INSERT IGNORE INTO Gruppi (id, nome) VALUES (1, 'Gruppo A');
 
--- Inserimento di un sottogruppo legato al gruppo precedente
-INSERT IGNORE INTO Sottogruppi (id, nome_sottogruppo, id_gruppo) VALUES (1, 'Sottogruppo 1', 1);
 
 -- Inserimento di una controparte
 INSERT IGNORE INTO Controparti (id, nome, cognome) VALUES (1, 'Controparte 1', 'Rossi');
 
 -- Inserimento di una pratica legata al sottogruppo e alla controparte
-INSERT IGNORE INTO Pratiche (id, nr_pratica, nome, tipologia, stato, avvocato, referente, competenza, ruolo_generale, giudice, id_sottogruppo) VALUES (1, 'P001', 'Pratica 1', 'Civile', 'Aperta', 'Avvocato 1', 'Referente 1', 'Competenza 1', 'Ruolo Generale 1', 'Giudice 1', 1);
+INSERT IGNORE INTO Pratiche (id, nr_pratica, nome, tipologia, stato, avvocato, referente, competenza, ruolo_generale, giudice, id_gruppo) VALUES (1, 'P001', 'Pratica 1', 'Civile', 'Aperta', 'Avvocato 1', 'Referente 1', 'Competenza 1', 'Ruolo Generale 1', 'Giudice 1', 1);
 
 -- Inserimento di una scadenza legata alla pratica
 INSERT IGNORE INTO Scadenze (id, data, motivo, id_pratica) VALUES (1, '2023-06-30', 'Scadenza 1', 1);

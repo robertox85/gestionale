@@ -12,7 +12,7 @@ class SettingsController extends BaseController
         $ruoli = Ruolo::getAll();
         // add permessi to each ruolo
         $ruoli = array_map(function ($ruolo) {
-            $permessi = Permesso::getByRuoloId($ruolo->id_ruolo);
+            $permessi = Permesso::getByRuoloId($ruolo->id);
             $ruolo->permessi = $permessi;
             return $ruolo;
         }, $ruoli);
@@ -20,7 +20,7 @@ class SettingsController extends BaseController
         $ruoloId = (isset($_GET['ruolo'])) ? (int) $_GET['ruolo'] : null;
         $ruoloSelezionato = null;
         foreach ($ruoli as $ruolo) {
-            if ($ruolo->id_ruolo === $ruoloId) {
+            if ($ruolo->id === $ruoloId) {
                 $ruoloSelezionato = $ruolo;
                 break;
             }

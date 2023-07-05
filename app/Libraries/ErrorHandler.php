@@ -72,6 +72,7 @@ class ErrorHandler extends BaseController
         Helper::addError($this->formatExceptionMessage($e));
 
         Helper::redirect('/500');
+
     }
 
 

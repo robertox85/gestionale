@@ -146,7 +146,7 @@ class Helper
         $redirect = $page ?: Helper::getCurrentPage();
 
         header("Location: $redirect");
-        exit();
+        exit;
     }
 
 }

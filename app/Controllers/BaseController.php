@@ -16,6 +16,5 @@ abstract class BaseController
     {
         $this->view = TwigConfigurator::configure();
         TwigGlobalVars::addGlobals($this->view);
-
     }
 }

@@ -45,13 +45,23 @@ $routes = function (RouteCollector $r) {
     // Pratiche
     $r->addRoute('GET', '/pratiche', [
         'middleware' => [$middlewareStack],
-        'handler' => ['App\Controllers\PracticeController', 'praticheView']
+        'handler' => ['App\Controllers\PraticheController', 'praticheView']
     ]);
 
     // Pratica
-    $r->addRoute('GET', '/pratica/{id:\d+}', [
+    $r->addRoute('GET', '/pratiche/edit/{id:\d+}', [
         'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\PracticeController', 'praticaView']
+        'handler' => ['App\Controllers\PraticheController', 'editPraticaView']
+    ]);
+
+    $r->addRoute('POST', '/pratiche/edit', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\PraticheController', 'editPratica']
+    ]);
+
+    $r->addRoute('GET', '/pratiche/delete/{id:\d+}', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\PraticheController', 'deletePratica']
     ]);
 
     // pratiche/crea
@@ -60,7 +70,7 @@ $routes = function (RouteCollector $r) {
             ['amministratore','dominus']
         ),
 
-        'handler' => ['App\Controllers\PracticeController', 'praticaCreaView']
+        'handler' => ['App\Controllers\PraticheController', 'praticaCreaView']
     ]);
 
     // pratiche/crea POST
@@ -68,7 +78,7 @@ $routes = function (RouteCollector $r) {
         'middleware' => new AuthenticationMiddleware(
             ['amministratore','dominus']
         ),
-        'handler' => ['App\Controllers\PracticeController', 'createPratica']
+        'handler' => ['App\Controllers\PraticheController', 'createPratica']
     ]);
 
 
@@ -121,9 +131,15 @@ $routes = function (RouteCollector $r) {
     ]);
 
     // Utente
-    $r->addRoute('GET', '/utente/{id:\d+}', [
+    $r->addRoute('GET', '/utenti/edit/{id:\d+}', [
         'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\UserController', 'utenteView']
+    ]);
+
+    // utenti/edit POST
+    $r->addRoute('POST', '/utenti/edit', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\UserController', 'editUtente']
     ]);
 
 
@@ -207,6 +223,14 @@ $routes = function (RouteCollector $r) {
     $r->addRoute('GET', '/sottogruppo/{id:\d+}', [
         'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\GruppiController', 'sottogruppoView']
+    ]);
+
+
+
+    // search ajax routes with parameters
+    $r->addRoute('GET', '/search', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\SearchController', 'search']
     ]);
 
 

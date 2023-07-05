@@ -23,7 +23,7 @@ class BaseModel
         $shortClassName = (new \ReflectionClass($className))->getShortName();
         $tableName = self::getPluralName($shortClassName);
 
-        $sql = "SELECT * FROM " . $tableName . " WHERE id_" . strtolower($shortClassName) . " = :id";
+        $sql = "SELECT * FROM " . $tableName . " WHERE id = :id";
         $options = [
             'query' => $sql,
             'params' => $params
@@ -34,10 +34,11 @@ class BaseModel
                 /*if (property_exists($this, $property)) {
                     $this->$property = $value;
                 }*/
-                $getterMethod = 'set' . ucfirst(str_replace('_','',$property));
-                if (method_exists($this, $getterMethod)) {
-                    $this->$getterMethod($value);
+                $setterMethod = 'set' . ucfirst(str_replace('_', '', $property));
+                if (method_exists($this, $setterMethod)) {
+                    $this->$setterMethod($value);
                 } else {
+                    // Deprecated: Creation of dynamic property App\Models\Permesso::$id is deprecated in /Users/robertodimarco/PhpstormProjects/GestLex/app/Models/BaseModel.php on line 41
                     $this->$property = $value;
                 }
             }
@@ -51,7 +52,7 @@ class BaseModel
         $className = static::class;
         $shortClassName = (new \ReflectionClass($className))->getShortName();
         $tableName = self::getPluralName($shortClassName);
-        $sql = "DELETE FROM " . $tableName . " WHERE id_" . $shortClassName . " = :id";
+        $sql = "DELETE FROM " . $tableName . " WHERE id = :id";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [':id' => $this->getId()];
@@ -76,7 +77,7 @@ class BaseModel
         $options['params'] = $this->getProperties();
         $db->query($options);
         $this->setId($db->lastInsertId());
-        return $this;
+        return $this->getId();
     }
 
 
@@ -89,7 +90,7 @@ class BaseModel
         $tableName = self::getPluralName($shortClassName);
         $sql = "UPDATE " . $tableName . " SET ";
         $sql .= implode(',', array_map(fn($key) => $key . ' = :' . $key, array_keys($this->getProperties())));
-        $sql .= " WHERE id_" . $shortClassName . " = :id";
+        $sql .= " WHERE id = :id";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = $this->getProperties();
@@ -134,8 +135,10 @@ class BaseModel
     private static function getPluralName(string $shortClassName)
     {
         // in Italiano
-
-        if (substr($shortClassName, -1) === 'o') {
+        if (substr($shortClassName, -2) === 'ca') {
+            return substr($shortClassName, 0, -2) . 'che';
+        }
+        elseif (substr($shortClassName, -1) === 'o') {
             return substr($shortClassName, 0, -1) . 'i';
         } elseif (substr($shortClassName, -1) === 'e') {
             return substr($shortClassName, 0, -1) . 'i';
@@ -147,7 +150,8 @@ class BaseModel
             return substr($shortClassName, 0, -1) . 'i';
         } elseif (substr($shortClassName, -1) === 's') {
             return $shortClassName;
-        } else {
+        }
+         else {
             return $shortClassName . 's';
         }
     }
@@ -160,7 +164,7 @@ class BaseModel
         $shortClassName = (new \ReflectionClass($className))->getShortName();
         $tableName = self::getPluralName($shortClassName);
         $singularLower = strtolower($shortClassName);
-        $sql = "SELECT * FROM " . $tableName . " WHERE id_" . $singularLower . " = :id";
+        $sql = "SELECT * FROM " . $tableName . " WHERE id = :id";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [':id' => $id];
@@ -168,7 +172,7 @@ class BaseModel
         $result = $db->query($options);
 
         if (isset($result[0])) {
-            return new $className($result[0]->{'id_' . $singularLower});
+            return new $className($result[0]->{'id'});
         } else {
             return null;
         }
@@ -190,7 +194,9 @@ class BaseModel
         $result = $db->query($options);
 
         if (isset($result[0])) {
-            return new $className($result[0]->{'id_' . $singularLower});
+            $id = 'id_' . $singularLower;
+            $id_utente = $result[0]->{'id'};
+            return new $className($id_utente);
         } else {
             return null;
         }
@@ -210,6 +216,7 @@ class BaseModel
     {
         $array = get_object_vars($this);
         if (array_key_exists('id_utente', $array)) {
+            $array['id'] = $array['id_utente'];
             unset($array['id_utente']);
         }
         return $array;

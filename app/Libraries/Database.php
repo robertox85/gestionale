@@ -30,8 +30,7 @@ class Database
             $this->db = new PDO("mysql:host={$this->db_host};dbname={$this->db_name}", $this->db_user, $this->db_password);
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         } catch (PDOException $e) {
-            // Gestione degli errori di connessione.
-            Helper::addError('Database connection error');
+            exit($e->getMessage());
         }
     }
 
@@ -114,7 +113,11 @@ class Database
 
         try {
             if ($this->db === null) {
-                throw new Exception('Database not found');
+                $errorHandler = ErrorHandler::getInstance();
+                $errorHandler->handleException(new Exception('Database not found'));
+                //throw new Exception('Database not found');
+                echo 'Database not found';
+                exit;
             } else {
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute($options['params']);

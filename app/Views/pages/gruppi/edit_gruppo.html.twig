@@ -2,65 +2,186 @@
 
 {% block content %}
 
+    <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">
+        {{ 'Add new group'|trans }}
+    </h2>
+
     <form action="{{ url('gruppi/edit') }}" method="POST">
-        <input type="hidden" name="csrf_token" value="{{ csrf_token('edit_gruppi') }}"/>
+        <input type="hidden" name="csrf_token" value="{{ csrf_token('gruppi') }}"/>
         <input type="hidden" name="id_gruppo" value="{{ gruppo.getId() }}"/>
+
+
+        <div class="grid gap-4 sm:grid-cols-2 sm:gap-6"
+             x-data="searchResults"
+             data-idGruppo="{{ gruppo.getId() }}"
+             data-selectedUsers="{{ gruppo.getUtenti() | json_encode() }}"
+        >
+            <div class="">
+                <label for="nome_gruppo" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    {{ 'Name'|trans }}
+                </label>
+                <input type="text"
+                       name="nome_gruppo"
+                       id="nome_gruppo"
+                       class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                       placeholder="{{ 'Name'|trans }}"
+                          value="{{ gruppo.getNome() }}"
+                       required>
+            </div>
+
+            <div class="" >
+                <!-- column for sending invite members -->
+                <label for="utenti" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    {{ 'Add members'|trans }}
+                </label>
+
+
+                <!-- input for email address with icon -->
+                <div class="relative">
+                    <div >
+                        <input type="text"
+                               x-model="query"
+                               @input="performSearch"
+                               @click="performSearch"
+                               name="utenti"
+                               id="utenti"
+                               class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
+                               placeholder="{{ 'Email address'|trans }}" >
+
+                        <div x-show="searchResults.length > 0" class="mt-1">
+                            <ul class="bg-white border border-gray-300 rounded-md shadow-md">
+                                <template x-for="result in searchResults" :key="result.id">
+                                    <li @click="selectUser(result)"
+                                        x-text="result.nome + ' ' + result.cognome + ' (' + result.email + ')'"
+                                        class="py-2 px-4 cursor-pointer hover:bg-gray-100">
+
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+
+                        <div x-show="showNoResultsMessage"
+                             class="mt-1 text-gray-500 dark:text-gray-400 text-sm italic font-bold ">
+                            Nessun utente trovato.
+                        </div>
+                    </div>
+
+                </div>
+
+                <p class="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                    {{ 'Enter the email addresses of the people you want to add to this group. They will receive an email with a link to join the group.'|trans }}
+                </p>
+
+            </div>
+
+            <!-- table for showing members -->
+
+            <div class="relative overflow-x-auto shadow-md sm:rounded-lg sm:col-span-2" >
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                    <caption
+                            class="p-5 text-lg font-semibold text-left text-gray-900 bg-white dark:text-white dark:bg-gray-800">
+                        {{ 'Members'|trans }}
+                    </caption>
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">
+                            {{ 'Name'|trans }}
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            {{ 'Email'|trans }}
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            {{ 'Status'|trans }}
+                        </th>
+
+                        <th scope="col" class="px-6 py-3">
+                            <span class="sr-only">Edit</span>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <template x-for="user in selectedUsers" :key="user.id">
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <!-- hidden input for sending invite members -->
+                            <input type="hidden" name="utenti[]" :value="user.id">
+                            <td scope="row"
+                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                x-text="user.nome"></td>
+                            <td scope="row"
+                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                x-text="user.cognome"></td>
+                            <td scope="row"
+                                class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                x-text="user.email"></td>
+                            <td class="px-6 py-4 text-right">
+                                <a href="#"
+                                   @click.prevent="removeUser(user)"
+                                   class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                    {{ 'Remove'|trans }}
+                                </a>
+                            </td>
+                        </tr>
+                    </template>
+
+
+                    </tbody>
+                </table>
+            </div>
+
+
+        </div>
+
+
+        <div class="fixed right-6 bottom-6 group ">
+            <button type="submit"
+                    class="inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800">
+                {{ 'Save'|trans }}
+            </button>
+        </div>
+
+
+        <!--
         <div class="p-6 space-y-6">
 
             <div class="grid grid-cols-1 gap-6">
                 <div>
                     <label for="nome_gruppo"
                            class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nome</label>
-
-                    <input type="text"
-                           name="nome_gruppo"
-                           id="nome_gruppo"
-                           value="{{ gruppo.getNomegruppo() }}"
+                    <input type="text" name="nome_gruppo" id="nome_gruppo"
                            class="block w-full mt-1 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-primary-400 focus:ring focus:ring-primary-300 focus:ring-opacity-50">
                 </div>
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
                     Team
                 </h3>
-
-
                 <div x-data="sottoGruppiContainer"
-
                      data-utenti="{{ utenti|json_encode|e('html_attr') }}"
                      data-sottogruppi="{{ sottogruppi|json_encode|e('html_attr') }}">
                     <template x-for="(sottogruppo, index) in sottogruppi" :key="index">
                         <div class="mb-4 border rounded-lg p-4 space-y-2">
-                            <input type="hidden" :name="'sottogruppi[' + index + '][id_sottogruppo]'"
-                                   :value="sottogruppo.id_sottogruppo">
+
                             <div class="flex items-center space-x-4">
                                 <label for="name"
                                        class="block text-sm font-medium text-gray-700 dark:text-gray-200">Nome</label>
                                 <input type="text"
-                                       x-model="sottogruppo.nome_sottogruppo"
-                                       :data-ID="sottogruppo.id_sottogruppo"
-                                       :name="'sottogruppi[' + index + '][nome_sottogruppo]'"
+                                       x-model="sottogruppo.nome"
+                                       :dataID="sottogruppo.id"
+                                       :name="'sottogruppi[' + index + '][nome]'"
                                        :id="'nome-' + index"
-                                       :value="sottogruppo.nome_sottogruppo"
                                        class="block w-full rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-primary-400 focus:ring focus:ring-primary-300 focus:ring-opacity-50">
-
                             </div>
 
                             <div class="flex items-center space-x-4">
-
                                 <label for="utenti"
                                        class="block text-sm font-medium text-gray-700 dark:text-gray-200">Utenti</label>
                                 <select x-ref="select2" :id="'select2-' + index" x-data="utenti" id="utenti"
                                         x-bind:name="'sottogruppi[' + index + '][utenti][]'"
-                                        x-model="sottogruppi[index].utenti"
+                                        x-model="sottogruppo.utenti"
                                         class="select2 block w-full mt-1 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-primary-400 focus:ring focus:ring-primary-300 focus:ring-opacity-50"
                                         multiple style="width: 100%">
                                     <template x-for="(utente, utenteIndex) in utenti" :key="utenteIndex">
-                                        <option :value="utente.id_utente" x-text="utente.nome"></option>
+                                        <option :value="utente.id" x-text="utente.nome"></option>
                                     </template>
                                 </select>
-
-
-
-
                             </div>
 
                             <div class="text-right flex items-center space-x-2 justify-end">
@@ -86,16 +207,35 @@
 
                     </template>
                 </div>
+
+
+                <div>
+                    <label for="status" class="block text-sm font-medium text-gray-700 dark:text-gray-200">Status</label>
+                    <select id="status" name="status"
+                            class="block w-full mt-1 rounded-lg shadow-sm dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 focus:border-primary-400 focus:ring focus:ring-primary-300 focus:ring-opacity-50">
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                </div>
             </div>
+
         </div>
 
+        <div class="absolute right-3 top-3 group  flex items-center">
+            <button type="submit"
+                    class="flex items-center justify-center text-white bg-green-500 hover:bg-green-600 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-500 w-24 h-12">
+                Save
+            </button>
+
+        </div>
 
         <div class="fixed right-6 bottom-6 group ">
-            <button type="submit"  class="flex items-center justify-center text-white bg-green-500 hover:bg-green-600 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-500 w-24 h-12">
-                <!-- Save icon -->
-                {{ 'Update'|trans }}
+            <button type="submit"  class="flex items-center justify-center text-white bg-green-500 hover:bg-green-600 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-4 py-2 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-500">
+                {{ 'Save'|trans }}
             </button>
         </div>
+
+        -->
     </form>
 
 {% endblock %}

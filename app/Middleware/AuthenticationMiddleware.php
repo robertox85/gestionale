@@ -23,7 +23,7 @@ class AuthenticationMiddleware
         if (empty($roles)) {
             $roles = Ruolo::getAll();
             $roles = array_map(function ($role) {
-                return strtolower($role->nome_ruolo);
+                return ($role) ? strtolower($role->nome) : null;
             }, $roles);
         }
 
@@ -62,10 +62,11 @@ class AuthenticationMiddleware
         $user = new Utente($_SESSION['utente']['id']);
         $ruolo = $user->getRuolo();
         if ($ruolo !== null) {
-            $nomeRuolo = $ruolo->getNomeRuolo();
+            $nomeRuolo = $ruolo->getNome();
             $userRole = strtolower(str_replace(' ', '_', $nomeRuolo));
         } else {
             // Gestione quando l'oggetto ruolo è nullo
+            echo 'Errore: l\'utente non ha un ruolo';
         }
 
         return in_array($userRole, $this->roles);

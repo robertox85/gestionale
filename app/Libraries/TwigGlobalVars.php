@@ -104,6 +104,8 @@ class TwigGlobalVars
             // add PageClass to the body tag
             'getPageClass' => function () {
                 $routeName = $_SERVER['REQUEST_URI'] ?? '';
+                // remove id from the route name (e.g. /pratiche/edit/12)
+                $routeName = preg_replace('/\/\d+/', '', $routeName);
                 $routeName = str_starts_with($routeName, '/') ? $routeName : "/$routeName";
                 $routeName = str_replace('/', '-', $routeName);
                 // remove first '-' from the route name

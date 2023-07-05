@@ -33,7 +33,7 @@
 
                             <option value="" selected disabled>Seleziona un ruolo</option>
                             {% for ruolo in ruoli %}
-                                <option value="{{ ruolo.id_ruolo }}" {% if ruoloSelezionato and ruoloSelezionato.id_ruolo == ruolo.id_ruolo %} selected {% endif %}>{{ ruolo.nome_ruolo }}</option>
+                                <option value="{{ ruolo.id }}" {% if ruoloSelezionato and ruoloSelezionato.id == ruolo.id %} selected {% endif %}>{{ ruolo.nome }}</option>
                             {% endfor %}
                         </select>
 
@@ -44,7 +44,7 @@
 
             <form action="{{ url('impostazioni/aggiornaRuolo') }}" method="post">
 
-                <input type="hidden" name="id_ruolo" value="{% if ruoloSelezionato %}{{ ruoloSelezionato.id_ruolo }}{% endif %}">
+                <input type="hidden" name="id_ruolo" value="{% if ruoloSelezionato %}{{ ruoloSelezionato.id }}{% endif %}">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token('aggiornaRuolo') }}">
 
                 <div class="flex flex-wrap -mx-3 mb-6">
@@ -59,17 +59,17 @@
                                         <input
                                                 {% if ruoloSelezionato %}
                                                     {% for permission in ruoloSelezionato.permessi %}
-                                                        {{ permission.id_permesso }}
-                                                        {% if permission.id_permesso == permesso.id_permesso %}
+                                                        {{ permission.id }}
+                                                        {% if permission.id == permesso.id %}
                                                             checked
                                                         {% endif %}
                                                     {% endfor %}
                                                 {% endif %}
 
                                                 type="checkbox" class="form-checkbox text-blue-500" name="permessi[]"
-                                               value="{{ permesso.id_permesso }}">
+                                               value="{{ permesso.id }}">
                                         <span class="ml-2 text-gray-800">
-                                            {{ permesso.descrizione_permesso }}
+                                            {{ permesso.descrizione }}
                                         </span>
                                     </label>
                                 </div>

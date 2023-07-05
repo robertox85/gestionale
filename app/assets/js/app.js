@@ -7,30 +7,80 @@ import 'flowbite';
 import Datepicker from 'flowbite-datepicker/Datepicker';
 import 'select2' // ES6 module
 import 'select2/dist/css/select2.css' // ES6 module
-
+import 'axios' // ES6 module
 import * as Toastr from 'toastr';
 // import 'toastr/build/toastr.css'; //You need style and css loader installed and set
 
 // init jquery
 document.addEventListener('DOMContentLoaded', function () {
     window.$ = window.jQuery = $;
-    Alpine.plugin(persist)
+    Alpine.plugin(persist);
     window.Alpine = Alpine;
     Alpine.start();
+
+    // init axios
+    window.axios = require('axios');
 });
 
 document.addEventListener('alpine:init', () => {
-    Alpine.data('utenti', () => ({
-        init() {
-            /*$(this.$el).select2({
-                placeholder: 'Seleziona un utente',
-            });
-            $(this.$el).on('change', (e) => {
-                this.selezione = e.target.value;
-            });*/
-        },
-    }));
+    Alpine.data('searchResults', () => ({
+        query: '',
+        searchResults: [],
+        showNoResultsMessage: false,
+        selectedUsers: [],
+        performSearch() {
+            // if query is less than 3 characters, don't perform search
+            if (this.query.length < 3 ) {
+                this.searchResults = [];
+                this.showNoResultsMessage = false;
+                return;
+            }
 
+            if (this.query.trim() === '') {
+                this.searchResults = [];
+                this.showNoResultsMessage = false;
+                return;
+            }
+
+
+
+            // Esegui la chiamata AJAX per cercare gli utenti corrispondenti nel database
+            // Puoi utilizzare axios o fetch per eseguire la chiamata AJAX
+            axios.get('/search', { params: { query: this.query } })
+                .then(response => {
+                    //this.searchResults = response.data;
+
+                    // Filtra i risultati per escludere gli utenti già selezionati
+                    this.searchResults = response.data.filter(user => {
+                        return !this.selectedUsers.find(selectedUser => selectedUser.id === user.id);
+                    });
+
+                    // Verifica se il risultato è vuoto e imposta showNoResultsMessage
+                    this.showNoResultsMessage = this.searchResults.length === 0;
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        },
+        selectUser(user) {
+            let query = this.query;
+            this.query = user.email;
+            this.searchResults = [];
+            this.selectedUsers.push(user);
+
+            // reset the query
+            this.query = query;
+        },
+        removeUser(user) {
+            this.selectedUsers = this.selectedUsers.filter(selectedUser => selectedUser.id !== user.id);
+        },
+        init() {
+            // get the selected users
+            this.selectedUsers = JSON.parse(this.$el.dataset.selectedusers);
+        }
+    }));
+});
+/*document.addEventListener('alpine:init', () => {
     Alpine.data('sottoGruppiContainer', () => ({
         sottogruppi: [],
         utenti: [],
@@ -66,28 +116,49 @@ document.addEventListener('alpine:init', () => {
         addUtente(sottogruppo) {
             sottogruppo.utenti.push();
         },
-
         init() {
+
             this.utenti = JSON.parse(this.$el.dataset.utenti);
             this.sottogruppi = JSON.parse(this.$el.dataset.sottogruppi);
+
+            // if utenti is empty, init utenti
+            if (this.utenti == null) {
+                this.utenti = [];
+            }
+
+            // if sottogruppi is empty, init first sottogruppo
+            if (this.sottogruppi == null) {
+                this.sottogruppi = []
+            }
+
+            console.log(this.sottogruppi);
+
             // init first sottogruppo
             if (this.sottogruppi != null && this.sottogruppi.length === 0) {
                 this.addSottoGruppo({
                     id: 0,
                     nome: '',
-                    utenti: this.utenti,
+                    utenti: '',
                 });
             }
 
             // if there are utenti in the sottogruppi, init utentiSelezionati
             if(this.sottogruppi != null && this.sottogruppi.length > 0) {
+
                 this.sottogruppi.forEach((sottogruppo, index) => {
-                    if (sottogruppo.utenti.length > 0) {
+                    if (sottogruppo.utenti.length > 0 && sottogruppo.nome != '') {
                         // get the select and init select2
                         setTimeout(() => {
                             $(`#select2-${index}`).select2({
                                 placeholder: 'Seleziona gli utenti da aggiungere al team',
-                            }).val(sottogruppo.utenti.map(utente => utente.id_utente)).trigger('change');
+                            }).val(sottogruppo.utenti.map(utente => utente.id)).trigger('change');
+                        }, 100);
+                    } else {
+                        // init select2 for the new sottogruppo
+                        setTimeout(() => {
+                            $(`#select2-${index}`).select2({
+                                placeholder: 'Seleziona gli utenti da aggiungere al team',
+                            });
                         }, 100);
                     }
                 });
@@ -100,63 +171,53 @@ document.addEventListener('alpine:init', () => {
                 }, 100);
             }
 
-
-
         }
     }));
+});*/
 
-});
 
-document.addEventListener('alpine:initialized', () => {
-    // Init select2
-    /*$('.select2').select2({
-        placeholder: 'Seleziona un utente',
-    });*/
-})
 
 
 var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
 var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 
+
 // Change the icons inside the button based on previous settings
 if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    themeToggleDarkIcon.classList.add('hidden');
     themeToggleLightIcon.classList.remove('hidden');
 } else {
     themeToggleDarkIcon.classList.remove('hidden');
+    themeToggleLightIcon.classList.add('hidden');
 }
 
 
 var themeToggleBtn = document.getElementById('theme-toggle');
-
 themeToggleBtn.addEventListener('click', function () {
-
     // toggle icons inside button
     themeToggleDarkIcon.classList.toggle('hidden');
     themeToggleLightIcon.classList.toggle('hidden');
 
-    // if set via local storage previously
-    if (localStorage.getItem('color-theme')) {
-        if (localStorage.getItem('color-theme') === 'light') {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('color-theme', 'dark');
-        } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('color-theme', 'light');
-        }
-
-        // if NOT set via local storage previously
+    // toggle theme
+    if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('color-theme', 'light');
     } else {
-        if (document.documentElement.classList.contains('dark')) {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('color-theme', 'light');
-        } else {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('color-theme', 'dark');
-        }
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('color-theme', 'dark');
     }
-
 });
 
+// Check the initial theme preference and update the icons
+if (localStorage.getItem('color-theme') === 'dark' || (!localStorage.getItem('color-theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark');
+    themeToggleDarkIcon.classList.add('hidden');
+    themeToggleLightIcon.classList.remove('hidden');
+} else {
+    document.documentElement.classList.remove('dark');
+    themeToggleDarkIcon.classList.remove('hidden');
+    themeToggleLightIcon.classList.add('hidden');
+}
 
 // on click of the button with attribute data-modal-target
 
@@ -414,6 +475,7 @@ if (datepickerEl) {
     });
 }
 window.initDatePicker = function () {
+return;
     setTimeout(function () {
         const datepickerEl = document.querySelectorAll('input[datepicker]');
         if (datepickerEl) {
@@ -426,7 +488,11 @@ window.initDatePicker = function () {
                     weekStart: 1,
                     zIndex: 9999,
                     todayHighlight: true,
-                    orientation: 'bottom'
+                    orientation: 'bottom',
+                    buttons: {
+                        clear: true,
+                        today: true,
+                    }
                 });
             });
         }

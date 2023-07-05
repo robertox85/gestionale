@@ -3,8 +3,6 @@
 namespace App\Controllers;
 
 use App\Models\Gruppo;
-use App\Models\SottoGruppo;
-use App\Models\Utente;
 
 use App\Libraries\Database;
 
@@ -14,9 +12,7 @@ class GruppiController extends BaseController
     {
         $gruppi = Gruppo::getAll();
         $gruppi = array_map(function ($gruppo) {
-            $gruppo = new Gruppo($gruppo->id_gruppo);
-            $sottogruppi = SottoGruppo::getByGroup($gruppo->getId());
-            $gruppo->setSottogruppi($sottogruppi);
+            $gruppo = new Gruppo($gruppo->id);
             return $gruppo;
         }, $gruppi);
 
@@ -27,75 +23,40 @@ class GruppiController extends BaseController
         );
     }
 
-
-
     public function creaGruppoView()
     {
-        $utenti = Utente::getAll();
-        echo $this->view->render('crea_gruppo.html.twig',
-            [
-                'utenti' => $utenti,
-            ]
-        );
+        // create a new group and redirect to edit page
+        try {
+            $gruppo = new Gruppo();
+            $gruppo->setNome('Nuovo gruppo');
+            $gruppo->save();
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            header('Location: /gruppi');
+        }
+
+        header('Location: /gruppi/edit/' . $gruppo->getId());
     }
 
     // editGruppoView
     public function editGruppoView(int $id_gruppo)
     {
-        $gruppo = new Gruppo($id_gruppo);
-        $sottogruppi = $gruppo->getSottoGruppi();
-        // convert array of objects to array of arrays
-
-        $utenti = Utente::getAll();
-
         echo $this->view->render('edit_gruppo.html.twig',
             [
-                'gruppo' => $gruppo,
-                'sottogruppi' => $sottogruppi,
-                'utenti' => $utenti,
+                'gruppo' => new Gruppo($id_gruppo),
             ]
         );
     }
 
-
-
-
+    // creaGruppo POST
     public function creaGruppo()
     {
         try {
             // Validazione dei dati
             $nomeGruppo = $_POST['nome_gruppo'];
-            $sottogruppi = $_POST['sottogruppi'];
-            // Creazione del gruppo
             $gruppo = new Gruppo();
-            $gruppo->setNomeGruppo($nomeGruppo);
+            $gruppo->setNome($nomeGruppo);
             $gruppo->save();
-
-            // Avvio della transazione
-            Database::beginTransaction();
-
-            // Aggiunta dei sottogruppi al gruppo
-            foreach ($sottogruppi as $sottogruppo) {
-                $sottogruppo_id = $gruppo->addSottoGruppo($sottogruppo);
-                if ($sottogruppo_id) {
-                    $sottogruppoObj = new SottoGruppo($sottogruppo_id);
-                    $utenti = $sottogruppo['utenti'];
-                    // Aggiunta degli utenti al sottogruppo
-                    foreach ($utenti as $utente) {
-                        $sottogruppoObj->addUtente($utente);
-                    }
-                } else {
-                    // Annullamento della transazione in caso di errore
-                    Database::rollBack();
-                    throw new \Exception("Errore durante l'aggiunta dei sottogruppi");
-                }
-            }
-
-
-
-            // Conferma della transazione
-            Database::commit();
-
             header('Location: /gruppi');
         } catch (\Exception $e) {
             // Gestione delle eccezioni
@@ -110,54 +71,33 @@ class GruppiController extends BaseController
 
         // Validazione dei dati
         $nomeGruppo = $_POST['nome_gruppo'];
-        $sottogruppi = $_POST['sottogruppi'];
+        $utenti = $_POST['utenti'];
+
 
         // Creazione del gruppo
         $gruppo = new Gruppo($id);
-        $gruppo->setNomeGruppo($nomeGruppo);
-        $gruppo->update();
+        $gruppo->setNome($nomeGruppo);
+
 
         // Avvio della transazione
         Database::beginTransaction();
 
-        // Variabile per tenere traccia degli errori
-        $errori = false;
+        // Aggiornamento del gruppo
+        try {
+            $gruppo->clearUtenti();
 
-        // Aggiunta dei sottogruppi al gruppo
-        foreach ($sottogruppi as $sottogruppo) {
-            try {
-                $sottogruppo_id = $sottogruppo['id_sottogruppo'];
-
-                $updateSottogruppo = $gruppo->updateSottogruppo($sottogruppo);
-                if (!$updateSottogruppo) {
-                    $errori = true; // Aggiornamento non riuscito
-                }
-
-                $sottogruppoObj = new SottoGruppo($sottogruppo_id);
-                $utenti = $sottogruppo['utenti'];
-
-                // Aggiunta degli utenti al sottogruppo
-                $sottogruppoObj->clearUtentiSottogruppo();
-                foreach ($utenti as $utente) {
-                    $sottogruppoObj->addUtente($utente);
-                }
-            } catch (\Exception $e) {
-                Database::rollBack();
-                throw new \Exception("Errore durante l'aggiunta dei sottogruppi");
+            foreach ($utenti as $id_utente) {
+                $gruppo->addUtente($id_utente);
             }
+            $gruppo->update();
+        } catch (\Exception $e) {
+            echo $e->getMessage();
+            Database::rollBack();
         }
+
 
         // Conferma della transazione
         Database::commit();
-
-        // Gestione dei risultati
-        if ($errori) {
-            // Si sono verificati errori durante l'aggiornamento
-            // Esegui le azioni appropriate per gestire gli errori
-        } else {
-            // Nessun errore, il processo può continuare
-            // Esegui le azioni appropriate per il successo dell'aggiornamento
-        }
 
         header('Location: /gruppi/edit/' . $id);
     }
@@ -168,28 +108,21 @@ class GruppiController extends BaseController
     {
         try {
             $gruppo = new Gruppo($id);
-            $sottoGruppi = $gruppo->getSottoGruppi();
-            foreach ($sottoGruppi as $sottoGruppo) {
-                $id = $sottoGruppo['id_sottogruppo'];
 
-                $sottoGruppo = new SottoGruppo($id);
+            Database::beginTransaction();
 
-                // clearUtentiSottogruppo
-                $sottoGruppo->clearUtentiSottogruppo();
-
-                // clearPraticheSottogruppo
-                $sottoGruppo->clearPraticheSottogruppo();
-
-                $sottoGruppo->delete();
+            try{
+                $gruppo->clearUtenti();
+                $gruppo->clearPratiche();
+                $gruppo->delete();
+            } catch (\Exception $e) {
+                echo $e->getMessage();
+                Database::rollBack();
             }
 
-            $gruppo->delete();
-
-
+            Database::commit();
 
             header('Location: /gruppi');
-
-
         } catch (\Exception $e) {
             echo $e->getMessage();
         }

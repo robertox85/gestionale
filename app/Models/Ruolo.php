@@ -9,18 +9,18 @@ use PHPUnit\TextUI\Help;
 
 class Ruolo extends BaseModel
 {
-    protected $id_ruolo;
-    protected  $nome_ruolo;
+    protected $id;
+    protected  $nome;
 
 
     public function getId()
     {
-        return $this->id_ruolo;
+        return $this->id;
     }
 
-    public function getNomeRuolo()
+    public function getNome()
     {
-        return $this->nome_ruolo;
+        return $this->nome;
     }
 
     public function possiedePermesso(Permission $permission)
@@ -41,7 +41,7 @@ class Ruolo extends BaseModel
     {
         $db = Database::getInstance();
         // Aggiungo il permesso al ruolo
-        $sql = "INSERT INTO Permessi_Ruoli (ruolo_id, permesso_id) VALUES (:ruolo_id, :permesso_id)";
+        $sql = "INSERT INTO Ruoli_Permessi (ruolo_id, permesso_id) VALUES (:ruolo_id, :permesso_id)";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [':ruolo_id' => $this->getId(), ':permesso_id' => $permesso_id];
@@ -54,7 +54,7 @@ class Ruolo extends BaseModel
     {
         $db = Database::getInstance();
         // Ottengo tutti i permessi del ruolo
-        $sql = "SELECT * FROM Permessi_Ruoli WHERE ruolo_id = :ruolo_id";
+        $sql = "SELECT * FROM Ruoli_Permessi WHERE ruolo_id = :ruolo_id";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [':ruolo_id' => $this->getId()];
@@ -73,7 +73,7 @@ class Ruolo extends BaseModel
     {
         $db = Database::getInstance();
         // Rimuovo tutti i permessi dal ruolo
-        $sql = "DELETE FROM Permessi_Ruoli WHERE ruolo_id = :ruolo_id";
+        $sql = "DELETE FROM Ruoli_Permessi WHERE ruolo_id = :ruolo_id";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [':ruolo_id' => $this->id];
@@ -81,15 +81,5 @@ class Ruolo extends BaseModel
         return $db->query($options);
     }
 
-    // update
-    /*public function update()
-    {
-        $db = Database::getInstance();
-        $sql = "UPDATE Ruoli SET nome_ruolo = :nome_ruolo WHERE id_ruolo = :id_ruolo";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [':nome_ruolo' => $this->name, ':id_ruolo' => $this->id];
 
-        return $db->query($options);
-    }*/
 }
