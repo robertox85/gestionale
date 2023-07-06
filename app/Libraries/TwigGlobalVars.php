@@ -42,6 +42,9 @@ class TwigGlobalVars
                     $currentQueryString = http_build_query(array_diff_key($_GET, $params));
                 }
 
+                unset($params['route']);
+
+
                 $query = http_build_query($params);
                 $query = $query ? "$currentQueryString&$query" : $currentQueryString;
 
