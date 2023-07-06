@@ -2,3 +2,5 @@
 node_modules/
 vendor/
 .idea/
+logs/error.log
+``
