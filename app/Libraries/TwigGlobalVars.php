@@ -45,8 +45,11 @@ class TwigGlobalVars
                 unset($params['route']);
 
 
+
                 $query = http_build_query($params);
                 $query = $query ? "$currentQueryString&$query" : $currentQueryString;
+
+                unset($query['route']);
 
                 return $_ENV['BASE_URL'] . $routeName . ($query ? "?$query" : '');
             },
