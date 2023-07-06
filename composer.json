@@ -27,9 +27,6 @@
   "scripts": {
     "post-install-cmd": [
       "php scripts/initialize-database.php"
-    ],
-    "post-update-cmd": [
-      "php scripts/update-database.php"
     ]
   }
 }
