@@ -99,6 +99,9 @@
                         </div>
 
 
+
+
+
                         <div x-data="{ assistiti: [] }"
                              class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2 rounded">
                             <label>
@@ -198,16 +201,7 @@
                             </button>
                         </div>
 
-                        <!-- Form Calcolatore scadenza -->
-                        <!-- Datetime: Data iniziale -->
-                        <!-- Numero: Giorni -->
-                        <!-- Select: Prima/Dopo -->
-                        <!-- Checkbox: Sospensione dei termini processuali -->
 
-
-                        <!-- Form Registro udienze -->
-                        <!-- Testo: Tipo udienza -->
-                        <!-- Datetime: Data udienza -->
 
                         <div x-data="{ udienze: {{ pratica.getUdienze() | json_encode }} }" x-init="initDatePicker()"
                              class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">

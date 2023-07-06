@@ -42,8 +42,8 @@ try {
           FOREIGN KEY (id_ruolo) REFERENCES Ruoli(id)
         );
         
-        -- Creazione della tabella Anagrafica
-        CREATE TABLE IF NOT EXISTS Anagrafica (
+        -- Creazione della tabella Anagrafiche
+        CREATE TABLE IF NOT EXISTS Anagrafiche (
           id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
           nome VARCHAR(50),
           cognome VARCHAR(50),
@@ -163,7 +163,7 @@ INSERT IGNORE INTO Utenti (id, email, password, id_ruolo) VALUES
   (2, 'luca@example.com', 'password456', 3), /* Referente  */ 
   (3, 'laura@example.com', 'password789', 5); /* Cliente */ 
   
--- Inserimento di dati nella tabella Anagrafica
+-- Inserimento di dati nella tabella Anagrafiche
 INSERT IGNORE INTO Anagrafiche (id, nome, cognome, indirizzo, cap, citta, provincia, telefono, cellulare, pec, codice_fiscale, partita_iva, note, id_utente) VALUES
   (1, 'Mario', 'Rossi', 'Via Roma 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', 'mario.rossi@pec.it', '','','', 1),
   (2, 'Luca', 'Bianchi', 'Via Milano 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 2),
