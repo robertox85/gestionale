@@ -13,6 +13,9 @@ class TwigGlobalVars
             $twig->addGlobal('session', $_SESSION);
         }
 
+        // if is localhost, add the global variable 'isLocalhost' to the twig template
+        $twig->addGlobal('isLocalhost', $_ENV['APP_ENV'] === 'local');
+
 
 
         self::addTwigFunctions($twig);
