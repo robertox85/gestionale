@@ -48,7 +48,7 @@ class TwigGlobalVars
 
 
                 // remove ?route={*} from the query string if exists
-                $url = preg_replace('/\?route=[^&]*/', '', $url);
+                //$url = preg_replace('/\?route=[^&]*/', '', $url);
 
                 return $url;
             },
