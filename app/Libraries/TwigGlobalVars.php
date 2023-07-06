@@ -44,8 +44,13 @@ class TwigGlobalVars
 
                 $query = http_build_query($params);
                 $query = $query ? "$currentQueryString&$query" : $currentQueryString;
+                $url = $_ENV['BASE_URL'] . $routeName . ($query ? "?$query" : '');
 
-                return $_ENV['BASE_URL'] . $routeName . ($query ? "?$query" : '');
+
+                // remove ?route={*} from the query string if exists
+                $url = preg_replace('/\?route=[^&]*/', '', $url);
+
+                return $url;
             },
             'csrf_token' => function (string $tokenId = 'authenticate') {
                 return Helper::generateToken($tokenId) ?? '';
