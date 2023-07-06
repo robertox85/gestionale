@@ -7,9 +7,5 @@ RewriteRule ^public/ - [L]
 RewriteCond %{DOCUMENT_ROOT}/public/$1 -f
 RewriteRule (.+) public/$1 [L]
 
-# Remove route parameter from all requests
-RewriteCond %{QUERY_STRING} (.*(?:^|&))route=[^&]*(?:&|$) [NC]
-RewriteRule ^(.*)$ /$1?%1 [R=302,L]
-
 # Route all other requests
 RewriteRule (.*) public/index.php?route=$1 [L,QSA]
