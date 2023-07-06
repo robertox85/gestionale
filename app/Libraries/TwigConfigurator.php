@@ -18,7 +18,7 @@ class TwigConfigurator
 
         $twig = new Environment($loader, [
             'cache' => false,
-            'debug' => true,
+            'debug' => false,
         ]);
 
         self::initTranslation($twig);
