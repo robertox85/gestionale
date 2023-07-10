@@ -193,6 +193,20 @@ class Pratica extends BaseModel
         return $db->query($options);
     }
 
+    public static function generateNrPratica()
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT MAX(CAST(nr_pratica AS UNSIGNED)) AS max_nr_pratica FROM Pratiche";
+        $options = [
+            'query' => $sql,
+            'params' => []
+        ];
+        $result = $db->query($options);
+        $maxNrPratica = $result[0]->max_nr_pratica ?? 0;
+        $nextNrPratica = $maxNrPratica + 1;
+        return sprintf('%04d', $nextNrPratica); // Formatta il numero come stringa con zeri iniziali
+    }
+
     public function getScadenze()
     {
         $db = Database::getInstance();
@@ -253,7 +267,7 @@ class Pratica extends BaseModel
     public function addNota( mixed $note)
     {
         $db = Database::getInstance();
-        $sql = "INSERT INTO Note (id_pratica, tipologia, testo, visibilita) VALUES (:id_pratica, :tipologia, :testo, :visibilita)";
+        $sql = "INSERT INTO Note (id_pratica, tipologia, descrizione, visibilita) VALUES (:id_pratica, :tipologia, :testo, :visibilita)";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [
@@ -277,7 +291,7 @@ class Pratica extends BaseModel
     }
 
     // addAssistito
-    public function addAssistito(mixed $assistito)
+    public function addAssistito(mixed $id_utente)
     {
         // Assistito è un Utente con ruolo cliente
         $db = Database::getInstance();
@@ -286,7 +300,7 @@ class Pratica extends BaseModel
         $options['query'] = $sql;
         $options['params'] = [
             ':id_pratica' => $this->getId(),
-            ':id_utente' => $assistito->getId()
+            ':id_utente' => $id_utente
         ];
 
         return $db->query($options);
@@ -318,7 +332,7 @@ class Pratica extends BaseModel
     }
 
     // addControparte
-    public function addControparte(mixed $controparte)
+    public function addControparte(mixed $id_utente)
     {
         // Controparte è un Utente con ruolo cliente. Se non esiste, viene prima creato
         $db = Database::getInstance();
@@ -327,7 +341,7 @@ class Pratica extends BaseModel
         $options['query'] = $sql;
         $options['params'] = [
             ':id_pratica' => $this->getId(),
-            ':id_utente' => $controparte->getId()
+            ':id_utente' => $id_utente
         ];
 
         return $db->query($options);

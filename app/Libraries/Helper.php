@@ -149,4 +149,37 @@ class Helper
         exit;
     }
 
+
+
+    static function generateBreadcrumb() {
+        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $segments = explode('/', trim($path, '/'));
+        $breadcrumbs = [];
+        $breadcrumbPath = '';
+
+        foreach ($segments as $segment) {
+            $breadcrumbPath .= '/' . $segment;
+            $breadcrumbs[] = [
+                'label' => ucfirst($segment), // Puoi personalizzare il modo in cui viene visualizzato il segmento
+                'url' => $breadcrumbPath, // Puoi personalizzare la generazione dell'URL
+            ];
+
+            // if is a number, remove it
+            if (is_numeric($segment)) {
+                array_pop($breadcrumbs);
+            }
+        }
+
+        // Aggiungi la pagina corrente alla fine del breadcrumb
+        $breadcrumbs[count($breadcrumbs) - 1]['url'] = '';
+        // Aggiungi la home all'inizio del breadcrumb
+        array_unshift($breadcrumbs, [
+            'label' => 'Home',
+            'url' => '/',
+        ]);
+
+        return $breadcrumbs;
+    }
+
+
 }

@@ -79,7 +79,7 @@ class Utente extends BaseModel
         $this->password = $password;
     }
 
-    public function setIdRuolo($id_ruolo)
+    public function setIdRuolo($id_ruolo): void
     {
         $this->id_ruolo = $id_ruolo;
     }
@@ -177,7 +177,8 @@ class Utente extends BaseModel
     public function isAnagraficaComplete()
     {
         $anagrafica = $this->getAnagrafica();
-        if ($anagrafica === null) {
+
+        if ($anagrafica === null || $anagrafica === false) {
             return false;
         }
 

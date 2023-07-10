@@ -251,6 +251,11 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\SearchController', 'search']
     ]);
 
+    $r->addRoute('POST', '/create', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\SearchController', 'create']
+    ]);
+
 
 
     // Impostazioni

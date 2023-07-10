@@ -49,12 +49,11 @@ class Gruppo extends BaseModel
         $db = Database::getInstance();
         // Fai una join con la tabella Utenti_Gruppi e Utenti e tra Utenti e Anagrafica
         //$sql = "SELECT Utenti.id,  Utenti.email FROM Utenti_Gruppi JOIN Utenti ON Utenti_Gruppi.id_utente = Utenti.id WHERE Utenti_Gruppi.id_gruppo = :id_gruppo";
-        $sql = "SELECT Utenti.id,  Utenti.email, Anagrafiche.nome, Anagrafiche.cognome FROM Utenti_Gruppi JOIN Utenti ON Utenti_Gruppi.id_utente = Utenti.id JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id WHERE Utenti_Gruppi.id_gruppo = :id_gruppo";
+        $sql = "SELECT Utenti.id, Anagrafiche.nome, Anagrafiche.cognome, Anagrafiche.denominazione, Anagrafiche.tipo_utente FROM Utenti_Gruppi JOIN Utenti ON Utenti_Gruppi.id_utente = Utenti.id JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id WHERE Utenti_Gruppi.id_gruppo = :id_gruppo";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [':id_gruppo' => $this->getId()];
-        $result = $db->query($options);
-        return $result;
+        return $db->query($options);
     }
 
     public function addUtente(int $id_utente)

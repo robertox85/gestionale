@@ -6,7 +6,7 @@ class Nota extends BaseModel{
     protected int $id;
     protected string $tipologia;
     protected string $descrizione;
-    protected string $visiblità;
+    protected string $visibilita;
 
     protected int $id_pratica;
 
@@ -17,7 +17,7 @@ class Nota extends BaseModel{
         $obj->setId($nota['id']);
         $obj->setTipologia($nota['tipologia']);
         $obj->setDescrizione($nota['descrizione']);
-        $obj->setVisiblità($nota['visiblità']);
+        $obj->setVisibilita($nota['visiblità']);
         $obj->setIdPratica($nota['id_pratica']);
         return $obj;
     }
@@ -52,14 +52,14 @@ class Nota extends BaseModel{
         $this->descrizione = $descrizione;
     }
 
-    public function getVisiblità(): string
+    public function getVisibilita(): string
     {
-        return $this->visiblità;
+        return $this->visibilita;
     }
 
-    public function setVisiblità(string $visiblità): void
+    public function setVisibilita(string $visibilita): void
     {
-        $this->visiblità = $visiblità;
+        $this->visibilita = $visibilita;
     }
 
     public function getIdPratica(): int

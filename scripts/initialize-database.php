@@ -228,7 +228,7 @@ try {
   (3, 'Referente'),
   (4, 'Segreteria'),
   (5, 'Cliente'),
-  (6, 'Controrparte');
+  (6, 'Controparte');
 
 -- Inserimento di dati nella tabella Utente
 INSERT IGNORE INTO Utenti (id, email, password, id_ruolo) VALUES

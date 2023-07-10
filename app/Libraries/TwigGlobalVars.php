@@ -13,6 +13,9 @@ class TwigGlobalVars
             $twig->addGlobal('session', $_SESSION);
         }
 
+        // add breadcrumbs
+        $twig->addGlobal('breadcrumbs', Helper::generateBreadcrumb());
+
         // if is localhost, add the global variable 'isLocalhost' to the twig template
         $twig->addGlobal('isLocalhost', $_ENV['APP_ENV'] === 'local');
 
@@ -25,6 +28,9 @@ class TwigGlobalVars
     private static function addTwigFunctions(Environment $twig): void
     {
         $twigFunctions = [
+            'breadcrumbs' => function () {
+                return Helper::generateBreadcrumb();
+            },
             'assets' => function (string $filename) {
                 // return full server path to the public folder
                 return $_ENV['BASE_URL'] . '/' . $filename;

@@ -81,13 +81,14 @@
 
 
         <div x-data="searchResults"
-             data-selectedItems="[]"
+             data-selectedItems="{{ pratica.getAssistiti() | json_encode() }}"
+             data-modalTarget="defaultModal"
              data-entity="assistiti"
 
-             class="relative overflow-x-auto shadow-md sm:rounded-lg sm:col-span-2 p-2.5 bg-white">
+             class="relative overflow-x-auto sm:col-span-2 p-2.  bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2 rounded">
             <div class="">
                 <!-- column for sending invite members -->
-                <label for="assistiti" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                <label for="assistiti" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white ">
                     {{ 'Assisted'|trans }}
                 </label>
 
@@ -102,13 +103,13 @@
                                name="assistiti"
                                id="assistiti"
                                class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                               placeholder="{{ 'Name or Surname or Email'|trans }}">
+                               placeholder="{{ 'Search assisted'|trans }}">
 
                         <div x-show="searchResults.length > 0" class="sm:col-span-2 mt-1">
                             <ul class="bg-white border border-gray-300 rounded-md shadow-md">
                                 <template x-for="result in searchResults" :key="result.id">
                                     <li @click="selectItem(result)"
-                                        x-text="result.nome + ' ' + result.cognome + ' (' + result.email + ')'"
+                                        x-text="result.nome + ' ' + result.cognome "
                                         class="py-2 px-4 cursor-pointer hover:bg-gray-100">
                                     </li>
                                 </template>
@@ -116,85 +117,188 @@
                         </div>
 
                         <div x-show="showNoResultsMessage"
-                             class="mt-1 text-gray-500 dark:text-gray-400 text-sm italic font-bold sm:col-span-2">
-                            Nessun utente trovato.
+                             class="text-gray-500 dark:text-gray-400 text-sm italic font-bold sm:col-span-2">
+                            {{ 'No assistiti found'|trans }}
                         </div>
 
-                        <div class="add">
+                        <div class="add absolute right-0 top-0 bottom-0 flex items-center justify-center">
+                            <!-- Simple text well formatted -->
+
                             <a href="#"
-                               data-toggle="modal"
-                               class="font-medium text-blue-600 dark:text-blue-500 hover:underline float-right">
-                                {{ 'Crea nuovo utente'|trans }}
+                                    data-modal-target="defaultModal"
+                                    data-modal-toggle="defaultModal"
+                                    class="flex items-center text-sm font-medium text-gray-900 dark:text-white hover:text-primary-600">
+                                {{ 'Crea nuovo assistito'|trans }}
+                                <ion-icon class="ml-2 -mr-1 h-5 w-5" name="add"></ion-icon>
                             </a>
+
+                            <!-- Main modal -->
+                            <div id="defaultModal"
+                                 tabindex="-1"
+                                 aria-hidden="true"
+                                 class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                <div class="relative w-full max-w-2xl max-h-full">
+                                    <!-- Modal content -->
+                                    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                        <!-- Modal header -->
+                                        <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                                {{ 'Add new assisted'|trans }}
+                                            </h3>
+                                            <button type="button"
+                                                    class="close text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                                    data-modal-hide="defaultModal">
+                                                <svg class="w-3 h-3" aria-hidden="true"
+                                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                    <path stroke="currentColor" stroke-linecap="round"
+                                                          stroke-linejoin="round" stroke-width="2"
+                                                          d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                                </svg>
+                                                <span class="sr-only">Close modal</span>
+                                            </button>
+                                        </div>
+                                        <!-- Modal body -->
+                                        <div class="p-6 space-y-6">
+                                            <div>
+                                                <select x-model="newItem.tipo_utente"
+                                                        :name="newItem.tipo_utente"
+                                                        id="newItem.tipo_utente"
+                                                >
+                                                    <option value="Persona">Persona</option>
+                                                    <option value="Azienda">Azienda</option>
+
+                                                </select>
+
+                                                <!-- Nome, Cognome, Denominazione -->
+                                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2"
+                                                     x-show="newItem.tipo_utente === 'Persona'"
+                                                     x-init="newItem.tipo_utente = 'Persona'">
+                                                    <div>
+                                                        <label for="nome"
+                                                               class="block text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ 'Name'|trans }}
+                                                        </label>
+                                                        <input type="text"
+                                                               x-model="newItem.nome"
+                                                               :name="newItem.nome"
+                                                               id="nome"
+                                                               placeholder="{{ 'Type name'|trans }}">
+                                                    </div>
+                                                    <div>
+                                                        <label for="cognome"
+                                                               class="block text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ 'Surname'|trans }}
+                                                        </label>
+                                                        <input type="text"
+                                                               x-model="newItem.cognome"
+                                                               :name="newItem.cognome"
+                                                               id="cognome"
+                                                               placeholder="{{ 'Type surname'|trans }}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2"
+                                                     x-show="newItem.tipo_utente === 'Azienda'">
+                                                    <div>
+                                                        <label for="denominazione"
+                                                               class="block text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ 'Denominazione'|trans }}
+                                                        </label>
+                                                        <input type="text"
+                                                               x-model="newItem.denominazione"
+                                                               :name="newItem.denominazione"
+                                                               id="denominazione"
+
+                                                               placeholder="{{ 'Type denominazione'|trans }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Modal footer -->
+                                            <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                                                <button
+                                                        id="defaultModal"
+                                                        type="button"
+                                                        @click="createItem(newItem)"
+                                                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                    {{ 'Create'|trans }}
+                                                </button>
+                                                <button data-modal-hide="defaultModal" type="button"
+                                                        class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                                                    {{ 'Cancel'|trans }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
                         </div>
 
                     </div>
-
                 </div>
 
-                <p class="my-2 text-sm text-gray-500 dark:text-gray-400">
-                    {{ 'Enter the name, surname or email of the user you want to add to the group.'|trans }}
-                </p>
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 mt-4">
 
-            </div>
-            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                    <th scope="col" class="px-6 py-3">
-                        {{ 'Name'|trans }}
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        {{ 'Email'|trans }}
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        <span class="sr-only">{{ 'Actions'|trans }}</span>
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                <template x-for="assistito in selectedItems" :key="assistito.id">
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <!-- hidden input for sending invite members -->
-                        <input type="hidden" name="assistiti[]" :value="assistito.id">
-                        <td scope="row"
-                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                            x-text="assistito.nome + ' ' + assistito.cognome "></td>
-
-                        <td class="px-6 py-4 text-gray-500 whitespace-nowrap dark:text-gray-400"
-                            x-text="assistito.email"></td>
-
-
-                        <td class="px-6 py-4 text-right">
-                            <a href="#"
-                               @click.prevent="removeItem(assistito)"
-                               class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                {{ 'Remove'|trans }}
-                            </a>
-                        </td>
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">
+                            {{ 'Name'|trans }}
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            {{ 'Type'|trans }}
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            <span class="sr-only">{{ 'Actions'|trans }}</span>
+                        </th>
                     </tr>
-                </template>
+                    </thead>
+                    <tbody>
+                    <template x-for="assistito in selectedItems" :key="assistito.id">
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <input type="hidden"
+                                   name="assistiti[]"
+                                   :value="assistito.id">
+                            <td
+                                    x-show="assistito.tipo_utente === 'Persona'"
+                                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                    x-text="assistito.nome + ' ' + assistito.cognome "></td>
+
+                            <td
+                                    x-show="assistito.tipo_utente === 'Azienda'"
+                                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                    x-text="assistito.denominazione"></td>
+
+                            <td class="px-6 py-4 text-gray-500 whitespace-nowrap dark:text-gray-400"
+                                x-text="assistito.tipo_utente"></td>
 
 
-                </tbody>
-            </table>
+                            <td class="px-6 py-4 text-right">
+                                <a href="#"
+                                   @click.prevent="removeItem(assistito)"
+                                   class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                    {{ 'Remove'|trans }}
+                                </a>
+                            </td>
+                        </tr>
+                    </template>
+
+
+                    </tbody>
+                </table>
+            </div>
         </div>
 
 
-        <!-- Form Controparti -->
-        <!-- Select: Persona fisica|Società -->
-        <!-- Testo: Cognome -->
-        <!-- Testo: Nome -->
-
         <div x-data="searchResults"
-             data-selectedItems="[]"
+             data-selectedItems="{{ pratica.getControparti()  | json_encode() }}"
+             data-modalTarget="modalControparti"
              data-entity="controparti"
-
-             class="relative overflow-x-auto shadow-md sm:rounded-lg sm:col-span-2 p-2.5 bg-white">
+             class="relative overflow-x-auto sm:col-span-2 p-2.5 bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2 rounded">
             <div class="">
                 <!-- column for sending invite members -->
-                <label for="controparti" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    {{ 'Controparti'|trans }}
+                <label for="assistiti" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                    {{ 'Add Controparti'|trans }}
                 </label>
 
 
@@ -208,13 +312,13 @@
                                name="controparti"
                                id="controparti"
                                class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                               placeholder="{{ 'Name or Surname or Email'|trans }}">
+                               placeholder="{{ 'Search controparti'|trans }}">
 
                         <div x-show="searchResults.length > 0" class="sm:col-span-2 mt-1">
                             <ul class="bg-white border border-gray-300 rounded-md shadow-md">
                                 <template x-for="result in searchResults" :key="result.id">
                                     <li @click="selectItem(result)"
-                                        x-text="result.nome + ' ' + result.cognome + ' (' + result.email + ')'"
+                                        x-text="result.nome + ' ' + result.cognome "
                                         class="py-2 px-4 cursor-pointer hover:bg-gray-100">
                                     </li>
                                 </template>
@@ -222,67 +326,178 @@
                         </div>
 
                         <div x-show="showNoResultsMessage"
-                             class="mt-1 text-gray-500 dark:text-gray-400 text-sm italic font-bold sm:col-span-2">
-                            Nessun utente trovato.
+                             class="text-gray-500 dark:text-gray-400 text-sm italic font-bold sm:col-span-2">
+                            {{ 'No controparti found'|trans }}
                         </div>
 
-                        <div class="add">
+                        <div class="add absolute right-0 top-0 bottom-0 flex items-center">
                             <a href="#"
-                               class="font-medium text-blue-600 dark:text-blue-500 hover:underline float-right">
-                                {{ 'Crea nuovo utente'|trans }}
+                               data-modal-target="modalControparti"
+                               data-modal-toggle="modalControparti"
+                               class="flex items-center text-sm font-medium text-gray-900 dark:text-white hover:text-primary-600">
+                                {{ 'Crea nuova controparte'|trans }}
+                                <ion-icon class="ml-2 -mr-1 h-5 w-5" name="add"></ion-icon>
                             </a>
+
+
+                            <!-- Main modal -->
+                            <div id="modalControparti"
+                                 tabindex="-1"
+                                 aria-hidden="true"
+                                 class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+                                <div class="relative w-full max-w-2xl max-h-full">
+                                    <!-- Modal content -->
+                                    <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                                        <!-- Modal header -->
+                                        <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                                            <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                                                {{ 'Add new controparti'|trans }}
+                                            </h3>
+                                            <button type="button"
+                                                    class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+                                                    data-modal-hide="modalControparti">
+                                                <svg class="w-3 h-3" aria-hidden="true"
+                                                     xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                                                    <path stroke="currentColor" stroke-linecap="round"
+                                                          stroke-linejoin="round" stroke-width="2"
+                                                          d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                                                </svg>
+                                                <span class="sr-only">Close modal</span>
+                                            </button>
+                                        </div>
+                                        <!-- Modal body -->
+                                        <div class="p-6 space-y-6">
+                                            <div>
+                                                <select x-model="newItem.tipo_utente"
+                                                        :name="newItem.tipo_utente"
+                                                        id="newItem.tipo_utente"
+                                                >
+                                                    <option value="Persona">Persona</option>
+                                                    <option value="Azienda">Azienda</option>
+
+                                                </select>
+
+                                                <!-- Nome, Cognome, Denominazione -->
+                                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2"
+                                                     x-show="newItem.tipo_utente === 'Persona'"
+                                                     x-init="newItem.tipo_utente = 'Persona'">
+                                                    <div>
+                                                        <label for="nome"
+                                                               class="block text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ 'Name'|trans }}
+                                                        </label>
+                                                        <input type="text"
+                                                               x-model="newItem.nome"
+                                                               :name="newItem.nome"
+                                                               id="nome"
+                                                               placeholder="{{ 'Type name'|trans }}">
+                                                    </div>
+                                                    <div>
+                                                        <label for="cognome"
+                                                               class="block text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ 'Surname'|trans }}
+                                                        </label>
+                                                        <input type="text"
+                                                               x-model="newItem.cognome"
+                                                               :name="newItem.cognome"
+                                                               id="cognome"
+                                                               placeholder="{{ 'Type surname'|trans }}">
+                                                    </div>
+                                                </div>
+
+                                                <div class="grid grid-cols-1 gap-6 sm:grid-cols-2"
+                                                     x-show="newItem.tipo_utente === 'Azienda'">
+                                                    <div>
+                                                        <label for="denominazione"
+                                                               class="block text-sm font-medium text-gray-900 dark:text-white">
+                                                            {{ 'Denominazione'|trans }}
+                                                        </label>
+                                                        <input type="text"
+                                                               x-model="newItem.denominazione"
+                                                               :name="newItem.denominazione"
+                                                               id="denominazione"
+
+                                                               placeholder="{{ 'Type denominazione'|trans }}">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <!-- Modal footer -->
+                                            <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                                                <button
+
+                                                        type="button"
+                                                        data-modal-hide="modalControparti"
+                                                        @click="createItem(newItem)"
+                                                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                                                    {{ 'Create'|trans }}
+                                                </button>
+                                                <button data-modal-hide="modalControparti" type="button"
+                                                        class="text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                                                    {{ 'Cancel'|trans }}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+
                         </div>
 
                     </div>
 
+
+
                 </div>
+                <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400 mt-4">
 
-                <p class="my-2 text-sm text-gray-500 dark:text-gray-400">
-                    {{ 'Enter the name, surname or email of the user you want to add to the group.'|trans }}
-                </p>
-
-            </div>
-            <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-
-                <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                <tr>
-                    <th scope="col" class="px-6 py-3">
-                        {{ 'Name'|trans }}
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        {{ 'Email'|trans }}
-                    </th>
-                    <th scope="col" class="px-6 py-3">
-                        <span class="sr-only">{{ 'Actions'|trans }}</span>
-                    </th>
-                </tr>
-                </thead>
-                <tbody>
-                <template x-for="controparte in selectedItems" :key="controparte.id">
-                    <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                        <!-- hidden input for sending invite members -->
-                        <input type="hidden" name="assistiti[]" :value="controparte.id">
-                        <td scope="row"
-                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                            x-text="controparte.nome + ' ' + controparte.cognome "></td>
-
-                        <td class="px-6 py-4 text-gray-500 whitespace-nowrap dark:text-gray-400"
-                            x-text="controparte.email"></td>
-
-
-                        <td class="px-6 py-4 text-right">
-                            <a href="#"
-                               @click.prevent="removeItem(controparte)"
-                               class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                                {{ 'Remove'|trans }}
-                            </a>
-                        </td>
+                    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <tr>
+                        <th scope="col" class="px-6 py-3">
+                            {{ 'Name'|trans }}
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            {{ 'Type'|trans }}
+                        </th>
+                        <th scope="col" class="px-6 py-3">
+                            <span class="sr-only">{{ 'Actions'|trans }}</span>
+                        </th>
                     </tr>
-                </template>
+                    </thead>
+                    <tbody>
+                    <template x-for="controparte in selectedItems" :key="controparte.id">
+                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
+                            <input type="hidden"
+                                   name="controparti[]"
+                                   :value="controparte.id">
+                            <td
+                                    x-show="controparte.tipo_utente === 'Persona'"
+                                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                    x-text="controparte.nome + ' ' + controparte.cognome "></td>
+
+                            <td
+                                    x-show="controparte.tipo_utente === 'Azienda'"
+                                    class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                                    x-text="controparte.denominazione"></td>
+
+                            <td class="px-6 py-4 text-gray-500 whitespace-nowrap dark:text-gray-400"
+                                x-text="controparte.tipo_utente"></td>
 
 
-                </tbody>
-            </table>
+                            <td class="px-6 py-4 text-right">
+                                <a href="#"
+                                   @click.prevent="removeItem(controparte)"
+                                   class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
+                                    {{ 'Remove'|trans }}
+                                </a>
+                            </td>
+                        </tr>
+                    </template>
+
+
+                    </tbody>
+                </table>
+            </div>
         </div>
 
 
@@ -290,8 +505,14 @@
         <!-- Datetime: Scadenza -->
         <!-- Testo: Motivo della scadenza -->
 
-        <div x-data="{ scadenze: {{ pratica.getScadenze() | json_encode }} }"
-             class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
+        <div
+                {% if pratica.getScadenze() is not empty %}
+                    x-data="{ scadenze: {{ pratica.getScadenze() | json_encode }} }"
+                {% else %}
+                    x-data="{ scadenze: [] }"
+                {% endif %}
+
+                class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
             <label>
                 {{ 'Deadlines'|trans }}
             </label>
@@ -323,8 +544,15 @@
         </div>
 
 
-        <div x-data="{ udienze: {{ pratica.getUdienze() | json_encode }} }" x-init="initDatePicker()"
-             class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
+        <div
+                {% if pratica.getUdienze() is not empty %}
+                    x-data="{ udienze: {{ pratica.getUdienze() | json_encode }} }"
+                    x-init="initDatePicker()"
+                {% else %}
+                    x-data="{ udienze: [] }"
+
+                {% endif %}
+                class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
             <label>
                 {{ 'Hearings'|trans }}
             </label>
@@ -358,11 +586,18 @@
         </div>
 
 
-        <div x-data="{ notes: {{ pratica.getNote() | json_encode }}, isOpen: [],dragging: null, dragAndDrop(index) {
-                                const draggedNote = this.notes[this.dragging];
-                                this.notes.splice(this.dragging, 1);
-                                this.notes.splice(index, 0, draggedNote);
-                            } }" class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
+        <div
+                x-data="{
+    notes: {% if pratica.getNote() is null %}[]{% else %}{{ pratica.getNote() | json_encode }}{% endif %},
+    isOpen: [],
+    dragging: null,
+    dragAndDrop(index) {
+        const draggedNote = this.notes[this.dragging];
+        this.notes.splice(this.dragging, 1);
+        this.notes.splice(index, 0, draggedNote);
+    }
+}"
+                class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
             <label>
                 {{ 'Notes'|trans }}
             </label>
@@ -388,10 +623,21 @@
                                     <path x-show="isOpen[index]" fill-rule="evenodd" clip-rule="evenodd"
                                           d="M14 11.414L10 15.414L6 11.414L4.586 13L10 18.414L15.414 13L14 11.414Z"/>
                                 </svg>
-                                <span class="font-medium text-gray-900 dark:text-white"
-                                      x-text="note.tipologia"></span>
-                                <span class="text-gray-500 dark:text-gray-400">- <span
-                                            x-text="note.visibilita"></span></span>
+                                <ion-icon name="globe-outline" class="text-gray-500 dark:text-gray-400"
+                                          x-show="note.visibilita == 'pubblica'"></ion-icon>
+                                <ion-icon name="lock-closed-outline" class="text-gray-500 dark:text-gray-400"
+                                          x-show="note.visibilita == 'privata'"></ion-icon>
+                                <span class="font-medium text-gray-900 dark:text-white ml-2"
+                                      x-text="(note.tipologia == 'registro_contabile') ? 'Registro Contabile' : 'Annotazioni'"></span>
+                                <span
+                                        class="text-gray-500 dark:text-gray-400">-
+                                    <span x-text="(note.visibilita == 'pubblica') ? 'Pubblica ' : 'Privata '"></span>
+                                    <!-- if pubblica show icon for pubblica , else icon for privata -->
+                                    </span>
+
+                                <span class="text-gray-500 dark:text-gray-400">- {{ 'Created'|trans }} {{ note.created_at|date('d/m/Y') }}
+
+                                </span>
                             </button>
                             <button type="button" @click="notes.splice(index, 1)"
                                     class="text-red-500 ml-2">
@@ -417,11 +663,15 @@
                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                     {{ 'Note'|trans }}
                                 </label>
-                                <textarea x-model="note.testo"
+                                <textarea x-model="note.descrizione"
                                           :id="'nota_' + index" rows="4"
-                                          :name="'note['+index+'][testo]'"
+                                          :name="'note['+index+'][descrizione]'"
                                           class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                          placeholder="Write your thoughts here..."></textarea>
+                                          placeholder="Write your thoughts here..."
+                                          x-text="note.descrizione"
+                                >
+
+                                </textarea>
                             </div>
                             <div class="mt-2">
                                 <label :for="'visibilita_' + index"
@@ -433,10 +683,10 @@
                                         :name="'note['+index+'][visibilita]'"
                                         :id="'visibilita_' + index"
                                         class="w-full">
-                                    <option value="pubblica" :selected="note.visibilita === 'Pubblica'">
+                                    <option value="pubblica" :selected="note.visibilita === 'pubblica'">
                                         Pubblica
                                     </option>
-                                    <option value="privata" :selected="note.visibilita === 'Privata'">
+                                    <option value="privata" :selected="note.visibilita === 'privata'">
                                         Privata
                                     </option>
 
@@ -504,10 +754,6 @@
             </select>
         </div>
 
-        <!-- Form Registro contabile -->
-        <!-- Area di Testo: Annotazioni private -->
-
-
         <div class="sm:col-span-2 text-right">
 
 
@@ -524,3 +770,4 @@
 
     </div>
 </div>
+

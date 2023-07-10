@@ -13,20 +13,14 @@
     </div>
 
 
-
     <!-- table for showing members -->
 
-    <div
-            x-data="searchResults"
-            data-idGruppo="{{ gruppo.getId() }}"
-            {% if not gruppo.getId() %}
-            data-selectedItems="[]"
-            {% else %}
+    <div    x-data="searchResults"
             data-selectedItems="{{ gruppo.getUtenti() | json_encode() }}"
-            {% endif %}
             data-entity="utenti"
-            class="relative overflow-x-auto shadow-md sm:rounded-lg sm:col-span-2 p-2.5 bg-white" >
-        <div class="" >
+            data-idGruppo="{{ gruppo.getId() }}"
+            class="relative overflow-x-auto shadow-md sm:rounded-lg sm:col-span-2 p-2.5 bg-white">
+        <div class="">
             <!-- column for sending invite members -->
             <label for="utenti" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                 {{ 'Add members'|trans }}
@@ -43,15 +37,14 @@
                            name="utenti"
                            id="utenti"
                            class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                           placeholder="{{ 'Name or Surname or Email'|trans }}" >
+                           placeholder="{{ 'Name or Surname or Email'|trans }}">
 
                     <div x-show="searchResults.length > 0" class="sm:col-span-2 mt-1">
                         <ul class="bg-white border border-gray-300 rounded-md shadow-md">
                             <template x-for="result in searchResults" :key="result.id">
                                 <li @click="selectItem(result)"
-                                    x-text="result.nome + ' ' + result.cognome + ' (' + result.email + ')'"
+                                    x-text="(result.tipo_utente === 'Persona') ? result.nome + ' ' + result.cognome + ' (' + result.tipo_utente + ')' : result.denominazione + ' (' + result.tipo_utente + ')'"
                                     class="py-2 px-4 cursor-pointer hover:bg-gray-100">
-
                                 </li>
                             </template>
                         </ul>
@@ -86,31 +79,32 @@
                     {{ 'Name'|trans }}
                 </th>
                 <th scope="col" class="px-6 py-3">
-                    {{ 'Email'|trans }}
-                </th>
-                <th scope="col" class="px-6 py-3">
-                    {{ 'Status'|trans }}
+                    {{ 'Type'|trans }}
                 </th>
 
                 <th scope="col" class="px-6 py-3">
-                    <span class="sr-only">Edit</span>
+                    <span class="sr-only">Actions</span>
                 </th>
             </tr>
             </thead>
             <tbody>
-            <template x-for="user in selectedItems" :key="user.id">
+            <template x-for="user in selectedItems">
                 <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
                     <!-- hidden input for sending invite members -->
                     <input type="hidden" name="utenti[]" :value="user.id">
-                    <td scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                        x-text="user.nome"></td>
-                    <td scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                        x-text="user.cognome"></td>
-                    <td scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                        x-text="user.email"></td>
+                    <td
+                            x-show="user.tipo_utente === 'Persona'"
+                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                            x-text="user.nome + ' ' + user.cognome "></td>
+
+                    <td
+                            x-show="user.tipo_utente === 'Azienda'"
+                            class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
+                            x-text="user.denominazione"></td>
+
+                    <td class="px-6 py-4 text-gray-500 whitespace-nowrap dark:text-gray-400"
+                        x-text="user.tipo_utente"></td>
+
                     <td class="px-6 py-4 text-right">
                         <a href="#"
                            @click.prevent="removeItem(user)"

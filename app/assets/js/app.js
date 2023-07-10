@@ -27,11 +27,12 @@ document.addEventListener('alpine:init', () => {
         query: '',
         searchResults: [],
         showNoResultsMessage: false,
-        selectedItems: null,
+        selectedItems: [],
+        newItem: [],
         entity: '',
         performSearch() {
             // if query is less than 3 characters, don't perform search
-            if (this.query.length < 3 ) {
+            if (this.query.length < 3) {
                 this.searchResults = [];
                 this.showNoResultsMessage = false;
                 return;
@@ -45,8 +46,9 @@ document.addEventListener('alpine:init', () => {
 
             // Esegui la chiamata AJAX per cercare gli utenti corrispondenti nel database
             // Puoi utilizzare axios o fetch per eseguire la chiamata AJAX
-            axios.get('/search', { params: { query: this.query, entity: this.entity } })
+            axios.get('/search', {params: {query: this.query, entity: this.entity}})
                 .then(response => {
+                    console.log(response.data);
                     // Filtra i risultati per escludere gli utenti già selezionati
                     this.searchResults = response.data.filter(user => {
                         return !this.selectedItems.find(selectedItem => selectedItem.id === user.id);
@@ -71,107 +73,59 @@ document.addEventListener('alpine:init', () => {
             if (this.selectedItems != null) this.selectedItems = this.selectedItems.filter(selectedItem => selectedItem.id !== item.id);
 
         },
+        createItem(item) {
+            // get data-attribute from the button
+
+            axios.post('/create', {
+                nome: this.newItem.nome ? this.newItem.nome : '',
+                cognome: this.newItem.cognome ? this.newItem.cognome : '',
+                denominazione: this.newItem.denominazione ? this.newItem.denominazione : '',
+                tipo_utente: this.newItem.tipo_utente ? this.newItem.tipo_utente : '',
+                entity: this.entity,
+            })
+                .then(response => {
+                    if (response.data.error) {
+                        //Toastr.error(response.data.error);
+                        alert(response.data.message);
+                    } else {
+                        this.selectedItems.push(response.data);
+                    }
+
+                    // get element with aria-modal="true"
+                    let modal = document.querySelector('[aria-modal="true"]');
+                    let backdrop = document.querySelector('[modal-backdrop]');
+                    // close modal
+                    if (modal) {
+                        modal.classList.remove('show');
+                        modal.setAttribute('aria-hidden', 'true');
+                        modal.setAttribute('style', 'display: none');
+                        backdrop.remove();
+                        // remove overflow hidden from body
+                        document.body.classList.remove('overflow-hidden');
+                        // reset modal
+                    }
+                })
+                .catch(error => {
+                    console.error(error);
+                }
+            );
+        },
         init() {
-            this.selectedItems = JSON.parse(this.$el.dataset.selecteditems);
+            //this.selectedItems = (this.$el.dataset.selectedItems !== undefined) ? JSON.parse(this.$el.dataset.selectedItems) : [];
+            this.selectedItems = (this.$el.dataset.selecteditems !== undefined && this.$el.dataset.selecteditems !== null && this.$el.dataset.selecteditems !== 'null') ? JSON.parse(this.$el.dataset.selecteditems) : [];
             this.entity = this.$el.dataset.entity;
+
+            if (this.entity === 'assistiti' || this.entity === 'controparti') {
+                this.newItem.push({
+                    nome: '',
+                    cognome: '',
+                    denominazione: '',
+                    tipo_utente: '',
+                })
+            }
         }
     }));
 });
-/*document.addEventListener('alpine:init', () => {
-    Alpine.data('sottoGruppiContainer', () => ({
-        sottogruppi: [],
-        utenti: [],
-        utentiSelezionati: [],
-        addSottoGruppo() {
-            const nuovoSottogruppo = {
-                id: this.sottogruppi.length,
-                nome: '',
-                utenti: this.utenti,
-            };
-
-            this.sottogruppi.push(nuovoSottogruppo);
-
-            // init select2 for the new sottogruppo
-            this.$nextTick(() => {
-                const index = this.sottogruppi.length - 1;
-                const select = this.$el.querySelector(`#select2-${index}`);
-
-                setTimeout(() => {
-                    $(`#select2-${index}`).select2({
-                        placeholder: 'Seleziona gli utenti da aggiungere al team',
-                    });
-                }, 100);
-            });
-        },
-        removeSottoGruppo(index) {
-            // if last element, don't remove
-            if (this.sottogruppi.length === 1) {
-                return;
-            }
-            this.sottogruppi.splice(index, 1);
-        },
-        addUtente(sottogruppo) {
-            sottogruppo.utenti.push();
-        },
-        init() {
-
-            this.utenti = JSON.parse(this.$el.dataset.utenti);
-            this.sottogruppi = JSON.parse(this.$el.dataset.sottogruppi);
-
-            // if utenti is empty, init utenti
-            if (this.utenti == null) {
-                this.utenti = [];
-            }
-
-            // if sottogruppi is empty, init first sottogruppo
-            if (this.sottogruppi == null) {
-                this.sottogruppi = []
-            }
-
-            console.log(this.sottogruppi);
-
-            // init first sottogruppo
-            if (this.sottogruppi != null && this.sottogruppi.length === 0) {
-                this.addSottoGruppo({
-                    id: 0,
-                    nome: '',
-                    utenti: '',
-                });
-            }
-
-            // if there are utenti in the sottogruppi, init utentiSelezionati
-            if(this.sottogruppi != null && this.sottogruppi.length > 0) {
-
-                this.sottogruppi.forEach((sottogruppo, index) => {
-                    if (sottogruppo.utenti.length > 0 && sottogruppo.nome != '') {
-                        // get the select and init select2
-                        setTimeout(() => {
-                            $(`#select2-${index}`).select2({
-                                placeholder: 'Seleziona gli utenti da aggiungere al team',
-                            }).val(sottogruppo.utenti.map(utente => utente.id)).trigger('change');
-                        }, 100);
-                    } else {
-                        // init select2 for the new sottogruppo
-                        setTimeout(() => {
-                            $(`#select2-${index}`).select2({
-                                placeholder: 'Seleziona gli utenti da aggiungere al team',
-                            });
-                        }, 100);
-                    }
-                });
-            } else {
-                // init select2 for the new sottogruppo
-                setTimeout(() => {
-                    $(`#select2-0`).select2({
-                        placeholder: 'Seleziona gli utenti da aggiungere al team',
-                    });
-                }, 100);
-            }
-
-        }
-    }));
-});*/
-
 
 
 
@@ -232,7 +186,6 @@ editUserButton.forEach(button => {
 
             inputs.forEach(input => {
                 if (userData[input.name] !== undefined) {
-                    console.log(input.name, userData[input.name])
                     input.value = userData[input.name];
                 }
             });
@@ -472,7 +425,7 @@ if (datepickerEl) {
     });
 }
 window.initDatePicker = function () {
-return;
+    return;
     setTimeout(function () {
         const datepickerEl = document.querySelectorAll('input[datepicker]');
         if (datepickerEl) {
