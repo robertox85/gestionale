@@ -142,6 +142,24 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\UserController', 'editUtente']
     ]);
 
+    // utenti/delete
+    $r->addRoute('GET', '/utenti/delete/{id:\d+}', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\UserController', 'deleteUtente']
+    ]);
+
+    // utenti/crea
+    $r->addRoute('GET', '/utenti/crea', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\UserController', 'utenteCreaView']
+    ]);
+
+    // utenti/crea POST
+    $r->addRoute('POST', '/utenti/crea', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\UserController', 'createUtente']
+    ]);
+
 
     // Archivio
     $r->addRoute('GET', '/archivio', [

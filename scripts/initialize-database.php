@@ -25,12 +25,31 @@ try {
 
     //TODO: Devo rinominare gli id delle tabelle da id_tabella a id perchè altrimenti non funziona il load dei dati
 
+    // DROP TABLES
+    $pdo->exec("DROP TABLE IF EXISTS Anagrafiche");
+    $pdo->exec("DROP TABLE IF EXISTS Assistiti");
+    $pdo->exec("DROP TABLE IF EXISTS Controparti");
+    $pdo->exec("DROP TABLE IF EXISTS Documenti");
+    $pdo->exec("DROP TABLE IF EXISTS Note");
+    $pdo->exec("DROP TABLE IF EXISTS Ruoli_Permessi");
+    $pdo->exec("DROP TABLE IF EXISTS Permessi");
+    $pdo->exec("DROP TABLE IF EXISTS Scadenze");
+    $pdo->exec("DROP TABLE IF EXISTS Udienze");
+    $pdo->exec("DROP TABLE IF EXISTS Pratiche");
+    $pdo->exec("DROP TABLE IF EXISTS Utenti_Gruppi");
+    $pdo->exec("DROP TABLE IF EXISTS Gruppi");
+    $pdo->exec("DROP TABLE IF EXISTS Utenti");
+    $pdo->exec("DROP TABLE IF EXISTS Ruoli");
+
+
     $pdo->exec("
     
         -- Creazione della tabella Ruoli
         CREATE TABLE IF NOT EXISTS Ruoli (
           id INT AUTO_INCREMENT PRIMARY KEY,
-          nome VARCHAR(50)
+          nome VARCHAR(50),
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         );
         
         -- Creazione della tabella Utenti
@@ -39,6 +58,8 @@ try {
           email VARCHAR(100),
           password VARCHAR(100),
           id_ruolo INT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (id_ruolo) REFERENCES Ruoli(id)
         );
         
@@ -47,6 +68,7 @@ try {
           id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
           nome VARCHAR(50),
           cognome VARCHAR(50),
+          denominazione VARCHAR(255),
           indirizzo VARCHAR(100),
           cap VARCHAR(10),
           citta VARCHAR(50),
@@ -57,24 +79,22 @@ try {
           codice_fiscale VARCHAR(50),
           partita_iva VARCHAR(50),
           note VARCHAR(500),
+          tipo_utente ENUM('Persona', 'Azienda') NOT NULL DEFAULT 'Persona',
+          
           id_utente INT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             FOREIGN KEY (id_utente) REFERENCES Utenti(id)
         );
         
         -- Creazione della tabella Gruppi
         CREATE TABLE IF NOT EXISTS Gruppi (
           id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-          nome VARCHAR(50)
-        );
-        
-        
-        
-        -- Creazione della tabella Controparti
-        CREATE TABLE IF NOT EXISTS Controparti (
-          id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
           nome VARCHAR(50),
-          cognome VARCHAR(50)
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         );
+        
         
         -- Creazione della tabella Pratiche
         CREATE TABLE IF NOT EXISTS Pratiche (
@@ -82,41 +102,87 @@ try {
           nr_pratica VARCHAR(50),
           nome VARCHAR(50),
           tipologia VARCHAR(50),
-          stato VARCHAR(50),
+          stato ENUM('aperta', 'chiusa', 'sospesa') NOT NULL DEFAULT 'aperta',
           avvocato VARCHAR(50),
           referente VARCHAR(50),
           competenza VARCHAR(50),
           ruolo_generale VARCHAR(50),
           giudice VARCHAR(50),
           id_gruppo INT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (id_gruppo) REFERENCES Gruppi(id)
         );
+        
+        
+        -- Creazione della tabella Controparti
+        CREATE TABLE IF NOT EXISTS Controparti (
+          id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+          id_pratica INT,
+          id_utente INT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (id_pratica) REFERENCES Pratiche(id),
+            FOREIGN KEY (id_utente) REFERENCES Utenti(id)
+            );
+        
+        
+        -- Creazione della tabella Assistiti
+        CREATE TABLE IF NOT EXISTS Assistiti (
+          id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+          id_pratica INT,
+          id_utente INT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (id_pratica) REFERENCES Pratiche(id),
+            FOREIGN KEY (id_utente) REFERENCES Utenti(id)
+            );
+        
+        
+        -- Creazione della tabella Documenti
+        CREATE TABLE IF NOT EXISTS Documenti (
+          id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+          nome VARCHAR(50),
+          descrizione VARCHAR(100),
+          path VARCHAR(100),
+          id_pratica INT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            FOREIGN KEY (id_pratica) REFERENCES Pratiche(id)
+            );
+        
         
         -- Creazione della tabella Scadenze
         CREATE TABLE IF NOT EXISTS Scadenze (
           id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
           data DATE,
-          motivo VARCHAR(100),
+          motivo VARCHAR(255),
           id_pratica INT,
+          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (id_pratica) REFERENCES Pratiche(id)
         );
         
         -- Creazione della tabella Udienze
         CREATE TABLE IF NOT EXISTS Udienze (
           id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-          tipo VARCHAR(50),
+          descrizione VARCHAR(255),
           data DATE,
           id_pratica INT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (id_pratica) REFERENCES Pratiche(id)
         );
         
         -- Creazione della tabella Note
         CREATE TABLE IF NOT EXISTS Note (
           id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
-          tipologia VARCHAR(50),
-          testo VARCHAR(500),
+          tipologia VARCHAR(255),
+          descrizione VARCHAR(255),
           visibilita VARCHAR(50),
           id_pratica INT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (id_pratica) REFERENCES Pratiche(id)
         );
         
@@ -124,7 +190,9 @@ try {
         CREATE TABLE IF NOT EXISTS Permessi (
             `id` INT(11) AUTO_INCREMENT PRIMARY KEY NOT NULL,
             `nome` VARCHAR(50) NOT NULL,
-            `descrizione` VARCHAR(255)
+            `descrizione` VARCHAR(255),
+            `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
         );
 
        
@@ -132,6 +200,8 @@ try {
           id INT AUTO_INCREMENT PRIMARY KEY NOT NULL,
           ruolo_id INT NOT NULL,
           permesso_id INT NOT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (ruolo_id) REFERENCES Ruoli(id),
           FOREIGN KEY (permesso_id) REFERENCES Permessi(id)
         );
@@ -141,6 +211,8 @@ try {
       CREATE TABLE IF NOT EXISTS Utenti_Gruppi (
           id_utente INT,
           id_gruppo INT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (id_utente) REFERENCES Utenti(id),
           FOREIGN KEY (id_gruppo) REFERENCES Gruppi(id),
           PRIMARY KEY (id_utente, id_gruppo)
@@ -155,7 +227,8 @@ try {
   (2, 'Dominus'),
   (3, 'Referente'),
   (4, 'Segreteria'),
-  (5, 'Cliente');
+  (5, 'Cliente'),
+  (6, 'Controrparte');
 
 -- Inserimento di dati nella tabella Utente
 INSERT IGNORE INTO Utenti (id, email, password, id_ruolo) VALUES
@@ -270,8 +343,6 @@ INSERT IGNORE  INTO Ruoli_Permessi (id, ruolo_id, permesso_id) VALUES
 INSERT IGNORE INTO Gruppi (id, nome) VALUES (1, 'Gruppo A');
 
 
--- Inserimento di una controparte
-INSERT IGNORE INTO Controparti (id, nome, cognome) VALUES (1, 'Controparte 1', 'Rossi');
 
 -- Inserimento di una pratica legata al sottogruppo e alla controparte
 INSERT IGNORE INTO Pratiche (id, nr_pratica, nome, tipologia, stato, avvocato, referente, competenza, ruolo_generale, giudice, id_gruppo) VALUES (1, 'P001', 'Pratica 1', 'Civile', 'Aperta', 'Avvocato 1', 'Referente 1', 'Competenza 1', 'Ruolo Generale 1', 'Giudice 1', 1);
@@ -280,10 +351,10 @@ INSERT IGNORE INTO Pratiche (id, nr_pratica, nome, tipologia, stato, avvocato, r
 INSERT IGNORE INTO Scadenze (id, data, motivo, id_pratica) VALUES (1, '2023-06-30', 'Scadenza 1', 1);
 
 -- Inserimento di un'udienza legata alla pratica
-INSERT IGNORE INTO Udienze (id, tipo, data, id_pratica) VALUES (1, 'Udienza 1', '2023-07-15', 1);
+INSERT IGNORE INTO Udienze (id, descrizione, data, id_pratica) VALUES (1, 'Udienza 1', '2023-07-15', 1);
 
 -- Inserimento di una nota legata alla pratica
-INSERT IGNORE INTO Note (id, tipologia, testo, visibilita, id_pratica) VALUES (1, 'Nota 1', 'Testo nota 1', 'Privata', 1);
+INSERT IGNORE INTO Note (id, tipologia, descrizione, visibilita, id_pratica) VALUES (1, 'Nota 1', 'Testo nota 1', 'Privata', 1);
 
 ");
 

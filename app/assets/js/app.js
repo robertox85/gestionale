@@ -27,7 +27,8 @@ document.addEventListener('alpine:init', () => {
         query: '',
         searchResults: [],
         showNoResultsMessage: false,
-        selectedUsers: [],
+        selectedItems: null,
+        entity: '',
         performSearch() {
             // if query is less than 3 characters, don't perform search
             if (this.query.length < 3 ) {
@@ -42,19 +43,14 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-
-
             // Esegui la chiamata AJAX per cercare gli utenti corrispondenti nel database
             // Puoi utilizzare axios o fetch per eseguire la chiamata AJAX
-            axios.get('/search', { params: { query: this.query } })
+            axios.get('/search', { params: { query: this.query, entity: this.entity } })
                 .then(response => {
-                    //this.searchResults = response.data;
-
                     // Filtra i risultati per escludere gli utenti già selezionati
                     this.searchResults = response.data.filter(user => {
-                        return !this.selectedUsers.find(selectedUser => selectedUser.id === user.id);
+                        return !this.selectedItems.find(selectedItem => selectedItem.id === user.id);
                     });
-
                     // Verifica se il risultato è vuoto e imposta showNoResultsMessage
                     this.showNoResultsMessage = this.searchResults.length === 0;
                 })
@@ -62,21 +58,22 @@ document.addEventListener('alpine:init', () => {
                     console.error(error);
                 });
         },
-        selectUser(user) {
+        selectItem(item) {
             let query = this.query;
-            this.query = user.email;
+            this.query = item.nome;
             this.searchResults = [];
-            this.selectedUsers.push(user);
+            this.selectedItems.push(item);
 
             // reset the query
             this.query = query;
         },
-        removeUser(user) {
-            this.selectedUsers = this.selectedUsers.filter(selectedUser => selectedUser.id !== user.id);
+        removeItem(item) {
+            if (this.selectedItems != null) this.selectedItems = this.selectedItems.filter(selectedItem => selectedItem.id !== item.id);
+
         },
         init() {
-            // get the selected users
-            this.selectedUsers = JSON.parse(this.$el.dataset.selectedusers);
+            this.selectedItems = JSON.parse(this.$el.dataset.selecteditems);
+            this.entity = this.$el.dataset.entity;
         }
     }));
 });

@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\Helper;
 use App\Models\Gruppo;
 
 use App\Libraries\Database;
@@ -16,6 +17,8 @@ class GruppiController extends BaseController
             return $gruppo;
         }, $gruppi);
 
+
+
         echo $this->view->render('gruppi.html.twig',
             [
                 'gruppi' => $gruppi,
@@ -25,25 +28,16 @@ class GruppiController extends BaseController
 
     public function creaGruppoView()
     {
-        // create a new group and redirect to edit page
-        try {
-            $gruppo = new Gruppo();
-            $gruppo->setNome('Nuovo gruppo');
-            $gruppo->save();
-        } catch (\Exception $e) {
-            echo $e->getMessage();
-            header('Location: /gruppi');
-        }
-
-        header('Location: /gruppi/edit/' . $gruppo->getId());
+        echo $this->view->render('creaGruppo.html.twig');
     }
 
     // editGruppoView
     public function editGruppoView(int $id_gruppo)
     {
-        echo $this->view->render('edit_gruppo.html.twig',
+        $gruppo = new Gruppo($id_gruppo);
+        echo $this->view->render('editGruppo.html.twig',
             [
-                'gruppo' => new Gruppo($id_gruppo),
+                'gruppo' => $gruppo
             ]
         );
     }
@@ -57,6 +51,9 @@ class GruppiController extends BaseController
             $gruppo = new Gruppo();
             $gruppo->setNome($nomeGruppo);
             $gruppo->save();
+
+            Helper::addSuccess('Gruppo creato con successo');
+
             header('Location: /gruppi');
         } catch (\Exception $e) {
             // Gestione delle eccezioni
@@ -84,7 +81,7 @@ class GruppiController extends BaseController
 
         // Aggiornamento del gruppo
         try {
-            $gruppo->clearUtenti();
+            $gruppo->removeRecordFromUtentiGruppiByGruppoId();
 
             foreach ($utenti as $id_utente) {
                 $gruppo->addUtente($id_utente);
@@ -99,7 +96,9 @@ class GruppiController extends BaseController
         // Conferma della transazione
         Database::commit();
 
-        header('Location: /gruppi/edit/' . $id);
+        Helper::addSuccess('Gruppo modificato con successo');
+
+        header('Location: /gruppi/');
     }
 
 
@@ -112,8 +111,8 @@ class GruppiController extends BaseController
             Database::beginTransaction();
 
             try{
-                $gruppo->clearUtenti();
-                $gruppo->clearPratiche();
+                $gruppo->removeRecordFromUtentiGruppiByGruppoId();
+                $gruppo->removeGruppoFromPraticheByGruppoId();
                 $gruppo->delete();
             } catch (\Exception $e) {
                 echo $e->getMessage();

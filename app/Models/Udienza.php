@@ -9,20 +9,12 @@ class Udienza extends BaseModel
     protected int $id;
 
     protected string $data;
-    protected string $tipo;
+    protected string $descrizione;
 
     protected int $id_pratica;
 
     // gettters and setters
-    private static function createObjectFromDb(mixed $udienza)
-    {
-        $obj = new self();
-        $obj->setId($udienza['id']);
-        $obj->setData($udienza['data']);
-        $obj->setTipo($udienza['tipo']);
-        $obj->setIdPratica($udienza['id_pratica']);
-        return $obj;
-    }
+
 
     public function getId(): int
     {
@@ -44,14 +36,14 @@ class Udienza extends BaseModel
         $this->data = $data;
     }
 
-    public function getTipo(): string
+    public function getDescrizione(): string
     {
-        return $this->tipo;
+        return $this->descrizione;
     }
 
-    public function setTipo(string $tipo): void
+    public function setDescrizione(string $descrizione): void
     {
-        $this->tipo = $tipo;
+        $this->descrizione = $descrizione;
     }
 
     public function getIdPratica(): int
@@ -64,20 +56,6 @@ class Udienza extends BaseModel
         $this->id_pratica = $id_pratica;
     }
 
-    public static function getByPraticaId(int $id_pratica)
-    {
-        $db = Database::getInstance();
-        $query = "SELECT * FROM Udienze WHERE id_pratica = :id_pratica";
-        $options = [];
-        $options['query'] = $query;
-        $options['params'] = [':id_pratica' => $id_pratica];
-        $result = $db->query($options);
-
-        $udienze = [];
-        foreach ($result as $udienza) {
-            $udienze[] = new Udienza($udienza->id);
-        }
-        return $udienze;
-    }
+  
 
 }

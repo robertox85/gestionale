@@ -11,6 +11,17 @@ class Gruppo extends BaseModel
     protected string $nome = '';
 
     // getter and setter
+    public static function addRecordToUtentiGruppi(mixed $id, mixed $gruppo)
+    {
+        $db = Database::getInstance();
+        $sql = "INSERT INTO Utenti_Gruppi (id_utente, id_gruppo) VALUES (:id_utente, :id_gruppo)";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id_utente' => $id, ':id_gruppo' => $gruppo];
+        $result = $db->query($options);
+        return $result;
+    }
+
     public function getId()
     {
         return $this->id;
@@ -60,7 +71,20 @@ class Gruppo extends BaseModel
         return $result;
     }
 
-    public function clearUtenti()
+    public static function removeRecordFromUtentiGruppiByUtenteId($utente_id)
+    {
+        $db = Database::getInstance();
+        $sql = "DELETE FROM Utenti_Gruppi WHERE id_utente = :id_utente";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [
+            ':id_utente' => $utente_id
+        ];
+        $result = $db->query($options);
+        return $result;
+    }
+
+    public function removeRecordFromUtentiGruppiByGruppoId()
     {
         $db = Database::getInstance();
         $sql = "DELETE FROM Utenti_Gruppi WHERE id_gruppo = :id_gruppo";
@@ -73,7 +97,7 @@ class Gruppo extends BaseModel
         return $result;
     }
 
-    public function clearPratiche(): bool
+    public function removeGruppoFromPraticheByGruppoId(): bool
     {
         // Update Pratiche set id_gruppo = null where id_gruppo = :id_gruppo
         $db = Database::getInstance();
@@ -85,6 +109,19 @@ class Gruppo extends BaseModel
         ];
         return $db->query($options);
 
+    }
+
+
+    // getGruppiByUtenteId
+    public static function getGruppiByUtenteId(int $id_utente)
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT Gruppi.id, Gruppi.nome FROM Utenti_Gruppi JOIN Gruppi ON Utenti_Gruppi.id_gruppo = Gruppi.id WHERE Utenti_Gruppi.id_utente = :id_utente";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id_utente' => $id_utente];
+        $result = $db->query($options);
+        return $result;
     }
 
 }

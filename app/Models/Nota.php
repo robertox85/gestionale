@@ -5,7 +5,7 @@ use App\Libraries\Database;
 class Nota extends BaseModel{
     protected int $id;
     protected string $tipologia;
-    protected string $testo;
+    protected string $descrizione;
     protected string $visiblità;
 
     protected int $id_pratica;
@@ -16,7 +16,7 @@ class Nota extends BaseModel{
         $obj = new self();
         $obj->setId($nota['id']);
         $obj->setTipologia($nota['tipologia']);
-        $obj->setTesto($nota['testo']);
+        $obj->setDescrizione($nota['descrizione']);
         $obj->setVisiblità($nota['visiblità']);
         $obj->setIdPratica($nota['id_pratica']);
         return $obj;
@@ -42,14 +42,14 @@ class Nota extends BaseModel{
         $this->tipologia = $tipologia;
     }
 
-    public function getTesto(): string
+    public function getDescrizione(): string
     {
-        return $this->testo;
+        return $this->descrizione;
     }
 
-    public function setTesto(string $testo): void
+    public function setDescrizione(string $descrizione): void
     {
-        $this->testo = $testo;
+        $this->descrizione = $descrizione;
     }
 
     public function getVisiblità(): string

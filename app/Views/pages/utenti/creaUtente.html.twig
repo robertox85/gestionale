@@ -1,7 +1,7 @@
 {% extends 'base.html.twig' %}
 
 {% block title %}
-    {{ 'Create a new practice'|trans }}
+    {{ 'Edit User'|trans }}
 {% endblock %}
 
 {% block content %}
@@ -10,22 +10,18 @@
 
             <div class=" flex justify-between w-full items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
-                    {{ 'Create a new practice'|trans }}
+                    {{ 'Create User'|trans }}
                 </h2>
             </div>
 
-            <form action="{{ url('pratiche/crea') }} " method="post" class="w-full">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token('crea-pratica') }}">
+            <form action="{{ url('utenti/crea') }} " method="post" class="w-full">
 
-                {% include 'pratiche/_form.html.twig' with {'button_label': 'Create'} %}
+                <input type="hidden" name="csrf_token" value="{{ csrf_token('utenti/crea') }}">
+
+                {% include 'utenti/_form.html.twig' with { 'button_label': 'Create', 'ruoli': ruoli, 'gruppi': gruppi } %}
 
             </form>
         </div>
     </section>
 {% endblock %}
 
-{% block javascripts %}
-    <script>
-
-    </script>
-{% endblock %}

@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+
+    <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">
+        {{ 'Add new group'|trans }}
+    </h2>
+
+    <form action="{{ url('gruppi/edit') }}" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token('gruppi') }}"/>
+        <input type="hidden" name="id_gruppo" value="{{ gruppo.getId() }}"/>
+
+
+        {% include 'gruppi/_form.html.twig' with { 'button_label': 'Save' ,'gruppo': gruppo} %}
+
+    </form>
+
+{% endblock %}

@@ -8,16 +8,16 @@ class Pratica extends BaseModel
 {
 
     protected $id;
-    protected $nr_pratica;
-    protected $nome;
-    protected $tipologia;
-    protected $stato;
-    protected $avvocato;
-    protected $referente;
-    protected $competenza;
-    protected $ruolo_generale;
-    protected $giudice;
-    protected $id_gruppo;
+    protected ?string $nr_pratica;
+    protected ?string $nome;
+    protected ?string $tipologia;
+    protected ?string $stato;
+    protected ?string $avvocato;
+    protected ?string $referente;
+    protected ?string $competenza;
+    protected ?string $ruolo_generale;
+    protected ?string $giudice;
+    protected ?int $id_gruppo;
 
     // getter and setter
     public function getId()
@@ -187,8 +187,8 @@ class Pratica extends BaseModel
         $options['query'] = $sql;
         $options['params'] = [
             ':id_pratica' => $this->getId(),
-            ':data' => $scadenza['data'],
-            ':motivo' => $scadenza['motivo']
+            ':data' => $scadenza->getData(),
+            ':motivo' => $scadenza->getMotivo()
         ];
         return $db->query($options);
     }
@@ -228,13 +228,13 @@ class Pratica extends BaseModel
     public function addUdienza(mixed $udienza)
     {
         $db = Database::getInstance();
-        $sql = "INSERT INTO Udienze (id_pratica, data, tipo) VALUES (:id_pratica, :data_udienza, :tipo)";
+        $sql = "INSERT INTO Udienze (id_pratica, data, descrizione) VALUES (:id_pratica, :data_udienza, :descrizione)";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [
             ':id_pratica' => $this->getId(),
-            ':data_udienza' => $udienza['data'],
-            ':tipo' => $udienza['tipo']
+            ':data_udienza' => $udienza->getData(),
+            ':descrizione' => $udienza->getDescrizione()
         ];
         return $db->query($options);
     }
@@ -296,10 +296,11 @@ class Pratica extends BaseModel
     public function getAssistiti()
     {
         $db = Database::getInstance();
-        $sql = "SELECT * FROM Assistiti WHERE id_pratica = :id_pratica";
+        // Make a JOIN with Utenti and Anagrafiche
+        $sql = "SELECT nome,cognome,denominazione,tipo_utente FROM Assistiti INNER JOIN Utenti ON Assistiti.id_utente = Utenti.id INNER JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id WHERE Assistiti.id_pratica = :id_pratica";
         $options = [];
         $options['query'] = $sql;
-        $options['params'] = [':id_pratica' => $this->id];
+        $options['params'] = [':id_pratica' => $this->getId()];
         return $db->query($options);
     }
 
@@ -336,7 +337,8 @@ class Pratica extends BaseModel
     public function getControparti()
     {
         $db = Database::getInstance();
-        $sql = "SELECT * FROM Controparti WHERE id_pratica = :id_pratica";
+        // Make a JOIN with Utenti and Anagrafiche
+        $sql = "SELECT nome,cognome,denominazione,tipo_utente FROM Controparti INNER JOIN Utenti ON Controparti.id_utente = Utenti.id INNER JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id WHERE Controparti.id_pratica = :id_pratica";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [':id_pratica' => $this->id];

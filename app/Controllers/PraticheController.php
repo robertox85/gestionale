@@ -3,8 +3,13 @@
 namespace App\Controllers;
 
 use App\Libraries\Database;
+use App\Libraries\Helper;
+use App\Models\Anagrafica;
 use App\Models\Gruppo;
 use App\Models\Pratica;
+use App\Models\Scadenza;
+use App\Models\Udienza;
+use App\Models\Utente;
 
 class PraticheController extends BaseController
 {
@@ -33,7 +38,7 @@ class PraticheController extends BaseController
 
 
         echo $this->view->render(
-            'listaPratiche.html.twig',
+            'pratiche.html.twig',
             [
                 'totalItems' => $totalItems,
                 'itemsPerPage' => $itemsPerPage,
@@ -47,10 +52,14 @@ class PraticheController extends BaseController
 
     public function editPraticaView(int $id_pratica)
     {
+        $pratica = new Pratica($id_pratica);
+        $form = $pratica->getFields();
         echo $this->view->render(
             'editPratica.html.twig',
             [
                 'pratica' => new Pratica($id_pratica),
+                'form' => $form,
+                'id_pratica' => $id_pratica,
                 'gruppi' => Gruppo::getAll(),
             ]
         );
@@ -68,6 +77,7 @@ class PraticheController extends BaseController
         $giudice = $_POST['giudice'];
         $stato = $_POST['stato'];
         $id_gruppo = $_POST['id_gruppo'];
+
 
 
         // Dati in relazione con altre tabelle
@@ -90,23 +100,65 @@ class PraticheController extends BaseController
         $pratica->setStato($stato);
         $pratica->setIdGruppo($id_gruppo);
 
+
+        $pratica->clearAssistiti();
+        foreach ($assistiti as $assistitoData) {
+            $assistito = new Utente();
+            $assistitoId = $assistito->save();
+            $anagrafica  = new Anagrafica();
+            $anagrafica->setNome('');
+            $anagrafica->setNome($assistitoData['nome']);
+            $anagrafica->setCognome('');
+            $anagrafica->setCognome($assistitoData['cognome']);
+            $anagrafica->setDenominazione('');
+            $anagrafica->setDenominazione($assistitoData['denominazione']);
+            $anagrafica->setTipoUtente('');
+            $anagrafica->setTipoUtente($assistitoData['tipo_utente']);
+            $anagrafica->setIdUtente($assistitoId);
+            $anagrafica->save();
+
+            $pratica->addAssistito($assistito);
+        }
+
+        $pratica->clearControparti();
+        foreach ($controparti as $controparteData) {
+            $controparte = new Utente();
+            $controparte->save();
+            $controparte->getAnagrafica()->setNome($controparteData['nome']);
+            $controparte->getAnagrafica()->setCognome($controparteData['cognome']);
+            $controparte->getAnagrafica()->setDenominazione($controparteData['denominazione']);
+            $controparte->getAnagrafica()->setTipoUtente($controparteData['tipo_utente']);
+            $controparte->getAnagrafica()->save();
+
+            $pratica->addControparte($controparte);
+        }
+
         $pratica->clearScadenze();
-        foreach ($scadenze as $scadenza) {
+        foreach ($scadenze as $scadenzaData) {
+            $scadenza = new Scadenza();
+            $scadenza->setData($scadenzaData['data']);
+            $scadenza->setMotivo($scadenzaData['motivo']);
+            $scadenza->setIdPratica($id_pratica);
+            $scadenza->save();
+
             $pratica->addScadenza($scadenza);
         }
 
         $pratica->clearUdienze();
-        foreach ($udienze as $udienza) {
-            $pratica->addUdienza($udienza);
-        }
+        foreach ($udienze as $udienzaData) {
+            $udienza = new Udienza();
+            $udienza->setData($udienzaData['data']);
+            $udienza->setDescrizione($udienzaData['descrizione']);
+            $udienza->setIdPratica($id_pratica);
+            $udienza->save();
 
-        $pratica->clearNote();
-        foreach ($note as $nota) {
-            $pratica->addNota($nota);
+            $pratica->addUdienza($udienza);
         }
 
 
         $pratica->update();
+
+        Helper::addSuccess('Pratica aggiornata con successo');
 
         header('Location: /pratiche/edit/' . $pratica->getId());
 
@@ -115,79 +167,93 @@ class PraticheController extends BaseController
     // praticaCreaView
     public function praticaCreaView() {
 
-        // create new practice and redirect to edit page
-        try {
-            $pratica = new Pratica();
-            $pratica->setNome('Nuova pratica');
-
-            $pratica->save();
-        } catch (\Exception $e) {
-            echo $e->getMessage();
-            header('Location: /pratiche');
-        }
-
-        header('Location: /pratiche/edit/' . $pratica->getId());
+        echo $this->view->render(
+            'creaPratica.html.twig',
+            [
+                'gruppi' => Gruppo::getAll(),
+            ]
+        );
     }
 
     public function createPratica()
     {
         // Ottenere i dati inviati dal form
         $nr_pratica = 0;
-        $nome = $_POST['nome'];
-        $tipologia = $_POST['tipologia'];
-        $avvocato = $_POST['avvocato'];
-        $referente = $_POST['referente'];
-        $competenza = $_POST['competenza'];
-        $ruolo_generale = $_POST['ruolo_generale'];
-        $giudice = $_POST['giudice'];
-        $stato = $_POST['stato'];
-        $id_gruppo = $_POST['id_gruppo'];
-
-
-
-
         // Creare un'istanza del modello Pratica e assegnare i valori
 
         $pratica = new Pratica();
         //$pratica->setNrPratica($nr_pratica);
-        $pratica->setNome($nome);
-        $pratica->setTipologia($tipologia);
-        $pratica->setAvvocato($avvocato);
-        $pratica->setReferente($referente);
-        $pratica->setCompetenza($competenza);
-        $pratica->setRuoloGenerale($ruolo_generale);
-        $pratica->setGiudice($giudice);
-        $pratica->setStato($stato);
-        $pratica->setIdGruppo($id_gruppo);
+        if (isset($_POST['nome'])) $pratica->setNome($_POST['nome']);
+        if (isset($_POST['tipologia'])) $pratica->setTipologia($_POST['tipologia']);
+        if (isset($_POST['avvocato'])) $pratica->setAvvocato($_POST['avvocato']);
+        if (isset($_POST['referente'])) $pratica->setReferente($_POST['referente']);
+        if (isset($_POST['competenza'])) $pratica->setCompetenza($_POST['competenza']);
+        if (isset($_POST['ruolo_generale'])) $pratica->setRuoloGenerale($_POST['ruolo_generale']);
+        if (isset($_POST['giudice'])) $pratica->setGiudice($_POST['giudice']);
+        if (isset($_POST['stato'])) $pratica->setStato($_POST['stato']);
+        if (isset($_POST['id_gruppo'])) $pratica->setIdGruppo($_POST['id_gruppo']);
 
 
         // Salvare la pratica nel database (ad esempio, utilizzando un'istanza di un'API di accesso al database)
-        $praticaNew = $pratica->save();
+        $praticaId = $pratica->save();
 
 
 
-        /*
+
         // Creare o aggiornare gli assistiti, le controparti, le scadenze, le udienze associati alla pratica
-        $assistiti = $request['assistiti'];
-        $controparti = $request['controparti'];
-        $scadenze = $request['scadenze'];
-        $udienze = $request['udienze'];
+        $assistiti = $_POST['assistiti'];
+        $controparti = $_POST['controparti'];
+        $scadenze = $_POST['scadenze'];
+        $udienze = $_POST['udienze'];
 
         foreach ($assistiti as $assistitoData) {
-            $assistito = new Assistiti();
-            $assistito->setNome($assistitoData['nome']);
-            $assistito->setCognome($assistitoData['cognome']);
+            $assistito = new Utente();
+            $assistito->save();
+            $assistito->getAnagrafica()->setNome($assistitoData['nome']);
+            $assistito->getAnagrafica()->setCognome($assistitoData['cognome']);
+            $assistito->getAnagrafica()->setDenominazione($assistitoData['denominazione']);
+            $assistito->getAnagrafica()->setTipoUtente($assistitoData['tipo_utente']);
+            $assistito->getAnagrafica()->save();
 
-            // Salvare l'assistito e la relazione con la pratica nel database
-            $this->assistitiModel->create($assistito, $praticaId);
+            $pratica->addAssistito($assistito);
         }
-        */
+
+        foreach ($controparti as $controparteData) {
+            $controparte = new Utente();
+            $controparte->save();
+            $controparte->getAnagrafica()->setNome($controparteData['nome']);
+            $controparte->getAnagrafica()->setCognome($controparteData['cognome']);
+            $controparte->getAnagrafica()->setDenominazione($controparteData['denominazione']);
+            $controparte->getAnagrafica()->setTipoUtente($controparteData['tipo_utente']);
+            $controparte->getAnagrafica()->save();
+
+            $pratica->addControparte($controparte);
+        }
 
 
-        // Ripetere il processo per le controparti, le scadenze e le udienze
+        foreach ($scadenze as $scadenzaData) {
+            $scadenza = new Scadenza();
+            $scadenza->setData($scadenzaData['data']);
+            $scadenza->setMotivo($scadenzaData['motivo']);
+            $scadenza->setIdPratica($praticaId);
+            $scadenza->save();
+
+            $pratica->addScadenza($scadenza);
+        }
+
+        foreach ($udienze as $udienzaData) {
+            $udienza = new Udienza();
+            $udienza->setData($udienzaData['data']);
+            $udienza->setDescrizione($udienzaData['descrizione']);
+            $udienza->setIdPratica($praticaId);
+            $udienza->save();
+
+            $pratica->addUdienza($udienza);
+        }
 
         // Reindirizzare l'utente alla pagina di visualizzazione della pratica appena creata
-        header("Location: /pratiche/edit/$praticaNew");
+        Helper::addSuccess('Pratica creata con successo');
+        header("Location: /pratiche");
 
     }
 

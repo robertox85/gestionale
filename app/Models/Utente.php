@@ -3,15 +3,39 @@
 namespace App\Models;
 
 
+use App\Libraries\Database;
+
 class Utente extends BaseModel
 {
-    protected int $id_utente;
-    protected string $email;
-    protected string $password;
-    protected int $id_ruolo;
+    protected int $id;
+    protected ?string $email;
+    protected ?string $password;
+    protected ?int $id_ruolo = 5;
 
 
     private string $ruolo;
+
+    public static function getControparti()
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT * FROM Utenti WHERE id_ruolo = 6";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [];
+        $controparti = $db->query($options);
+        return $controparti;
+    }
+
+    public static function getAssistiti()
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT * FROM Utenti WHERE id_ruolo = 5";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [];
+        $assistiti = $db->query($options);
+        return $assistiti;
+    }
 
     public function setRuolo($ruolo)
     {
@@ -21,7 +45,7 @@ class Utente extends BaseModel
    // constructor
     public function getId()
     {
-        return $this->id_utente;
+        return $this->id;
     }
 
     public function getEmail()
@@ -40,9 +64,9 @@ class Utente extends BaseModel
     }
 
     // setter
-    public function setId($id_utente)
+    public function setId($id)
     {
-        $this->id_utente = $id_utente;
+        $this->id = $id;
     }
 
     public function setEmail($email)
@@ -135,4 +159,96 @@ class Utente extends BaseModel
         return true;
     }
 
+    // getGruppi
+    public function getGruppi()
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT Gruppi.id, Gruppi.nome FROM Utenti_Gruppi JOIN Gruppi ON Utenti_Gruppi.id_gruppo = Gruppi.id WHERE Utenti_Gruppi.id_utente = :id_utente";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id_utente' => $this->getId()];
+        $result = $db->query($options);
+        return $result;
+    }
+
+    // isIncomplete
+
+
+    public function isAnagraficaComplete()
+    {
+        $anagrafica = $this->getAnagrafica();
+        if ($anagrafica === null) {
+            return false;
+        }
+
+        if ($anagrafica->getTipoUtente() === null) {
+            return false;
+        }
+
+        if($anagrafica->getTipoUtente() === 'Azienda'){
+            if ($anagrafica->getDenominazione() === null) {
+                return false;
+            }
+
+            if ($anagrafica->getPartitaIva() === null) {
+                return false;
+            }
+        }
+
+        if ($anagrafica->getTipoUtente() === 'Persona') {
+            if ($anagrafica->getNome() === null) {
+                return false;
+            }
+
+            if ($anagrafica->getCognome() === null) {
+                return false;
+            }
+
+            if ($anagrafica->getCodiceFiscale() === null) {
+                return false;
+            }
+        }
+
+        if ($anagrafica->getIndirizzo() === null) {
+            return false;
+        }
+
+        if ($anagrafica->getCap() === null) {
+            return false;
+        }
+
+        if ($anagrafica->getCitta() === null) {
+            return false;
+        }
+
+        if ($anagrafica->getProvincia() === null) {
+            return false;
+        }
+
+        if ($anagrafica->getTelefono() === null) {
+            return false;
+        }
+
+        if ($anagrafica->getCellulare() === null) {
+            return false;
+        }
+
+
+
+        return true;
+    }
+
+    // is LoginDataComplete
+    public function isLoginDataComplete()
+    {
+        if ($this->getEmail() === null) {
+            return false;
+        }
+
+        if ($this->getPassword() === null) {
+            return false;
+        }
+
+        return true;
+    }
 }

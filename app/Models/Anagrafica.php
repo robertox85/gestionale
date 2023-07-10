@@ -3,22 +3,26 @@
 namespace App\Models;
 
 use App\Libraries\Database;
+
 class Anagrafica extends BaseModel
 {
     protected int $id;
-    protected string $nome;
-    protected string $cognome;
-    protected string $indirizzo;
-    protected string $cap;
-    protected string $citta;
-    protected string $provincia;
-    protected string $telefono;
-    protected string $cellulare;
-    protected string $pec;
-    protected string $codice_fiscale;
-    protected string $partita_iva;
-    protected string $note;
-    protected int $id_utente;
+    protected ?string $nome;
+    protected ?string $cognome;
+    protected ?string $denominazione;
+    protected ?string $indirizzo;
+    protected ?string $cap;
+    protected ?string $citta;
+    protected ?string $provincia;
+    protected ?string $telefono;
+    protected ?string $cellulare;
+    protected ?string $pec;
+    protected ?string $codice_fiscale;
+    protected ?string $partita_iva;
+    protected ?string $note;
+    protected ?string $tipo_utente;
+
+    protected ?int $id_utente;
 
     public static function getByUserId(int $id_utente)
     {
@@ -45,6 +49,11 @@ class Anagrafica extends BaseModel
     public function getCognome()
     {
         return $this->cognome;
+    }
+
+    public function getDenominazione()
+    {
+        return $this->denominazione;
     }
 
     public function getIndirizzo()
@@ -97,7 +106,14 @@ class Anagrafica extends BaseModel
         return $this->note;
     }
 
-    public function getUtenteId()
+    public function getTipoUtente()
+    {
+        return $this->tipo_utente;
+    }
+
+
+
+    public function getIdUtente()
     {
         return $this->id_utente;
     }
@@ -116,6 +132,11 @@ class Anagrafica extends BaseModel
     public function setCognome($cognome)
     {
         $this->cognome = $cognome;
+    }
+
+    public function setDenominazione($denominazione)
+    {
+        $this->denominazione = $denominazione;
     }
 
     public function setIndirizzo($indirizzo)
@@ -155,13 +176,12 @@ class Anagrafica extends BaseModel
 
     public function setCodiceFiscale($codice_fiscale)
     {
-        // $this->codice_fiscale = $codice_fiscale;
-        $this->codice_fiscale = $codice_fiscale === null ? '' : $codice_fiscale;
+        $this->codice_fiscale = ($codice_fiscale == '') ? null : strtoupper($codice_fiscale);
     }
 
     public function setPartitaIva($partita_iva)
     {
-        $this->partita_iva = $partita_iva;
+        $this->partita_iva = ($partita_iva == '') ? null : strtoupper($partita_iva);
     }
 
     public function setNote($note)
@@ -169,8 +189,26 @@ class Anagrafica extends BaseModel
         $this->note = $note;
     }
 
-    public function setUtenteId($id_utente)
+    public function setTipoUtente($tipo_utente)
+    {
+        $this->tipo_utente = $tipo_utente;
+    }
+
+
+
+    public function setIdUtente($id_utente)
     {
         $this->id_utente = $id_utente;
+    }
+
+
+    public function getGruppo() {
+        $db = Database::getInstance();
+        $query = "SELECT id_gruppo FROM Utenti_Gruppi WHERE id_utente = :id";
+        $options = [];
+        $options['query'] = $query;
+        $options['params'] = [':id' => $this->getIdUtente()];
+        $result = $db->query($options);
+        return $result ? $result[0]->id_gruppo : false;
     }
 }
