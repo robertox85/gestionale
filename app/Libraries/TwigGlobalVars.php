@@ -28,8 +28,8 @@ class TwigGlobalVars
     private static function addTwigFunctions(Environment $twig): void
     {
         $twigFunctions = [
-            'breadcrumbs' => function () {
-                return Helper::generateBreadcrumb();
+            'isLoginPage' => function () {
+                return str_contains($_SERVER['REQUEST_URI'], 'sign-in');
             },
             'assets' => function (string $filename) {
                 // return full server path to the public folder
