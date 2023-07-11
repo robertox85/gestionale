@@ -1,11 +1,12 @@
 <aside
-        class="fixed top-0 left-0 z-40 w-48 h-screen pt-14 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
+        class="fixed top-0 left-0 z-40 w-48 h-screen pt-20 transition-transform -translate-x-full bg-white border-r border-gray-200 md:translate-x-0 dark:bg-gray-800 dark:border-gray-700"
         aria-label="Sidenav"
         id="drawer-navigation"
 >
     <div class="overflow-y-auto py-5 px-3 h-full bg-white dark:bg-gray-800">
 
         {% if session.utente %}
+
             <!-- {% include ('search.html.twig') with { 'class': 'md:hidden mb-2' } %}-->
 
             <ul class="space-y-2">
@@ -16,7 +17,9 @@
                         <ion-icon name="stats-chart"
                                   class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
 
-                        <span class="ml-3">Overview</span>
+                        <span class="ml-3">
+                            {{ 'Overview'|trans }}
+                        </span>
                     </a>
                 </li>
 
@@ -26,7 +29,9 @@
                        class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <ion-icon name="person"
                                   class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
-                        <span class="ml-3">Assistiti</span>
+                        <span class="ml-3">
+                            {{ 'Assisted'|trans }}
+                        </span>
                     </a>
                 </li>
 
@@ -36,7 +41,9 @@
                        class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <ion-icon name="people"
                                   class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
-                        <span class="ml-3">Controparti</span>
+                        <span class="ml-3">
+                            {{ 'Counterparties'|trans }}
+                        </span>
                     </a>
                 </li>
 
@@ -45,7 +52,9 @@
                        class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <ion-icon name="document-text"
                                   class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
-                        <span class="ml-3">Pratiche</span>
+                        <span class="ml-3">
+                            {{ 'Practices'|trans }}
+                        </span>
                     </a>
                 </li>
 
@@ -54,7 +63,9 @@
                        class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <ion-icon name="people"
                                   class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
-                        <span class="ml-3">Gruppi</span>
+                        <span class="ml-3">
+                            {{ 'Groups'|trans }}
+                        </span>
                     </a>
                 </li>
 
@@ -63,7 +74,9 @@
                        class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <ion-icon name="people"
                                   class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
-                        <span class="ml-3">Utenti</span>
+                        <span class="ml-3">
+                            {{ 'Users'|trans }}
+                        </span>
                     </a>
                 </li>
 
@@ -73,7 +86,9 @@
                        class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <ion-icon name="settings"
                                   class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
-                        <span class="ml-3">Impostazioni</span>
+                        <span class="ml-3">
+                            {{ 'Settings'|trans }}
+                        </span>
                     </a>
                 </li>
 
@@ -88,12 +103,12 @@
 
                     <a href="{{ url('sign-in') }}"
                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 mr-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                        Login
+                        {{ 'Sign in'|trans }}
                     </a>
 
                     <a href="{{ url('sign-up') }}"
                        class="py-2.5 px-5 mr-2 mb-2 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                        Register
+                        {{ 'Sign up'|trans }}
                     </a>
                 </div>
             </div>
@@ -102,20 +117,14 @@
     </div>
 
     <div class="hidden absolute bottom-0 left-0 justify-center p-4 w-full lg:flex bg-white dark:bg-gray-800 z-20">
-        <div
-                id="tooltip-settings"
-                role="tooltip"
-                class="inline-block absolute invisible z-10 py-2 px-3 text-sm font-medium text-white bg-gray-900 rounded-lg shadow-sm opacity-0 transition-opacity duration-300 tooltip"
-        >
-            {% trans %}settings_page{% endtrans %}
-            <div class="tooltip-arrow" data-popper-arrow></div>
-        </div>
         <button
                 type="button"
                 data-dropdown-toggle="language-dropdown"
                 class="inline-flex justify-center p-2 text-gray-500 rounded cursor-pointer dark:hover:text-white dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-600"
         >
-            <span class="sr-only">Select language</span>
+            <span class="sr-only">
+                {{ 'Change language'|trans }}
+            </span>
 
             <!-- add html code for italy flag -->
 
@@ -133,6 +142,7 @@
 
         </button>
         <!-- Dropdown -->
+
         <div class="hidden z-50 my-4 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700"
              id="language-dropdown">
             <ul class="py-1" role="none">

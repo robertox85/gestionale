@@ -43,7 +43,7 @@
     {% endif %}
 
 
-    <main class="p-4 {% if session.utente %} md:ml-48 {% endif %} h-screen pt-20">
+    <main class="{% if session.utente %} md:ml-48 {% endif %} h-screen pt-20 px-4">
 
         <!-- if is not login page -->
         {% if not isLoginPage() %}

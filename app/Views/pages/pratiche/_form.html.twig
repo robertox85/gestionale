@@ -4,7 +4,7 @@
         <!-- Testo: Nome pratica -->
         <div>
             <label for="nome">
-                {{ 'Pratica name'|trans }}
+                {{ 'Name'|trans }}
             </label>
             <input type="text"
                    name="nome"
@@ -118,7 +118,7 @@
 
                         <div x-show="showNoResultsMessage"
                              class="text-gray-500 dark:text-gray-400 text-sm italic font-bold sm:col-span-2">
-                            {{ 'No assistiti found'|trans }}
+                            {{ 'No results found'|trans }}
                         </div>
 
                         <div class="add absolute right-0 top-0 bottom-0 flex items-center justify-center">
@@ -128,7 +128,7 @@
                                     data-modal-target="defaultModal"
                                     data-modal-toggle="defaultModal"
                                     class="flex items-center text-sm font-medium text-gray-900 dark:text-white hover:text-primary-600">
-                                {{ 'Crea nuovo assistito'|trans }}
+                                {{ 'Add new assisted'|trans }}
                                 <ion-icon class="ml-2 -mr-1 h-5 w-5" name="add"></ion-icon>
                             </a>
 
@@ -154,7 +154,9 @@
                                                           stroke-linejoin="round" stroke-width="2"
                                                           d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                                                 </svg>
-                                                <span class="sr-only">Close modal</span>
+                                                <span class="sr-only">
+                                                    {{ 'Close'|trans }}
+                                                </span>
                                             </button>
                                         </div>
                                         <!-- Modal body -->
@@ -164,8 +166,12 @@
                                                         :name="newItem.tipo_utente"
                                                         id="newItem.tipo_utente"
                                                 >
-                                                    <option value="Persona">Persona</option>
-                                                    <option value="Azienda">Azienda</option>
+                                                    <option value="Persona">
+                                                        {{ 'Person'|trans }}
+                                                    </option>
+                                                    <option value="Azienda">
+                                                        {{ 'Company'|trans }}
+                                                    </option>
 
                                                 </select>
 
@@ -202,14 +208,14 @@
                                                     <div>
                                                         <label for="denominazione"
                                                                class="block text-sm font-medium text-gray-900 dark:text-white">
-                                                            {{ 'Denominazione'|trans }}
+                                                            {{ 'Company name'|trans }}
                                                         </label>
                                                         <input type="text"
                                                                x-model="newItem.denominazione"
                                                                :name="newItem.denominazione"
                                                                id="denominazione"
 
-                                                               placeholder="{{ 'Type denominazione'|trans }}">
+                                                               placeholder="{{ 'Type company name'|trans }}">
                                                     </div>
                                                 </div>
                                             </div>
@@ -298,7 +304,7 @@
             <div class="">
                 <!-- column for sending invite members -->
                 <label for="assistiti" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                    {{ 'Add Controparti'|trans }}
+                    {{ 'Add counterparty'|trans }}
                 </label>
 
 
@@ -327,7 +333,7 @@
 
                         <div x-show="showNoResultsMessage"
                              class="text-gray-500 dark:text-gray-400 text-sm italic font-bold sm:col-span-2">
-                            {{ 'No controparti found'|trans }}
+                            {{ 'No results found'|trans }}
                         </div>
 
                         <div class="add absolute right-0 top-0 bottom-0 flex items-center">
@@ -335,7 +341,7 @@
                                data-modal-target="modalControparti"
                                data-modal-toggle="modalControparti"
                                class="flex items-center text-sm font-medium text-gray-900 dark:text-white hover:text-primary-600">
-                                {{ 'Crea nuova controparte'|trans }}
+                                {{ 'Add new counterparty'|trans }}
                                 <ion-icon class="ml-2 -mr-1 h-5 w-5" name="add"></ion-icon>
                             </a>
 
@@ -351,7 +357,7 @@
                                         <!-- Modal header -->
                                         <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
                                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                                                {{ 'Add new controparti'|trans }}
+                                                {{ 'Add new counterparty'|trans }}
                                             </h3>
                                             <button type="button"
                                                     class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
@@ -362,7 +368,9 @@
                                                           stroke-linejoin="round" stroke-width="2"
                                                           d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                                                 </svg>
-                                                <span class="sr-only">Close modal</span>
+                                                <span class="sr-only">
+                                                    {{ 'Close'|trans }}
+                                                </span>
                                             </button>
                                         </div>
                                         <!-- Modal body -->
@@ -372,8 +380,12 @@
                                                         :name="newItem.tipo_utente"
                                                         id="newItem.tipo_utente"
                                                 >
-                                                    <option value="Persona">Persona</option>
-                                                    <option value="Azienda">Azienda</option>
+                                                    <option value="Persona">
+                                                        {{ 'Person'|trans }}
+                                                    </option>
+                                                    <option value="Azienda">
+                                                        {{ 'Company'|trans }}
+                                                    </option>
 
                                                 </select>
 
@@ -410,14 +422,14 @@
                                                     <div>
                                                         <label for="denominazione"
                                                                class="block text-sm font-medium text-gray-900 dark:text-white">
-                                                            {{ 'Denominazione'|trans }}
+                                                            {{ 'Company name'|trans }}
                                                         </label>
                                                         <input type="text"
                                                                x-model="newItem.denominazione"
                                                                :name="newItem.denominazione"
                                                                id="denominazione"
 
-                                                               placeholder="{{ 'Type denominazione'|trans }}">
+                                                               placeholder="{{ 'Type company name'|trans }}">
                                                     </div>
                                                 </div>
                                             </div>
@@ -528,7 +540,7 @@
                     <input x-model="scadenza.motivo"
                            type="text"
                            :name="'scadenze['+index+'][motivo]'" :id="'scadenza_motivo_'+index"
-                           placeholder="Motivo">
+                           placeholder="{{ 'Type deadline reason'|trans }}">
                     <button type="button" x-on:click="scadenze.splice(index, 1)"
                             class="text-white bg-red-500 px-2 py-1 rounded flex items-center">
                         <ion-icon name="trash"></ion-icon>
@@ -569,7 +581,7 @@
 
                     <input x-model="udienza.descrizione"
                            :name="'udienze['+index+'][descrizione]'" :id="'udienza_descrizione_'+index"
-                           type="text" placeholder="Tipo">
+                           type="text" placeholder="{{ 'Type hearing reason'|trans }}">
 
 
                     <button type="button" x-on:click="udienze.splice(index, 1)"
@@ -654,8 +666,12 @@
                                         :id="'tipologia_' + index"
                                         :name="'note['+index+'][tipologia]'"
                                         class="w-full">
-                                    <option value="registro_contabile">Registro Contabile</option>
-                                    <option value="annotazioni">Annotazioni</option>
+                                    <option value="registro_contabile">
+                                        {{ 'Accounting Register'|trans }}
+                                    </option>
+                                    <option value="annotazioni">
+                                        {{ 'Annotations'|trans }}
+                                    </option>
                                 </select>
                             </div>
                             <div class="mt-2">
@@ -667,7 +683,7 @@
                                           :id="'nota_' + index" rows="4"
                                           :name="'note['+index+'][descrizione]'"
                                           class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                                          placeholder="Write your thoughts here..."
+                                          placeholder="{{ 'Note'|trans }}"
                                           x-text="note.descrizione"
                                 >
 
@@ -684,10 +700,10 @@
                                         :id="'visibilita_' + index"
                                         class="w-full">
                                     <option value="pubblica" :selected="note.visibilita === 'pubblica'">
-                                        Pubblica
+                                        {{ 'Public'|trans }}
                                     </option>
                                     <option value="privata" :selected="note.visibilita === 'privata'">
-                                        Privata
+                                        {{ 'Private'|trans }}
                                     </option>
 
                                 </select>
@@ -711,7 +727,7 @@
         <!-- Select: Stato -->
         <div>
             <label for="stato">
-                {{ 'Pratica status'|trans }}
+                {{ 'Status'|trans }}
             </label>
             <select id="stato" name="stato">
                 <option selected="" disabled>{{ 'Select a status'|trans }}</option>
@@ -719,19 +735,22 @@
                         {% if pratica.getStato() == 'aperta' %}
                             selected
                         {% endif %}
-                        value="aperta">Aperta
+                        value="aperta">
+                    {{ 'Open'|trans }}
                 </option>
                 <option
                         {% if pratica.getStato() == 'chiusa' %}
                             selected
                         {% endif %}
-                        value="chiusa">Archiviata
+                        value="chiusa">
+                    {{ 'Closed'|trans }}
                 </option>
                 <option
                         {% if pratica.getStato() == 'sospesa' %}
                             selected
                         {% endif %}
-                        value="sospesa">Sospesa
+                        value="sospesa">
+                    {{ 'Suspended'|trans }}
                 </option>
             </select>
         </div>
@@ -739,7 +758,7 @@
         <!-- Multi Select: Assegna gruppo -->
         <div>
             <label for="id_gruppo">
-                {{ 'Select a group'|trans }}
+                {{ 'Assign group'|trans }}
             </label>
 
             <select id="id_gruppo" name="id_gruppo">
@@ -762,7 +781,7 @@
             <div class="fixed right-6 bottom-6 group ">
                 <button type="submit" class="submit">
                     <!-- Save icon -->
-                    {{ button_label|default('Save') }}
+                    {{ button_label | default('Save') | trans }}
                 </button>
             </div>
 

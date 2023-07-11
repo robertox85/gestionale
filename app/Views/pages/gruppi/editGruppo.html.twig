@@ -3,7 +3,7 @@
 {% block content %}
 
     <h2 class="mb-4 text-xl font-bold text-gray-900 dark:text-white">
-        {{ 'Add new group'|trans }}
+        {{ 'Edit Group'|trans }}
     </h2>
 
     <form action="{{ url('gruppi/edit') }}" method="POST">
@@ -11,7 +11,7 @@
         <input type="hidden" name="id_gruppo" value="{{ gruppo.getId() }}"/>
 
 
-        {% include 'gruppi/_form.html.twig' with { 'button_label': 'Save' ,'gruppo': gruppo} %}
+        {% include 'gruppi/_form.html.twig' with { 'button_label': 'Update' ,'gruppo': gruppo} %}
 
     </form>
 

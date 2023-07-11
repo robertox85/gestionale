@@ -9,12 +9,6 @@ use App\Models\Utente;
 
 class SearchController extends BaseController
 {
-
-    public function searchView()
-    {
-        echo $this->view->render('search.html.twig');
-    }
-
     public function search()
     {
         // check if the query is set, and if it is, call the searchUtenti() method or searchGruppi() method depending on the value of the entity parameter

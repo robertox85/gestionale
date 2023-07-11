@@ -196,7 +196,7 @@
         <div class="" >
             <!-- column for sending invite members -->
             <label for="gruppi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                {{ 'Add members'|trans }}
+                {{ 'Groups'|trans }}
             </label>
 
 
@@ -210,7 +210,7 @@
                            name="gruppi"
                            id="gruppi"
                            class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                           placeholder="{{ 'Name or Surname or Email'|trans }}" >
+                           placeholder="{{ 'Name or Surname or Email or Company name'|trans }}">
 
                     <div x-show="searchResults.length > 0" class="sm:col-span-2 mt-1">
                         <ul class="bg-white border border-gray-300 rounded-md shadow-md">
@@ -225,15 +225,9 @@
 
                     <div x-show="showNoResultsMessage"
                          class="mt-1 text-gray-500 dark:text-gray-400 text-sm italic font-bold sm:col-span-2">
-                        Nessun utente trovato.
+                        {{ 'No results found'|trans }}
                     </div>
 
-                    <div class="add">
-                        <a href="#"
-                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline float-right">
-                            {{ 'Crea nuovo utente'|trans }}
-                        </a>
-                    </div>
 
                 </div>
 

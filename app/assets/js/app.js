@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', function () {
     window.axios = require('axios');
 });
 
+$(document).ready(function() {
+    $('.js-example-basic-multiple').select2();
+});
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('searchResults', () => ({
         query: '',

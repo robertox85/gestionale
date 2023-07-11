@@ -2,6 +2,10 @@
 
 namespace App\Libraries;
 
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
+use RecursiveRegexIterator;
+use RegexIterator;
 use RobThree\Auth\TwoFactorAuth;
 use RobThree\Auth\TwoFactorAuthException;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;

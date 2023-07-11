@@ -273,6 +273,11 @@ $routes = function (RouteCollector $r) {
 
     // rotta pubblica
     $r->addRoute('GET', '/public', ['App\Controllers\HomeController', 'publicView']);
+
+
+
+    // set_language must have '?_locale=en' in the URL to set the language to 'en
+    $r->addRoute('GET', '/set_language', ['App\Controllers\LocaleController', 'setLanguage']);
 };
 
 return $routes;

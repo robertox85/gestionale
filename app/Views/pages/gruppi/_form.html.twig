@@ -23,7 +23,7 @@
         <div class="">
             <!-- column for sending invite members -->
             <label for="utenti" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                {{ 'Add members'|trans }}
+                {{ 'Add users'|trans }}
             </label>
 
 
@@ -52,23 +52,19 @@
 
                     <div x-show="showNoResultsMessage"
                          class="mt-1 text-gray-500 dark:text-gray-400 text-sm italic font-bold sm:col-span-2">
-                        Nessun utente trovato.
+                        {{ 'No results found'|trans }}
                     </div>
 
                     <div class="add">
                         <a href="#"
                            class="font-medium text-blue-600 dark:text-blue-500 hover:underline float-right">
-                            {{ 'Crea nuovo utente'|trans }}
+                            {{ 'Add'|trans }}
                         </a>
                     </div>
 
                 </div>
-
             </div>
 
-            <p class="my-2 text-sm text-gray-500 dark:text-gray-400">
-                {{ 'Enter the name, surname or email of the user you want to add to the group.'|trans }}
-            </p>
 
         </div>
         <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
@@ -83,7 +79,7 @@
                 </th>
 
                 <th scope="col" class="px-6 py-3">
-                    <span class="sr-only">Actions</span>
+                    <span class="sr-only">{{ 'Remove'|trans }}</span>
                 </th>
             </tr>
             </thead>
