@@ -230,131 +230,180 @@ try {
   (5, 'Cliente'),
   (6, 'Controparte');
 
--- Inserimento di dati nella tabella Utente
+-- Inserimento di dati nella tabella Utente , crea 20 utenti
 INSERT IGNORE INTO Utenti (id, email, password, id_ruolo) VALUES
   (1, 'mario@example.com', 'password123', 1), /* Amministratore  */ 
   (2, 'luca@example.com', 'password456', 3), /* Referente  */ 
-  (3, 'laura@example.com', 'password789', 5); /* Cliente */ 
+  (3, 'laura@example.com', 'password789', 5), /* Cliente  */
+  (4, 'matteo@example.com', 'password789', 6), /* Controparte  */
+  (5, 'anna@example.com', 'password456', 2),  /* Dominus  */
+  (6, 'franco@example.com', 'password789', 4), /* Segreteria  */
+  (7, 'chiara@example.com', 'password321', 1),
+  (8, 'davide@example.com', 'password654', 3),
+  (9, 'elena@example.com', 'password987', 2),
+  (10, 'giovanni@example.com', 'password741', 1),
+  (11, 'simone@example.com', 'password852', 3),
+  (12, 'francesca@example.com', 'password963', 4),
+  (13, 'giacomo@example.com', 'password123', 1),
+  (14, 'luigi@example.com', 'password456', 3),
+  (15, 'sofia@example.com', 'password789', 2),
+  (16, 'massimo@example.com', 'password321', 1),
+  (17, 'giulia@example.com', 'password654', 4),
+  (18, 'antonio@example.com', 'password987', 1),
+  (19, 'silvia@example.com', 'password741', 3),
+  (20, 'federico@example.com', 'password852', 2);
+
   
+
+
 -- Inserimento di dati nella tabella Anagrafiche
 INSERT IGNORE INTO Anagrafiche (id, nome, cognome, indirizzo, cap, citta, provincia, telefono, cellulare, pec, codice_fiscale, partita_iva, note, id_utente) VALUES
-  (1, 'Mario', 'Rossi', 'Via Roma 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', 'mario.rossi@pec.it', '','','', 1),
-  (2, 'Luca', 'Bianchi', 'Via Milano 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 2),
-  (3, 'Laura', 'Verdi', 'Via Napoli 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 3);
+    (1, 'Mario', 'Rossi', 'Via Roma 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', 'mario.rossi@pec.it', '','','', 1),
+    (2, 'Luca', 'Bianchi', 'Via Milano 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 2),
+    (3, 'Laura', 'Verdi', 'Via Napoli 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 3),
+    (4, 'Matteo', 'Gialli', 'Via Torino 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 4),
+    (5, 'Anna', 'Neri', 'Via Firenze 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 5),
+    (6, 'Franco', 'Russo', 'Via Venezia 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 6),
+    (7, 'Chiara', 'Gallo', 'Via Bologna 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 7),
+    (8, 'Davide', 'Conti', 'Via Genova 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 8),
+    (9, 'Elena', 'De Luca', 'Via Palermo 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 9),
+    (10, 'Giovanni', 'Mancini', 'Via Salerno 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 10),
+    (11, 'Simone', 'Costa', 'Via Catania 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 11),
+    (12, 'Francesca', 'Giordano', 'Via Messina 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 12),
+    (13, 'Giacomo', 'Martini', 'Via Siracusa 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 13),
+    (14, 'Luigi', 'Lombardi', 'Via Agrigento 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 14),
+    (15, 'Sofia', 'Serra', 'Via Caltanissetta 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 15),
+    (16, 'Massimo', 'Rizzo', 'Via Enna 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 16),
+    (17, 'Giulia', 'Greco', 'Via Trapani 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 17),
+    (18, 'Antonio', 'Fontana', 'Via Agrigento 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 18),
+    (19, 'Silvia', 'Santoro', 'Via Caltanissetta 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 19),
+    (20, 'Federico', 'Marino', 'Via Enna 1', '00100', 'Roma', 'RM', '06 12345678', '333 1234567', '','','','', 20);
+    
+    
 
 -- Inserimento di dati nella tabella Permessi
+-- Visualizza tutte le pratiche, modifica tutte le pratiche, elimina tutte le pratiche, crea nuova pratica
+-- Visualizza le proprie pratiche, modifica le proprie pratiche, elimina le proprie pratiche, crea nuova pratica
+-- Visualizza le pratiche del gruppo, modifica le pratiche del gruppo, elimina le pratiche del gruppo, crea nuova pratiche
+
 INSERT IGNORE INTO Permessi (id, nome, descrizione) VALUES
-  (1, 'visualizza_pratiche', 'Visualizza le pratiche'),
-  (2, 'modifica_pratiche', 'Modifica le pratiche'),
-  (3, 'elimina_pratiche', 'Elimina le pratiche'),
-  (4, 'crea_pratica', 'Crea nuova pratica'),
-    (5, 'visualizza_scadenze', 'Visualizza le scadenze'),
-    (6, 'modifica_scadenze', 'Modifica le scadenze'),
-    (7, 'elimina_scadenze', 'Elimina le scadenze'),
-    (8, 'crea_scadenza', 'Crea nuova scadenza'),
-    (9, 'visualizza_udienze', 'Visualizza le udienze'),
-    (10, 'modifica_udienze', 'Modifica le udienze'),
-    (11, 'elimina_udienze', 'Elimina le udienze'),
-    (12, 'crea_udienza', 'Crea nuova udienza'),
-    (13, 'visualizza_note', 'Visualizza le note'),
-    (14, 'modifica_note', 'Modifica le note'),
-    (15, 'elimina_note', 'Elimina le note'),
-    (16, 'crea_nota', 'Crea nuova nota'),
-    (17, 'visualizza_controparti', 'Visualizza le controparti'),
-    (18, 'modifica_controparti', 'Modifica le controparti'),
-    (19, 'elimina_controparti', 'Elimina le controparti'),
-    (20, 'crea_controparte', 'Crea nuova controparte'),
-    (21, 'visualizza_gruppi', 'Visualizza i gruppi'),
-    (22, 'modifica_gruppi', 'Modifica i gruppi'),
-    (23, 'elimina_gruppi', 'Elimina i gruppi'),
-    (24, 'crea_gruppo', 'Crea nuovo gruppo'),
-    (25, 'visualizza_sottogruppi', 'Visualizza i sottogruppi'),
-    (26, 'modifica_sottogruppi', 'Modifica i sottogruppi'),
-    (27, 'elimina_sottogruppi', 'Elimina i sottogruppi'),
-    (28, 'crea_sottogruppo', 'Crea nuovo sottogruppo'),
-    (29, 'visualizza_utenti', 'Visualizza gli utenti'),
-    (30, 'modifica_utenti', 'Modifica gli utenti'),
-    (31, 'elimina_utenti', 'Elimina gli utenti'),
-    (32, 'crea_utente', 'Crea nuovo utente'),
-    (33, 'visualizza_ruoli', 'Visualizza i ruoli'),
-    (34, 'modifica_ruoli', 'Modifica i ruoli'),
-    (35, 'elimina_ruoli', 'Elimina i ruoli'),
-    (36, 'crea_ruolo', 'Crea nuovo ruolo'),
-    (37, 'visualizza_permessi', 'Visualizza i permessi'),
-    (38, 'modifica_permessi', 'Modifica i permessi'),
-    (39, 'elimina_permessi', 'Elimina i permessi'),
-    (40, 'crea_permesso', 'Crea nuovo permesso');
-
--- Inserimento di dati nella tabella Ruoli_Permessi (Amministratore) e Descrizione permessi
-INSERT IGNORE INTO Ruoli_Permessi (id, ruolo_id, permesso_id) VALUES
-  (1, 1, 1), /* Amministratore - visualizza_pratiche  */ 
-  (2, 1, 2), /* Amministratore - modifica_pratiche  */ 
-  (3, 1, 3), /* Amministratore - elimina_pratiche  */ 
-  (4, 1, 4), /* Amministratore - crea_pratica  */ 
-  (5, 1, 5), /* Amministratore - visualizza_scadenze  */ 
-  (6, 1, 6), /* Amministratore - modifica_scadenze  */ 
-  (7, 1, 7), /* Amministratore - elimina_scadenze  */ 
-  (8, 1, 8), /* Amministratore - crea_scadenza  */ 
-  (9, 1, 9), /* Amministratore - visualizza_udienze  */ 
-  (10, 1, 10), /* Amministratore - modifica_udienze  */ 
-  (11, 1, 11), /* Amministratore - elimina_udienze  */ 
-  (12, 1, 12), /* Amministratore - crea_udienza  */ 
-  (13, 1, 13), /* Amministratore - visualizza_note  */ 
-  (14, 1, 14), /* Amministratore - modifica_note  */ 
-  (15, 1, 15), /* Amministratore - elimina_note  */ 
-  (16, 1, 16), /* Amministratore - crea_nota  */ 
-  (17, 1, 17), /* Amministratore - visualizza_controparti  */ 
-  (18, 1, 18), /* Amministratore - modifica_controparti  */ 
-  (19, 1, 19), /* Amministratore - elimina_controparti  */ 
-  (20, 1, 20), /* Amministratore - crea_controparte  */ 
-  (21, 1, 21), /* Amministratore - visualizza_gruppi  */ 
-  (22, 1, 22), /* Amministratore - modifica_gruppi  */ 
-  (23, 1, 23), /* Amministratore - elimina_gruppi  */ 
-  (24, 1, 24), /* Amministratore - crea_gruppo  */ 
-  (25, 1, 25), /* Amministratore - visualizza_sottogruppi  */ 
-  (26, 1, 26), /* Amministratore - modifica_sottogruppi  */ 
-  (27, 1, 27), /* Amministratore - elimina_sottogruppi  */ 
-  (28, 1, 28), /* Amministratore - crea_sottogruppo  */ 
-  (29, 1, 29), /* Amministratore - visualizza_utenti  */ 
-  (30, 1, 30), /* Amministratore - modifica_utenti  */ 
-  (31, 1, 31), /* Amministratore - elimina_utenti  */ 
-  (32, 1, 32), /* Amministratore - crea_utente  */ 
-  (33, 1, 33), /* Amministratore - visualizza_ruoli  */ 
-  (34, 1, 34), /* Amministratore - modifica_ruoli  */ 
-  (35, 1, 35), /* Amministratore - elimina_ruoli  */ 
-  (36, 1, 36), /* Amministratore - crea_ruolo  */ 
-  (37, 1, 37), /* Amministratore - visualizza_permessi  */ 
-  (38, 1, 38), /* Amministratore - modifica_permessi  */ 
-  (39, 1, 39), /* Amministratore - elimina_permessi  */ 
-  (40, 1, 40); /* Amministratore - crea_permesso  */
-
--- Inserimento di dati nella tabella Ruoli_Permessi (Avvocato) e Descrizione permessi
-INSERT IGNORE  INTO Ruoli_Permessi (id, ruolo_id, permesso_id) VALUES
-    (41, 2, 1), /* Avvocato - visualizza_pratiche  */ 
-    (42, 2, 2), /* Avvocato - modifica_pratiche  */ 
-    (43, 2, 3), /* Avvocato - elimina_pratiche  */ 
-    (44, 2, 4); /* Avvocato - crea_pratica  */ 
+    (1, 'visualizza_pratiche', 'Visualizza tutte le pratiche'),
+    (5, 'visualizza_pratiche_gruppo', 'Visualizza le pratiche del gruppo'),
+    (41, 'visualizza_pratiche_cliente', 'Visualizza le proprie pratiche');
+ 
 ");
 
 
     $pdo->exec("
 
 -- Inserimento di un gruppo
-INSERT IGNORE INTO Gruppi (id, nome) VALUES (1, 'Gruppo A');
+INSERT IGNORE INTO Gruppi (id, nome) VALUES 
+(1, 'Gruppo A'),
+(2, 'Gruppo B'),
+(3, 'Gruppo C'),
+(4, 'Gruppo D'),
+(5, 'Gruppo E'),
+(6, 'Gruppo F'),
+(7, 'Gruppo G'),
+(8, 'Gruppo H'),
+(9, 'Gruppo I'),
+(10, 'Gruppo L'),
+(11, 'Gruppo M'),
+(12, 'Gruppo N'),
+(13, 'Gruppo O'),
+(14, 'Gruppo P'),
+(15, 'Gruppo Q'),
+(16, 'Gruppo R'),
+(17, 'Gruppo S'),
+(18, 'Gruppo T'),
+(19, 'Gruppo U'),
+(20, 'Gruppo V');
+-- 
 
 
 
 -- Inserimento di una pratica legata al sottogruppo e alla controparte
-INSERT IGNORE INTO Pratiche (id, nr_pratica, nome, tipologia, stato, avvocato, referente, competenza, ruolo_generale, giudice, id_gruppo) VALUES (1, 'P001', 'Pratica 1', 'Civile', 'Aperta', 'Avvocato 1', 'Referente 1', 'Competenza 1', 'Ruolo Generale 1', 'Giudice 1', 1);
+INSERT IGNORE INTO Pratiche (id, nr_pratica, nome, tipologia, stato, avvocato, referente, competenza, ruolo_generale, giudice, id_gruppo) VALUES 
+(1, 'P001', 'Pratica 1', 'Civile', 'Aperta', 'Avvocato 1', 'Referente 1', 'Competenza 1', 'Ruolo Generale 1', 'Giudice 1', 1),
+(2, 'P002', 'Pratica 2', 'Penale', 'Aperta', 'Avvocato 2', 'Referente 2', 'Competenza 2', 'Ruolo Generale 2', 'Giudice 2', 2),
+(3, 'P003', 'Pratica 3', 'Civile', 'Aperta', 'Avvocato 3', 'Referente 3', 'Competenza 3', 'Ruolo Generale 3', 'Giudice 3', 3),
+(4, 'P004', 'Pratica 4', 'Penale', 'Aperta', 'Avvocato 4', 'Referente 4', 'Competenza 4', 'Ruolo Generale 4', 'Giudice 4', 4),
+(5, 'P005', 'Pratica 5', 'Civile', 'Aperta', 'Avvocato 5', 'Referente 5', 'Competenza 5', 'Ruolo Generale 5', 'Giudice 5', 5),
+(6, 'P006', 'Pratica 6', 'Penale', 'Aperta', 'Avvocato 6', 'Referente 6', 'Competenza 6', 'Ruolo Generale 6', 'Giudice 6', 6),
+(7, 'P007', 'Pratica 7', 'Civile', 'Aperta', 'Avvocato 7', 'Referente 7', 'Competenza 7', 'Ruolo Generale 7', 'Giudice 7', 7),
+(8, 'P008', 'Pratica 8', 'Penale', 'Aperta', 'Avvocato 8', 'Referente 8', 'Competenza 8', 'Ruolo Generale 8', 'Giudice 8', 8),
+(9, 'P009', 'Pratica 9', 'Civile', 'Aperta', 'Avvocato 9', 'Referente 9', 'Competenza 9', 'Ruolo Generale 9', 'Giudice 9', 9),
+(10, 'P010', 'Pratica 10', 'Penale', 'Aperta', 'Avvocato 10', 'Referente 10', 'Competenza 10', 'Ruolo Generale 10', 'Giudice 10', 10),
+(11, 'P011', 'Pratica 11', 'Civile', 'Aperta', 'Avvocato 11', 'Referente 11', 'Competenza 11', 'Ruolo Generale 11', 'Giudice 11', 11),
+(12, 'P012', 'Pratica 12', 'Penale', 'Aperta', 'Avvocato 12', 'Referente 12', 'Competenza 12', 'Ruolo Generale 12', 'Giudice 12', 12),
+(13, 'P013', 'Pratica 13', 'Civile', 'Aperta', 'Avvocato 13', 'Referente 13', 'Competenza 13', 'Ruolo Generale 13', 'Giudice 13', 13),
+(14, 'P014', 'Pratica 14', 'Penale', 'Aperta', 'Avvocato 14', 'Referente 14', 'Competenza 14', 'Ruolo Generale 14', 'Giudice 14', 14),
+(15, 'P015', 'Pratica 15', 'Civile', 'Aperta', 'Avvocato 15', 'Referente 15', 'Competenza 15', 'Ruolo Generale 15', 'Giudice 15', 15),
+(16, 'P016', 'Pratica 16', 'Penale', 'Aperta', 'Avvocato 16', 'Referente 16', 'Competenza 16', 'Ruolo Generale 16', 'Giudice 16', 16),
+(17, 'P017', 'Pratica 17', 'Civile', 'Aperta', 'Avvocato 17', 'Referente 17', 'Competenza 17', 'Ruolo Generale 17', 'Giudice 17', 17);
+
+
 
 -- Inserimento di una scadenza legata alla pratica
-INSERT IGNORE INTO Scadenze (id, data, motivo, id_pratica) VALUES (1, '2023-06-30', 'Scadenza 1', 1);
+INSERT IGNORE INTO Scadenze (id, data, motivo, id_pratica) VALUES 
+(1, '2023-06-30', 'Scadenza 1', 1),
+(2, '2023-07-31', 'Scadenza 2', 2),
+(3, '2023-08-31', 'Scadenza 3', 3),
+(4, '2023-09-30', 'Scadenza 4', 4),
+(5, '2023-10-31', 'Scadenza 5', 5),
+(6, '2023-11-30', 'Scadenza 6', 6),
+(7, '2023-12-31', 'Scadenza 7', 7),
+(8, '2024-01-31', 'Scadenza 8', 8),
+(9, '2024-02-28', 'Scadenza 9', 9),
+(10, '2024-03-31', 'Scadenza 10', 10),
+(11, '2024-04-30', 'Scadenza 11', 11),
+(12, '2024-05-31', 'Scadenza 12', 12),
+(13, '2024-06-30', 'Scadenza 13', 13),
+(14, '2024-07-31', 'Scadenza 14', 14),
+(15, '2024-08-31', 'Scadenza 15', 15),
+(16, '2024-09-30', 'Scadenza 16', 16),
+(17, '2024-10-31', 'Scadenza 17', 17);
+
 
 -- Inserimento di un'udienza legata alla pratica
-INSERT IGNORE INTO Udienze (id, descrizione, data, id_pratica) VALUES (1, 'Udienza 1', '2023-07-15', 1);
+INSERT IGNORE INTO Udienze (id, descrizione, data, id_pratica) VALUES 
+(1, 'Udienza 1', '2023-07-15', 1),
+(2, 'Udienza 2', '2023-08-15', 2),
+(3, 'Udienza 3', '2023-09-15', 3),
+(4, 'Udienza 4', '2023-10-15', 4),
+(5, 'Udienza 5', '2023-11-15', 5),
+(6, 'Udienza 6', '2023-12-15', 6),
+(7, 'Udienza 7', '2024-01-15', 7),
+(8, 'Udienza 8', '2024-02-15', 8),
+(9, 'Udienza 9', '2024-03-15', 9),
+(10, 'Udienza 10', '2024-04-15', 10),
+(11, 'Udienza 11', '2024-05-15', 11),
+(12, 'Udienza 12', '2024-06-15', 12),
+(13, 'Udienza 13', '2024-07-15', 13),
+(14, 'Udienza 14', '2024-08-15', 14),
+(15, 'Udienza 15', '2024-09-15', 15),
+(16, 'Udienza 16', '2024-10-15', 16),
+(17, 'Udienza 17', '2024-11-15', 17);
 
 -- Inserimento di una nota legata alla pratica
-INSERT IGNORE INTO Note (id, tipologia, descrizione, visibilita, id_pratica) VALUES (1, 'Nota 1', 'Testo nota 1', 'Privata', 1);
+INSERT IGNORE INTO Note 
+(id, tipologia, descrizione, visibilita, id_pratica) VALUES (1, 'Nota 1', 'Testo nota 1', 'Privata', 1),
+(2, 'Nota 2', 'Testo nota 2', 'Privata', 2),
+(3, 'Nota 3', 'Testo nota 3', 'Privata', 3),
+(4, 'Nota 4', 'Testo nota 4', 'Privata', 4),
+(5, 'Nota 5', 'Testo nota 5', 'Privata', 5),
+(6, 'Nota 6', 'Testo nota 6', 'Privata', 6),
+(7, 'Nota 7', 'Testo nota 7', 'Privata', 7),
+(8, 'Nota 8', 'Testo nota 8', 'Privata', 8),
+(9, 'Nota 9', 'Testo nota 9', 'Privata', 9),
+(10, 'Nota 10', 'Testo nota 10', 'Privata', 10),
+(11, 'Nota 11', 'Testo nota 11', 'Privata', 11),
+(12, 'Nota 12', 'Testo nota 12', 'Privata', 12),
+(13, 'Nota 13', 'Testo nota 13', 'Privata', 13),
+(14, 'Nota 14', 'Testo nota 14', 'Privata', 14),
+(15, 'Nota 15', 'Testo nota 15', 'Privata', 15),
+(16, 'Nota 16', 'Testo nota 16', 'Privata', 16),
+(17, 'Nota 17', 'Testo nota 17', 'Privata', 17);
 
 ");
 

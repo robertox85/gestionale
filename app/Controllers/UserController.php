@@ -12,9 +12,16 @@ use App\Models\Utente;
 
 class UserController extends BaseController
 {
-    public function utentiView()
-    {
-        $utenti = Utente::getAll();
+    private function getGruppi(){
+        $gruppi = Gruppo::getAll();
+        $gruppi = array_map(function ($gruppo) {
+            return new Gruppo($gruppo->id);
+        }, $gruppi);
+        return $gruppi;
+    }
+
+    private function getUtenti($args = []) {
+        $utenti = Utente::getAll($args);
         $utenti = array_map(function ($utente) {
             $utente = new Utente($utente->id);
             $ruolo = $utente->getRuolo();
@@ -22,25 +29,35 @@ class UserController extends BaseController
             $utente->setRuolo(strtolower($ruolo));
             return $utente;
         }, $utenti);
-        $totalItems = count($utenti);
-        $totalPages = ceil($totalItems / 10);
-        $currentPage = 1;
+        return $utenti;
+    }
+    public function utentiView()
+    {
+        $args = $this->createViewArgs();
+        $utenti = $this->getUtenti($args);
+        $totalItems = Utente::getAll();
+        $totalItems = count($totalItems);
+        $totalPages = ceil($totalItems / $args['limit']);
+
         echo $this->view->render('utenti.html.twig', [
             'utenti' => $utenti,
-            'totalItems' => $totalItems,
+            'entity' => 'utenti',
             'totalPages' => $totalPages,
-            'currentPage' => $currentPage
+            'totalItems' => $totalItems,
+            'itemsPerPage' => $args['limit'],
+            'currentPage' => $args['currentPage'],
         ]);
     }
 
     public function utenteView($id)
     {
         $utente = new Utente($id);
+
         //$utente = $utente->toArray();
         echo $this->view->render('editUtente.html.twig', [
             'utente' => $utente,
             'ruoli' => Ruolo::getAll(),
-            'gruppi' => Gruppo::getAll(),
+            'gruppi' => $this->getGruppi()
         ]);
     }
 
@@ -117,6 +134,18 @@ class UserController extends BaseController
         Controparte::removeRecordFromContropartiByUtenteId($id);
         Gruppo::removeRecordFromUtentiGruppiByUtenteId($id);
         $utente->delete();
+
+        // if is controparti or assistiti view redirect to controparti or assistiti
+        if (strpos($_SERVER['HTTP_REFERER'], 'controparti') !== false) {
+            header('Location: /controparti');
+            return;
+        }
+
+        if (strpos($_SERVER['HTTP_REFERER'], 'assistiti') !== false) {
+            header('Location: /assistiti');
+            return;
+        }
+
         header('Location: /utenti');
     }
 
@@ -124,7 +153,7 @@ class UserController extends BaseController
     {
         echo $this->view->render('creaUtente.html.twig', [
             'ruoli' => Ruolo::getAll(),
-            'gruppi' => Gruppo::getAll(),
+            'gruppi' => $this->getGruppi(),
         ]);
     }
 
@@ -201,6 +230,7 @@ class UserController extends BaseController
     // contropartiView
     public function contropartiView()
     {
+        $args = $this->createViewArgs();
         $utenti = Utente::getControparti();
         $utenti = array_map(function ($utente) {
             $utente = new Utente($utente->id);
@@ -210,18 +240,19 @@ class UserController extends BaseController
             return $utente;
         }, $utenti);
         $totalItems = count($utenti);
-        $totalPages = ceil($totalItems / 10);
-        $currentPage = 1;
+        $totalPages = ceil($totalItems / $args['limit']);
         echo $this->view->render('utenti.html.twig', [
             'utenti' => $utenti,
             'totalItems' => $totalItems,
             'totalPages' => $totalPages,
-            'currentPage' => $currentPage
+            'currentPage' => $args['currentPage']
+
         ]);
     }
 
     public function assistitiView()
     {
+        $args = $this->createViewArgs();
         $utenti = Utente::getAssistiti();
         $utenti = array_map(function ($utente) {
             $utente = new Utente($utente->id);
@@ -231,14 +262,15 @@ class UserController extends BaseController
             return $utente;
         }, $utenti);
         $totalItems = count($utenti);
-        $totalPages = ceil($totalItems / 10);
-        $currentPage = 1;
+        $totalPages = ceil($totalItems / $args['limit']);
         echo $this->view->render('utenti.html.twig', [
             'utenti' => $utenti,
             'totalItems' => $totalItems,
             'totalPages' => $totalPages,
-            'currentPage' => $currentPage
+            'currentPage' => $args['currentPage']
+
         ]);
+
     }
 
 

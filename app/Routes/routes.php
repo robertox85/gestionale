@@ -12,10 +12,15 @@ use App\Middleware\MiddlewareStack;
 
 $routes = function (RouteCollector $r) {
 
-
     $middlewareStack = new MiddlewareStack();
 
-    $middlewareStack->add(new AuthenticationMiddleware(['amministratore','operatore']));
+    $middlewareStack->add(new AuthenticationMiddleware(
+            [
+                'amministratore',
+                'dominus'
+            ]
+        )
+    );
     $middlewareStack->add(new AuthorizationMiddleware('visualizza_pratiche'));
 
     // Rotte pubbliche
@@ -33,8 +38,6 @@ $routes = function (RouteCollector $r) {
     // Registrazione
     $r->addRoute('GET', '/sign-up', ['App\Controllers\AuthController', 'signUpView']);
     $r->addRoute('POST', '/sign-up', ['App\Controllers\AuthController', 'signUpUser']);
-
-
 
     // Usa l'istanza di AuthenticationMiddleware per le tue rotte che richiedono autenticazione
     $r->addRoute('GET', '/', [
@@ -67,20 +70,18 @@ $routes = function (RouteCollector $r) {
     // pratiche/crea
     $r->addRoute('GET', '/pratiche/crea', [
         'middleware' => new AuthenticationMiddleware(
-            ['amministratore','dominus']
+            ['amministratore', 'dominus']
         ),
-
         'handler' => ['App\Controllers\PraticheController', 'praticaCreaView']
     ]);
 
     // pratiche/crea POST
     $r->addRoute('POST', '/pratiche/crea', [
         'middleware' => new AuthenticationMiddleware(
-            ['amministratore','dominus']
+            ['amministratore', 'dominus']
         ),
         'handler' => ['App\Controllers\PraticheController', 'createPratica']
     ]);
-
 
     // Assistiti
     $r->addRoute('GET', '/assistiti', [
@@ -160,7 +161,6 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\UserController', 'createUtente']
     ]);
 
-
     // Archivio
     $r->addRoute('GET', '/archivio', [
         'middleware' => new AuthenticationMiddleware(),
@@ -179,34 +179,27 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\ProgramController', 'programmaView']
     ]);
 
-
-
     // gruppi
-    $middlewareStack = new MiddlewareStack();
-    $middlewareStack->add(new AuthenticationMiddleware(['amministratore','dominus']));
-    $middlewareStack->add(new AuthorizationMiddleware('visualizza_gruppi'));
+
 
     $r->addRoute('GET', '/gruppi', [
-        'middleware' => $middlewareStack,
+        'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\GruppiController', 'gruppiView']
     ]);
 
-    $middlewareStack = new MiddlewareStack();
-    $middlewareStack->add(new AuthenticationMiddleware(['amministratore','dominus']));
-    $middlewareStack->add(new AuthorizationMiddleware(['crea_gruppo','visualizza_gruppi','modifica_gruppo','elimina_gruppo']));
 
     $r->addRoute('GET', '/gruppi/crea', [
-        'middleware' => $middlewareStack,
+        'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\GruppiController', 'creaGruppoView']
     ]);
 
     $r->addRoute('POST', '/gruppi/crea', [
-        'middleware' => $middlewareStack,
+        'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\GruppiController', 'creaGruppo']
     ]);
 
     $r->addRoute('GET', '/gruppi/delete/{id:\d+}', [
-        'middleware' => $middlewareStack,
+        'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\GruppiController', 'deleteGruppo']
     ]);
 
@@ -217,33 +210,15 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\GruppiController', 'editGruppoView']
     ]);
 
+    $r->addRoute('GET', '/gruppi/view/{id:\d+}', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\GruppiController', 'viewGruppo']
+    ]);
+
     $r->addRoute('POST', '/gruppi/edit', [
         'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\GruppiController', 'editGruppo']
     ]);
-
-    $middlewareStack = new MiddlewareStack();
-    $middlewareStack->add(new AuthenticationMiddleware(['amministratore','dominus']));
-    $middlewareStack->add(new AuthorizationMiddleware('visualizza_sottogruppi'));
-
-    // sotto gruppi
-    $r->addRoute('GET', '/sottogruppi', [
-        'middleware' => $middlewareStack,
-        'handler' => ['App\Controllers\SottoGruppoController', 'sottogruppiView']
-    ]);
-
-    $r->addRoute('GET', '/sottogruppi/{id:\d+}', [
-        'middleware' => $middlewareStack,
-        'handler' => ['App\Controllers\SottoGruppoController', 'sottogruppiView']
-    ]);
-
-    // sotto gruppo
-    $r->addRoute('GET', '/sottogruppo/{id:\d+}', [
-        'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\GruppiController', 'sottogruppoView']
-    ]);
-
-
 
     // search ajax routes with parameters
     $r->addRoute('GET', '/search', [
@@ -255,7 +230,6 @@ $routes = function (RouteCollector $r) {
         'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\SearchController', 'create']
     ]);
-
 
 
     // Impostazioni
@@ -270,10 +244,21 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\SettingsController', 'aggiornaRuolo']
     ]);
 
+    // creaPermesso
+    $r->addRoute('POST', '/impostazioni/creaPermesso', [
+        'middleware' => new AuthenticationMiddleware('amministratore'),
+        'handler' => ['App\Controllers\SettingsController', 'creaPermesso']
+    ]);
+
+    // impostazioni/eliminaPermesso
+    $r->addRoute('GET', '/impostazioni/eliminaPermesso/{id:\d+}', [
+        'middleware' => new AuthenticationMiddleware('amministratore'),
+        'handler' => ['App\Controllers\SettingsController', 'eliminaPermesso']
+    ]);
+
 
     // rotta pubblica
     $r->addRoute('GET', '/public', ['App\Controllers\HomeController', 'publicView']);
-
 
 
     // set_language must have '?_locale=en' in the URL to set the language to 'en

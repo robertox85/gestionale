@@ -8,6 +8,7 @@ use App\Models\Anagrafica;
 use App\Models\Gruppo;
 use App\Models\Nota;
 use App\Models\Pratica;
+use App\Models\Ruolo;
 use App\Models\Scadenza;
 use App\Models\Udienza;
 use App\Models\Utente;
@@ -17,35 +18,25 @@ class PraticheController extends BaseController
 
     public function praticheView()
     {
-        $pratiche = Pratica::getAll();
+        $args = $this->createViewArgs();
+        $pratiche = Pratica::getAll($args);
         $pratiche = array_map(function ($pratica) {
             return new Pratica($pratica->id);
         }, $pratiche);
 
-        // if length of pratiche is 0, set default values
-        if (count($pratiche) == 0) {
-            $itemsPerPage = 10;
-            $totalItems = 0;
-            $totalPages = 0;
-            $currentPage = 1;
-        } else {
-            $itemsPerPage = 10;
-            $totalItems = count($pratiche);
-            $totalPages = ceil($totalItems / $itemsPerPage);
-            $currentPage = 1;
-            $offset = ($currentPage - 1) * $itemsPerPage;
-            $pratiche = array_slice($pratiche, $offset, $itemsPerPage);
-        }
-
+        $totalPratiche = Pratica::getAll();
+        $totalPratiche = count($totalPratiche);
+        $totalPages = ceil($totalPratiche / $args['limit']);
 
         echo $this->view->render(
             'pratiche.html.twig',
             [
-                'totalItems' => $totalItems,
-                'itemsPerPage' => $itemsPerPage,
-                'currentPage' => $currentPage,
-                'totalPages' => $totalPages,
                 'pratiche' => $pratiche,
+                'entity' => 'pratiche',
+                'totalPages' => $totalPages,
+                'totalItems' => $totalPratiche,
+                'itemsPerPage' => $args['limit'],
+                'currentPage' => $args['currentPage'],
             ]
         );
         exit();
@@ -53,13 +44,23 @@ class PraticheController extends BaseController
 
     public function editPraticaView(int $id_pratica)
     {
-        $pratica = new Pratica($id_pratica);
+        $assistiti = Utente::getAssistiti();
+        $assistiti = array_map(function ($assistito) {
+            return new Utente($assistito->id);
+        }, $assistiti);
+        $controparti = Utente::getControparti();
+        $controparti = array_map(function ($controparte) {
+            return new Utente($controparte->id);
+        }, $controparti);
         echo $this->view->render(
             'editPratica.html.twig',
             [
                 'pratica' => new Pratica($id_pratica),
                 'id_pratica' => $id_pratica,
-                'gruppi' => Gruppo::getAll()
+                'gruppi' => Gruppo::getAll(),
+                'assistiti' => $assistiti,
+                'controparti' => $controparti,
+
             ]
         );
     }

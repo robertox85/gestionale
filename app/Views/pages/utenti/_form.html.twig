@@ -59,8 +59,9 @@
 
         <select name="tipo_utente" id="tipo_utente"
                 x-model="tipo_utente"
-                @change="tipo_utente = $event.target.value"
+                @change="tipo_utente = $event.target.value; if(tipo_utente == 'Persona') { document.getElementById('nome').value = ''; document.getElementById('cognome').value = ''; document.getElementById('denominazione').value = ''; } else { document.getElementById('nome').value = ''; document.getElementById('cognome').value = ''; document.getElementById('denominazione').value = ''; }"
                 x-init="tipo_utente = {% if utente is not null %}'{{ utente.getAnagrafica().getTipoUtente() }}'{% else %}'Persona'{% endif %}"
+
                 class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
             <option value="Persona" {% if utente.getAnagrafica().getTipoUtente() == 'Persona' %}selected{% endif %}>
                 {{ 'Person'|trans }}
@@ -176,6 +177,24 @@
                class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none" >
     </div>
 
+    <div class="mb-4">
+        <label for="gruppi" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+            {{ 'Groups'|trans }}
+        </label>
+        <select class="select2" name="gruppi[]" multiple="multiple">
+            {% for gruppo in gruppi %}
+                <option
+                        {% if gruppo.getId() in utente.getGruppi() | json_encode() %}
+                            selected
+                        {% endif %}
+
+                        value="{{ gruppo.getId() }}">
+                    {{ gruppo.getNome() }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
     <div class="mb-4 sm:col-span-2">
         <label for="note" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
             {{ 'Note'|trans }}
@@ -188,93 +207,10 @@
     <!-- Gruppo di appartenenza -->
 
 
-    <div x-data="searchResults"
-            data-idGruppo="[]"
-            data-selectedItems="[]"
-            data-entity="gruppi"
-            class="relative overflow-x-auto shadow-md sm:rounded-lg sm:col-span-2 p-2.5 bg-white" >
-        <div class="" >
-            <!-- column for sending invite members -->
-            <label for="gruppi" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                {{ 'Groups'|trans }}
-            </label>
 
 
-            <!-- input for email address with icon -->
-            <div class="relative">
-                <div class="grid gap-4 sm:grid-cols-2 sm:gap-6 items-center">
-                    <input type="text"
-                           x-model="query"
-                           @input="performSearch"
-                           @click="performSearch"
-                           name="gruppi"
-                           id="gruppi"
-                           class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
-                           placeholder="{{ 'Name or Surname or Email or Company name'|trans }}">
-
-                    <div x-show="searchResults.length > 0" class="sm:col-span-2 mt-1">
-                        <ul class="bg-white border border-gray-300 rounded-md shadow-md">
-                            <template x-for="result in searchResults" :key="result.id">
-                                <li @click="selectItem(result)"
-                                    x-text="result.nome"
-                                    class="py-2 px-4 cursor-pointer hover:bg-gray-100">
-                                </li>
-                            </template>
-                        </ul>
-                    </div>
-
-                    <div x-show="showNoResultsMessage"
-                         class="mt-1 text-gray-500 dark:text-gray-400 text-sm italic font-bold sm:col-span-2">
-                        {{ 'No results found'|trans }}
-                    </div>
 
 
-                </div>
-
-            </div>
-
-            <p class="my-2 text-sm text-gray-500 dark:text-gray-400">
-                {{ 'Enter the name, surname or email of the user you want to add to the group.'|trans }}
-            </p>
-
-        </div>
-        <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-
-            <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-            <tr>
-                <th scope="col" class="px-6 py-3">
-                    {{ 'Name'|trans }}
-                </th>
-
-
-                <th scope="col" class="px-6 py-3">
-                    {{ 'Actions'|trans }}
-                </th>
-            </tr>
-            </thead>
-            <tbody>
-            <template x-for="gruppo in selectedItems" :key="gruppo.id">
-                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700">
-                    <!-- hidden input for sending invite members -->
-                    <input type="hidden" name="gruppi[]" :value="gruppo.id">
-                    <td scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                        x-text="gruppo.nome"></td>
-
-                    <td class="px-6 py-4 text-right">
-                        <a href="#"
-                           @click.prevent="removeItem(gruppo)"
-                           class="font-medium text-blue-600 dark:text-blue-500 hover:underline">
-                            {{ 'Remove'|trans }}
-                        </a>
-                    </td>
-                </tr>
-            </template>
-
-
-            </tbody>
-        </table>
-    </div>
 
 
 

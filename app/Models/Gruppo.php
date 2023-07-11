@@ -123,4 +123,20 @@ class Gruppo extends BaseModel
         return $result;
     }
 
+    public function getPratiche()
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT * FROM Pratiche WHERE id_gruppo = :id_gruppo";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id_gruppo' => $this->getId()];
+        $result = $db->query($options);
+        // return only id
+        $result = array_map(function($result){
+            return $result->id;
+        }, $result);
+
+        return $result;
+    }
+
 }

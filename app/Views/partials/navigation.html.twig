@@ -59,18 +59,18 @@
                 </span>
                 <img
                         class="w-8 h-8 rounded-full"
-                        src="https://ui-avatars.com/api/?name={{ session.utente.nome ~ ' ' ~ session.utente.cognome }}&color=7F9CF5&background=EBF4FF"
-                        alt="{{ session.utente.nome ~ ' ' ~ session.utente.cognome }}"
+                        src="https://ui-avatars.com/api/?name={{ session.utente.nome ~ ' ' ~ session.utente.cognome ~ ' ' ~ session.utente.denominazione }}&color=7F9CF5&background=EBF4FF"
+                        alt="{{ session.utente.nome ~ ' ' ~ session.utente.cognome ~ ' ' ~ session.utente.denominazione }}"
                 />
             </button>
 
-            <div id=" dropdown" class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y
+            <div id="dropdown" class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y
                 divide-gray-100 shadow rounded-xl">
                 <div class="py-3 px-4">
                     <a href="{{ url('utenti/edit/'~ session.utente.id) }}">
               <span class="block text-sm font-semibold text-gray-900 dark:text-white">
 
-                      {{ session.utente.nome ~ ' ' ~ session.utente.cognome }}
+                      {{ session.utente.nome ~ ' ' ~ session.utente.cognome  ~ '' ~ session.utente.denominazione }}
 
               </span>
                         <span class="block text-sm text-gray-900 truncate dark:text-white">
@@ -80,6 +80,7 @@
                 </div>
 
                 <ul
+
                         class="py-1 text-gray-700 dark:text-gray-300"
                         aria-labelledby="dropdown"
                 >

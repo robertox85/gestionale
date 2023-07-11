@@ -10,7 +10,7 @@
     <form action="{{ url('gruppi/crea') }}" method="POST">
         <input type="hidden" name="csrf_token" value="{{ csrf_token('gruppi') }}"/>
 
-        {% include 'gruppi/_form.html.twig' with {'button_label': 'Create'} only %}
+        {% include 'gruppi/_form.html.twig' with {'button_label': 'Create', 'utenti': utenti} only %}
     </form>
 
 {% endblock %}

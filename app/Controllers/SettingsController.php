@@ -59,4 +59,49 @@ class SettingsController extends BaseController
             $errorHandler->handleException($e);
         }
     }
+
+    // creaPermesso
+    public function creaPermesso()
+    {
+        try {
+            $request_body = file_get_contents('php://input');
+            $data = json_decode($request_body, true);
+            $permesso = new Permesso();
+            $permesso->setNome($data['nome']);
+            $permesso->setDescrizione($data['descrizione']);
+            $permesso->save();
+            echo json_encode(
+                [
+                    'id' => $permesso->getId(),
+                    'nome' => $permesso->getNome(),
+                    'descrizione' => $permesso->getDescrizione()
+                ]
+            );
+            return;
+        } catch (\Exception $e) {
+            echo json_encode(
+                [
+                    'error' => true,
+                    'message' => $e->getMessage()
+                ]
+            );
+            return;
+        }
+    }
+
+    // eliminaPermesso
+    public function eliminaPermesso($id)
+    {
+        try {
+            $permesso = Permesso::getById($id);
+            $permesso->delete();
+
+            Helper::addSuccess('Permesso eliminato');
+            Helper::redirect('/impostazioni');
+
+        } catch (\Exception $e) {
+            Helper::addError($e->getMessage());
+            Helper::redirect('/impostazioni');
+        }
+    }
 }

@@ -311,7 +311,7 @@ class Pratica extends BaseModel
     {
         $db = Database::getInstance();
         // Make a JOIN with Utenti and Anagrafiche
-        $sql = "SELECT nome,cognome,denominazione,tipo_utente FROM Assistiti INNER JOIN Utenti ON Assistiti.id_utente = Utenti.id INNER JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id WHERE Assistiti.id_pratica = :id_pratica";
+        $sql = "SELECT Anagrafiche.id_utente, nome,cognome,denominazione,tipo_utente FROM Assistiti INNER JOIN Utenti ON Assistiti.id_utente = Utenti.id INNER JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id WHERE Assistiti.id_pratica = :id_pratica";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [':id_pratica' => $this->getId()];
@@ -352,7 +352,7 @@ class Pratica extends BaseModel
     {
         $db = Database::getInstance();
         // Make a JOIN with Utenti and Anagrafiche
-        $sql = "SELECT nome,cognome,denominazione,tipo_utente FROM Controparti INNER JOIN Utenti ON Controparti.id_utente = Utenti.id INNER JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id WHERE Controparti.id_pratica = :id_pratica";
+        $sql = "SELECT Anagrafiche.id_utente,nome,cognome,denominazione,tipo_utente FROM Controparti INNER JOIN Utenti ON Controparti.id_utente = Utenti.id INNER JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id WHERE Controparti.id_pratica = :id_pratica";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [':id_pratica' => $this->id];

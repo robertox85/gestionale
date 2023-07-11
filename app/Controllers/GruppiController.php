@@ -6,40 +6,68 @@ use App\Libraries\Helper;
 use App\Models\Gruppo;
 
 use App\Libraries\Database;
+use App\Models\Pratica;
+use App\Models\Utente;
 
 class GruppiController extends BaseController
 {
     public function gruppiView()
     {
-        $gruppi = Gruppo::getAll();
+        $args = $this->createViewArgs();
+
+        $gruppi = Gruppo::getAll($args);
         $gruppi = array_map(function ($gruppo) {
             $gruppo = new Gruppo($gruppo->id);
             return $gruppo;
         }, $gruppi);
-
+        $totalItems = Gruppo::getAll();
+        $totalItems = count($totalItems);
+        $totalPages = ceil($totalItems / $args['limit']);
 
 
         echo $this->view->render('gruppi.html.twig',
             [
                 'gruppi' => $gruppi,
+                'entity' => 'pratiche',
+                'totalPages' => $totalPages,
+                'totalItems' => $totalItems,
+                'itemsPerPage' => $args['limit'],
+                'currentPage' => $args['currentPage'],
             ]
         );
     }
 
     public function creaGruppoView()
     {
-        echo $this->view->render('creaGruppo.html.twig');
+        echo $this->view->render(
+            'creaGruppo.html.twig',
+            [
+                'utenti' => $this->getUtenti()
+            ]
+        );
     }
 
     // editGruppoView
     public function editGruppoView(int $id_gruppo)
     {
-        $gruppo = new Gruppo($id_gruppo);
         echo $this->view->render('editGruppo.html.twig',
             [
-                'gruppo' => $gruppo
+                'gruppo' => new Gruppo($id_gruppo),
+                'utenti' => $this->getUtenti(),
+                'pratiche' => Pratica::getAll()
             ]
         );
+    }
+
+    private function getUtenti() {
+        $utenti= Utente::getAll();
+        $utenti = array_filter($utenti, function ($utente) {
+            return $utente->id_ruolo != 6;
+        });
+        $utenti = array_map(function ($utente) {
+            return new Utente($utente->id);
+        }, $utenti);
+        return $utenti;
     }
 
     // creaGruppo POST
@@ -48,9 +76,16 @@ class GruppiController extends BaseController
         try {
             // Validazione dei dati
             $nomeGruppo = $_POST['nome_gruppo'];
+            $utenti = $_POST['utenti'];
             $gruppo = new Gruppo();
             $gruppo->setNome($nomeGruppo);
-            $gruppo->save();
+
+            $gruppoId = $gruppo->save();
+
+            foreach ($utenti as $id_utente) {
+                $gruppo = new Gruppo($gruppoId);
+                $gruppo->addUtente($id_utente);
+            }
 
             Helper::addSuccess('Gruppo creato con successo');
 
@@ -69,6 +104,7 @@ class GruppiController extends BaseController
         // Validazione dei dati
         $nomeGruppo = $_POST['nome_gruppo'];
         $utenti = $_POST['utenti'];
+        $pratiche = $_POST['pratiche'];
 
 
         // Creazione del gruppo
@@ -86,6 +122,15 @@ class GruppiController extends BaseController
             foreach ($utenti as $id_utente) {
                 $gruppo->addUtente($id_utente);
             }
+
+            $gruppo->removeGruppoFromPraticheByGruppoId();
+            foreach ($pratiche as $id_pratica) {
+                $pratica = new Pratica($id_pratica);
+                $pratica->setIdGruppo($id);
+                $pratica->update();
+            }
+
+
             $gruppo->update();
         } catch (\Exception $e) {
             echo $e->getMessage();
@@ -125,6 +170,27 @@ class GruppiController extends BaseController
         } catch (\Exception $e) {
             echo $e->getMessage();
         }
+    }
+
+
+    // viewGruppo
+    public function viewGruppo($id)
+    {
+        $gruppo = new Gruppo($id);
+        $utenti = $gruppo->getUtenti();
+        $utenti = array_map(function ($utente) {
+            return new Utente($utente->id);
+        }, $utenti);
+
+        $pratiche = $gruppo->getPratiche();
+
+        echo $this->view->render('viewGruppo.html.twig',
+            [
+                'gruppo' => $gruppo,
+                'utenti' => $utenti,
+                'pratiche' => $pratiche
+            ]
+        );
     }
 
 

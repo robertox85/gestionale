@@ -12,86 +12,217 @@
                 </button>
             </li>
 
+            <li class="mr-2" role="presentation">
+                <button class="inline-block p-4 border-b-2 rounded-t-lg" id="permessi-tab" data-tabs-target="#permessi"
+                        type="button" role="tab" aria-controls="permessi" aria-selected="false">
+                    {{ 'Permissions' |trans }}
+                </button>
+            </li>
+
 
         </ul>
     </div>
     <div id="myTabContent">
 
-        <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="ruoli" role="tabpanel"
-             aria-labelledby="profile-tab">
+    <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="ruoli" role="tabpanel"
+         aria-labelledby="profile-tab">
 
-            <!-- Assegna Permessi -->
-            <form method="get" action="{{ url('impostazioni') }}">
-                <div class="flex flex-wrap -mx-3 mb-6">
-                    <div class="w-full px-3">
-                        <label class="block mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase"
-                               for="grid-password">
-                            {{ 'Roles' |trans }}
-                        </label>
-                        <select onchange="this.form.submit()" name="ruolo"
-                                class="block w-full px-4 py-3 pr-8 leading-tight text-gray-700 bg-white border border-gray-200 rounded shadow appearance-none focus:outline-none focus:shadow-outline">
+        <!-- Assegna Permessi -->
+        <form method="get" action="{{ url('impostazioni') }}">
+            <div class="flex flex-wrap -mx-3 mb-6">
+                <div class="w-full px-3">
+                    <label class="block mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase"
+                           for="grid-password">
+                        {{ 'Roles' |trans }}
+                    </label>
+                    <select onchange="this.form.submit()" name="ruolo"
+                            class="block w-full px-4 py-3 pr-8 leading-tight text-gray-700 bg-white border border-gray-200 rounded shadow appearance-none focus:outline-none focus:shadow-outline">
 
-                            <option value="" selected disabled>Seleziona un ruolo</option>
-                            {% for ruolo in ruoli %}
-                                <option value="{{ ruolo.id }}" {% if ruoloSelezionato and ruoloSelezionato.id == ruolo.id %} selected {% endif %}>{{ ruolo.nome }}</option>
-                            {% endfor %}
-                        </select>
+                        <option value="" selected disabled>Seleziona un ruolo</option>
+                        {% for ruolo in ruoli %}
+                            <option value="{{ ruolo.id }}" {% if ruoloSelezionato and ruoloSelezionato.id == ruolo.id %} selected {% endif %}>{{ ruolo.nome }}</option>
+                        {% endfor %}
+                    </select>
 
 
-                    </div>
                 </div>
-            </form>
+            </div>
+        </form>
 
-            <form action="{{ url('impostazioni/aggiornaRuolo') }}" method="post">
+        <form action="{{ url('impostazioni/aggiornaRuolo') }}" method="post">
 
-                <input type="hidden" name="id_ruolo" value="{% if ruoloSelezionato %}{{ ruoloSelezionato.id }}{% endif %}">
-                <input type="hidden" name="csrf_token" value="{{ csrf_token('aggiornaRuolo') }}">
+            <input type="hidden" name="id_ruolo" value="{% if ruoloSelezionato %}{{ ruoloSelezionato.id }}{% endif %}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token('aggiornaRuolo') }}">
 
-                <div class="flex flex-wrap -mx-3 mb-6">
-                    <div class="w-full px-3">
-                        <label class="block mb-2 text-sm font-bold text-gray-700 uppercase" for="grid-password">
-                            {{ 'Permissions' |trans }}
-                        </label>
-                        <div class="flex flex-wrap -mx-2">
-                            {% for permesso in permessi %}
-                                <div class="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6 px-2 mb-3">
-                                    <label class="inline-flex items-center w-full cursor-pointer">
-                                        <input
-                                                {% if ruoloSelezionato %}
-                                                    {% for permission in ruoloSelezionato.permessi %}
-                                                        {{ permission.id }}
-                                                        {% if permission.id == permesso.id %}
-                                                            checked
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                {% endif %}
+            <div class="flex flex-wrap -mx-3 mb-6">
+                <div class="w-full px-3">
+                    <label class="block mb-2 text-sm font-bold text-gray-700 uppercase" for="grid-password">
+                        {{ 'Permissions' |trans }}
+                    </label>
+                    <div class="flex flex-wrap -mx-2">
+                        {% for permesso in permessi %}
+                            <div class="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/6 px-2 mb-3">
+                                <label class="inline-flex items-center w-full cursor-pointer">
+                                    <input
+                                            {% if ruoloSelezionato %}
+                                                {% for permission in ruoloSelezionato.permessi %}
+                                                    {{ permission.id }}
+                                                    {% if permission.id == permesso.id %}
+                                                        checked
+                                                    {% endif %}
+                                                {% endfor %}
+                                            {% endif %}
 
-                                                type="checkbox" class="form-checkbox text-blue-500" name="permessi[]"
-                                               value="{{ permesso.id }}">
-                                        <span class="ml-2 text-gray-800">
+                                            type="checkbox" class="form-checkbox text-blue-500" name="permessi[]"
+                                            value="{{ permesso.id }}">
+                                    <span class="ml-2 text-gray-800">
                                             {{ permesso.descrizione }}
                                         </span>
-                                    </label>
-                                </div>
-                            {% endfor %}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="flex flex-wrap -mx-3 mb-6">
+                <div class="w-full px-3">
+                    <button
+                            class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline"
+                            type="submit">
+                        {{ 'Update' |trans }}
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+
+    <div class="hidden p-4 rounded-lg bg-gray-50 dark:bg-gray-800" id="permessi" role="tabpanel"
+         aria-labelledby="profile-tab">
+
+        <!-- Assegna Permessi -->
+        <form method="get" action="{{ url('impostazioni') }}">
+            <div class="flex flex-wrap -mx-3 mb-6">
+                <div class="w-full px-3">
+                    <label
+                            class="
+                            flex items-center justify-between
+                            block mb-2 text-xs font-bold tracking-wide text-gray-700 uppercase"
+                            for="grid-password">
+                        {{ 'Permissions' |trans }}
+
+                        <!-- add permission -->
+                        <a href="#"
+                           id="add-permesso"
+                           class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline">
+                            {{ 'Add' |trans }}
+                        </a>
+
+                    </label>
+
+
+                    <!-- table for showing permissions -->
+
+
+                    <table id="table-permessi" class="table-auto">
+                        <thead>
+                        <tr>
+                            <th class="px-4 py-2">{{ 'ID' |trans }}</th>
+                            <th class="px-4 py-2">{{ 'Name' |trans }}</th>
+                            <th class="px-4 py-2">{{ 'Description' |trans }}</th>
+                            <th class="px-4 py-2">{{ 'Action' |trans }}</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for permesso in permessi %}
+                            <tr>
+                                <td class="border px-4 py-2">{{ permesso.id }}</td>
+                                <td class="border px-4 py-2">{{ permesso.nome }}</td>
+                                <td class="border px-4 py-2">{{ permesso.descrizione }}</td>
+                                <td class="border px-4 py-2 flex justify-center">
+                                    <a href="#"
+                                       class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline">
+                                        {{ 'Edit' |trans }}
+                                    </a>
+
+                                    <a href="{{ url('impostazioni/eliminaPermesso/' ~ permesso.id) }}"
+                                       onclick="return confirm('Sei sicuro di voler eliminare questo permesso?')"
+                                       class="px-4 py-2 font-bold text-white bg-red-500 rounded hover:bg-red-700 focus:outline-none focus:shadow-outline">
+                                        {{ 'Delete' |trans }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+
+                </div>
+            </div>
+        </form>
+
+
+    </div>
+
+    <div id="modalAddPermessi" tabindex="-1" aria-hidden="true"
+         class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
+        <div class="relative w-full max-w-2xl max-h-full">
+            <!-- Modal content -->
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <!-- Modal header -->
+                <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        {{ 'Add new user'|trans }}
+                    </h3>
+                    <button type="button"
+                            class="close-modal text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white ">
+                        <svg class="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none"
+                             viewBox="0 0 14 14">
+                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                  d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                        </svg>
+                        <span class="sr-only">Close modal</span>
+                    </button>
+                </div>
+                <!-- Modal body -->
+
+                <div class="p-6 space-y-6" x-data="{
+            nome: '',
+            descrizione: '',
+            }">
+                    <!-- nome, descrizione -->
+                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                        <div>
+                            <label class="text-gray-700 dark:text-gray-200" for="nome">
+                                {{ 'Name'|trans }}
+                            </label>
+                            <input id="nome" type="text" x-model="nome"
+                                   class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none focus:ring">
+                        </div>
+
+                        <div>
+                            <label class="text-gray-700 dark:text-gray-200" for="descrizione">
+                                {{ 'Description'|trans }}
+                            </label>
+                            <input id="descrizione" type="text" x-model="descrizione"
+                                   class="block w-full px-4 py-2 mt-2 text-gray-700 bg-white border border-gray-300 rounded-md dark:bg-gray-800 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none focus:ring">
                         </div>
                     </div>
                 </div>
 
-
-                <div class="flex flex-wrap -mx-3 mb-6">
-                    <div class="w-full px-3">
-                        <button
-                                class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline"
-                                type="submit">
-                            {{ 'Update' |trans }}
-                        </button>
-                    </div>
+                <!-- Modal footer -->
+                <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
+                    <button id="save-modal" type="button"
+                            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        {{ 'Save'|trans }}
+                    </button>
+                    <button type="button"
+                            class="close-modal text-gray-500 bg-white hover:bg-gray-100 focus:ring-4 focus:outline-none focus:ring-blue-300 rounded-lg border border-gray-200 text-sm font-medium px-5 py-2.5 hover:text-gray-900 focus:z-10 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-500 dark:hover:text-white dark:hover:bg-gray-600 dark:focus:ring-gray-600">
+                        {{ 'Cancel'|trans }}
+                    </button>
                 </div>
-
-            </form>
+            </div>
         </div>
-
     </div>
-
 {% endblock %}

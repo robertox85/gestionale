@@ -164,14 +164,36 @@ class BaseModel
 
 
 
-    public static function getAll()
+    public static function getAll(array $args = [])
     {
         $db = Database::getInstance();
         $className = static::class;
         $shortClassName = (new \ReflectionClass($className))->getShortName();
         $tableName = self::getPluralName($shortClassName);
+
+
         $sql = "SELECT * FROM " . $tableName;
+
+
+
         $options = [];
+        if (!empty($args)) {
+            $options['limit'] = $args['limit'];
+            $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
+            $options['order_dir'] = $args['order'];
+            $options['order_by'] = $args['sort'];
+
+            // if role or status is set, add where clause
+            if (!empty($args['role']) || !empty($args['status'])) {
+                $options['where'] = [];
+                if (!empty($args['role'])) {
+                    $options['where']['role'] = $args['role'];
+                }
+                if (!empty($args['status'])) {
+                    $options['where']['status'] = $args['status'];
+                }
+            }
+        }
         $options['query'] = $sql;
 
         $result = $db->query($options);

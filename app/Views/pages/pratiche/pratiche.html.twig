@@ -135,8 +135,7 @@
                                     </div>
                                 </td>
 
-                                <th scope="row"
-                                    class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
+                                <th scope="row" class="px-4 py-3 font-medium text-gray-900 whitespace-nowrap dark:text-white">
                                     {{ pratica.getNrPratica() }}
                                 </th>
 
@@ -190,6 +189,7 @@
                                     </a>
 
                                     <a href="{{ url('/pratiche/delete/' ~ pratica.getId()) }}"
+                                       onclick="return confirm('Sei sicuro di voler eliminare la pratica?')"
                                        class="text-xl text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500">
                                         <ion-icon name="trash-outline"></ion-icon>
                                     </a>

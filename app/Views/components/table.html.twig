@@ -1,0 +1,23 @@
+<table
+        class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
+        id="table"
+>
+    <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+
+    <tr >
+        {% for column in columns %}
+            <th class="px-4 py-3">{{ column }}</th>
+        {% endfor %}
+    </tr>
+    </thead>
+    <tbody>
+
+    {% for row in rows %}
+        <tr class="border-b dark:border-gray-700">
+            {% for item in row %}
+                <td class="px-4 py-3">{{ item }}</td>
+            {% endfor %}
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>

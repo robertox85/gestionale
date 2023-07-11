@@ -20,8 +20,7 @@ class AuthController extends BaseController
     {
         try {
             $csrf_token = $_POST['csrf_token'] ?? '';
-            // $email = $_POST['username-or-email'] ?? '';
-            $email = 'mario@example.com';
+            $email = $_POST['username-or-email'] ?? '';
             $password = $_POST['password'] ?? '';
             $remember_me = isset($_POST['remember']);
 
@@ -39,16 +38,12 @@ class AuthController extends BaseController
                 Helper::redirect('sign-in');
             }
 
-            /*if (!password_verify($password, $user->getPassword())) {
+            /*
+            if (!password_verify($password, $user->getPassword())) {
                 Helper::addError('Login failed');
                 Helper::redirect('sign-in');
-            }
+            }*/
 
-            if ($user->getStatus() !== 'active') {
-                Helper::addError('Utente not active');
-                Helper::redirect('sign-in');
-            }
-*/
             if ($remember_me) {
                 $user->rememberMe();
             }

@@ -8,6 +8,8 @@ import Datepicker from 'flowbite-datepicker/Datepicker';
 import 'select2' // ES6 module
 import 'select2/dist/css/select2.css' // ES6 module
 import 'axios' // ES6 module
+import {Modal} from 'flowbite';
+
 import * as Toastr from 'toastr';
 // import 'toastr/build/toastr.css'; //You need style and css loader installed and set
 
@@ -22,8 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
     window.axios = require('axios');
 });
 
-$(document).ready(function() {
-    $('.js-example-basic-multiple').select2();
+$(document).ready(function () {
+    $('.select2').select2();
 });
 
 document.addEventListener('alpine:init', () => {
@@ -111,8 +113,7 @@ document.addEventListener('alpine:init', () => {
                 })
                 .catch(error => {
                     console.error(error);
-                }
-            );
+                });
         },
         init() {
             //this.selectedItems = (this.$el.dataset.selectedItems !== undefined) ? JSON.parse(this.$el.dataset.selectedItems) : [];
@@ -121,16 +122,193 @@ document.addEventListener('alpine:init', () => {
 
             if (this.entity === 'assistiti' || this.entity === 'controparti') {
                 this.newItem.push({
-                    nome: '',
-                    cognome: '',
-                    denominazione: '',
-                    tipo_utente: '',
+                    nome: '', cognome: '', denominazione: '', tipo_utente: '',
                 })
             }
         }
     }));
 });
 
+
+// MODAL
+// set the modal menu element
+const $modalAddUtente = document.getElementById('modalAddUtente');
+if ($modalAddUtente !== null) {
+    // options with default values
+    const options = {
+        placement: 'center',
+        backdrop: 'dynamic',
+        backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+        closable: true,
+        onHide: () => {
+            console.log('modal is hidden');
+        },
+        onShow: () => {
+            console.log('modal is shown');
+        },
+        onToggle: () => {
+            console.log('modal has been toggled');
+        }
+    };
+
+    // init the modal menu
+    const modalAddUtente = new Modal($modalAddUtente, options);
+    // on #add-assistito click show the modal
+    document.getElementById('add-assistito').addEventListener('click', () => {
+        $modalAddUtente.querySelector('#entity').value = 'assistiti';
+        modalAddUtente.show();
+    });
+
+// on #add-controparte click show the modal
+    document.getElementById('add-controparte').addEventListener('click', () => {
+        $modalAddUtente.querySelector('#entity').value = 'controparti';
+        modalAddUtente.show();
+    });
+
+    const $closeModal = document.getElementsByClassName('close-modal');
+// on #close-modal click hide the modal
+    for (let i = 0; i < $closeModal.length; i++) {
+        $closeModal[i].addEventListener('click', () => {
+            modalAddUtente.hide();
+        });
+    }
+
+    const $saveModal = document.getElementById('save-modal');
+// on #save-modal click hide the modal
+    $saveModal.addEventListener('click', () => {
+        // send the form data to the server via Axios
+        let nome = $modalAddUtente.querySelector('#nome').value;
+        let cognome = $modalAddUtente.querySelector('#cognome').value;
+        let denominazione = $modalAddUtente.querySelector('#denominazione').value;
+        let tipo_utente = $modalAddUtente.querySelector('#tipo_utente').value;
+        let entity = $modalAddUtente.querySelector('#entity').value;
+
+        axios.post('/create', {
+            nome: nome ? nome : '',
+            cognome: cognome ? cognome : '',
+            denominazione: denominazione ? denominazione : '',
+            tipo_utente: tipo_utente ? tipo_utente : '',
+            entity: entity,
+        })
+            .then(response => {
+                if (response.data.error) {
+                    //Toastr.error(response.data.error);
+                    alert(response.data.message);
+                } else {
+                    // add the new item to the list
+                    // select can be .select2 name="assistiti[]" or .select2 name="controparti[]"
+                    let $select = document.querySelector('.select2[name="' + entity + '[]"]');
+                    let $option = document.createElement('option');
+                    $option.value = response.data.id;
+                    $option.text = response.data.nome + ' ' + response.data.cognome + ' ' + response.data.denominazione + ' - ' + response.data.tipo_utente;
+                    $select.add($option);
+
+                    // select the new item
+                    $select.value = response.data.id;
+                    // trigger change event
+                    $select.dispatchEvent(new Event('change'));
+
+                    // clear the modal form
+                    $modalAddUtente.querySelector('#nome').value = '';
+                    $modalAddUtente.querySelector('#cognome').value = '';
+                    $modalAddUtente.querySelector('#denominazione').value = '';
+                    $modalAddUtente.querySelector('#tipo_utente').value = '';
+                }
+
+                modalAddUtente.hide();
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
+}
+
+const $modalAddPermessi = document.getElementById('modalAddPermessi');
+if ($modalAddPermessi !== null) {
+    // options with default values
+    const options = {
+        placement: 'center',
+        backdrop: 'dynamic',
+        backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+        closable: true,
+        onHide: () => {
+            console.log('modal is hidden');
+        },
+        onShow: () => {
+            console.log('modal is shown');
+        },
+        onToggle: () => {
+            console.log('modal has been toggled');
+        }
+    };
+
+    // init the modal menu
+    const modalAddPermessi = new Modal($modalAddPermessi, options);
+    // on #add-assistito click show the modal
+    document.getElementById('add-permesso').addEventListener('click', () => {
+        modalAddPermessi.show();
+    });
+
+    const $closeModal = document.getElementsByClassName('close-modal');
+
+    // on #close-modal click hide the modal
+    for (let i = 0; i < $closeModal.length; i++) {
+        $closeModal[i].addEventListener('click', () => {
+            modalAddPermessi.hide();
+        });
+    }
+
+    const $saveModal = document.getElementById('save-modal');
+    // on #save-modal click hide the modal
+    $saveModal.addEventListener('click', () => {
+        // send the form data to the server via Axios
+        let nome = $modalAddPermessi.querySelector('#nome').value;
+        let descrizione = $modalAddPermessi.querySelector('#descrizione').value;
+
+        axios.post('/impostazioni/creaPermesso', {
+            nome: nome ? nome : '',
+            descrizione: descrizione ? descrizione : '',
+        })
+            .then(response => {
+                if (response.data.error) {
+                    //Toastr.error(response.data.error);
+                    alert(response.data.message);
+                } else {
+                    // add the new item to the table
+                    let $table = document.querySelector('#table-permessi tbody');
+                    let $tr = document.createElement('tr');
+                    $tr.innerHTML = `
+                        <td class="border px-4 py-2">${response.data.id}</td>
+                        <td class="border px-4 py-2">${response.data.nome}</td>
+                        <td class="border px-4 py-2">${response.data.descrizione}</td>
+                        <td class="border px-4 py-2 flex justify-center">
+                            <a href="#"
+                               class="px-4 py-2 font-bold text-white bg-blue-500 rounded hover:bg-blue-700 focus:outline-none focus:shadow-outline">
+                                Edit
+                            </a>
+
+                            <a href="/impostazioni/eliminaPermesso/${response.data.id}/"
+                               onclick="return confirm('Sei sicuro di voler eliminare questo permesso?')"
+                               class="px-4 py-2 font-bold text-white bg-red-500 rounded hover:bg-red-700 focus:outline-none focus:shadow-outline">
+                                Delete
+                            </a>
+                        </td>
+                    `;
+                    $table.appendChild($tr);
+
+
+                    // clear the modal form
+                    $modalAddPermessi.querySelector('#nome').value = '';
+                    $modalAddPermessi.querySelector('#descrizione').value = '';
+                }
+
+                modalAddPermessi.hide();
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
+}
 
 
 var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
@@ -444,8 +622,7 @@ window.initDatePicker = function () {
                     todayHighlight: true,
                     orientation: 'bottom',
                     buttons: {
-                        clear: true,
-                        today: true,
+                        clear: true, today: true,
                     }
                 });
             });

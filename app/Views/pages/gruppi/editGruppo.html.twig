@@ -10,7 +10,6 @@
         <input type="hidden" name="csrf_token" value="{{ csrf_token('gruppi') }}"/>
         <input type="hidden" name="id_gruppo" value="{{ gruppo.getId() }}"/>
 
-
         {% include 'gruppi/_form.html.twig' with { 'button_label': 'Update' ,'gruppo': gruppo} %}
 
     </form>

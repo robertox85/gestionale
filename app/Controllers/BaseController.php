@@ -28,4 +28,23 @@ abstract class BaseController
         echo $this->view->render($template_name, ['tableName' => $tableName, 'fields' => $fields]);
     }
 
+    protected function createViewArgs()
+    {
+        $limit = $_GET['limit'] ?? 10;
+        $currentPage = $_GET['page'] ?? 1;
+        $sort = $_GET['sort'] ?? 'id';
+        $direction = $_GET['direction'] ?? 'asc';
+        $role = $_GET['role'] ?? '';
+        $status = $_GET['status'] ?? '';
+
+        return [
+            'limit' => $limit,
+            'currentPage' => $currentPage,
+            'sort' => $sort,
+            'order' => $direction,
+            'role' => $role,
+            'status' => $status,
+        ];
+    }
+
 }

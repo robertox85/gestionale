@@ -15,7 +15,7 @@ class Utente extends BaseModel
 
     private string $ruolo;
 
-    public static function getControparti()
+    public static function getControparti($args = [])
     {
         $db = Database::getInstance();
         $sql = "SELECT * FROM Utenti WHERE id_ruolo = 6";
