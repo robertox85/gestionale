@@ -62,7 +62,8 @@ class TwigGlobalVars
 
                 // remove ?route={*} from the query string if exists, and if i'm not in login or register page
                 if (str_contains($url, '?route=') && !str_contains($url, 'sign-in') && !str_contains($url, 'register')) {
-                    //$url = explode('?', $url)[0];
+                    // unset the route parameter from the query string
+                    $url = preg_replace('/&?route=[^&]+/', '', $url);
                 }
 
                 return $url;
