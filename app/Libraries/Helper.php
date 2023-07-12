@@ -185,5 +185,20 @@ class Helper
         return $breadcrumbs;
     }
 
+    public static function getPageTitle()
+    {
+        $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+        $segments = explode('/', trim($path, '/'));
+        $pageTitle = '';
+
+        foreach ($segments as $segment) {
+            $pageTitle .= ucfirst($segment) . ' - ';
+        }
+
+        $pageTitle = rtrim($pageTitle, ' - ');
+
+        return $pageTitle;
+    }
+
 
 }

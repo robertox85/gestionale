@@ -7,6 +7,7 @@ use App\Models\Anagrafica;
 use App\Models\Assistito;
 use App\Models\Controparte;
 use App\Models\Gruppo;
+use App\Models\Pratica;
 use App\Models\Ruolo;
 use App\Models\Utente;
 
@@ -424,6 +425,20 @@ class UserController extends BaseController
                 'sortKey' => 'id_ruolo'
             ],
             [
+                'label' => 'Gruppi',
+                'sortable' => true,
+                'sortUrl' => 'assistiti',
+                'sortKey' => 'gruppi'
+            ],
+
+            [
+                'label' => 'Pratiche',
+                'sortable' => true,
+                'sortUrl' => 'assistiti',
+                'sortKey' => 'pratiche'
+            ],
+
+            [
                 'label' => 'Azioni',
                 'sortable' => false
             ],
@@ -436,6 +451,8 @@ class UserController extends BaseController
                     ['content' => $utente->getAnagrafica()->getNome() . ' ' . $utente->getAnagrafica()->getCognome() . ' ' . $utente->getAnagrafica()->getDenominazione()],
                     ['content' => $utente->getEmail()],
                     ['content' => $utente->getRuolo()->getNome()],
+                    ['content' => count($utente->getGruppi())],
+                    ['content' => count($utente->getPraticheAssistito())],
                     ['content' => $this->createActionsCell($utente)],
                 ]
             ];
@@ -449,6 +466,92 @@ class UserController extends BaseController
             'headers' => $headers,
             'rows' => $rows
         ]);
+
+    }
+
+    // searchUtente (id)
+    public function searchUtenteView($id)
+    {
+        $utente = Utente::getById($id);
+
+        if (!$utente) {
+            Helper::addError('Utente non trovato');
+            header('Location: /utenti');
+            return;
+        }
+
+        $anagrafica = $utente->getAnagrafica();
+        $ruolo = $utente->getRuolo();
+        $gruppi = $utente->getGruppi();
+        $gruppi = array_map(function ($gruppo) {
+            $gruppo = new Gruppo($gruppo->id);
+            return $gruppo->getId();
+        }, $gruppi);
+
+
+        switch ($utente->getIdRuolo()):
+            case '5':
+                $pratiche = $utente->getPraticheAssistito();
+                $pratiche = array_map(function ($pratica) {
+                    return new Pratica($pratica->id);
+                }, $pratiche);
+                break;
+            default:
+                $pratiche = $utente->getPraticheUtente();
+                $pratiche = array_map(function ($pratica_id) {
+                    return new Pratica($pratica_id);
+                }, $pratiche);
+                break;
+        endswitch;
+
+
+        echo $this->view->render('utente.html.twig', [
+            'utente' => $utente,
+            'pratiche' => [
+                'headers' => [
+                    [
+                        'label' => 'ID',
+                        'sortable' => false,
+                        'sortUrl' => 'utente',
+                        'sortKey' => 'id'
+                    ],
+                    [
+                        'label' => 'Nome',
+                        'sortable' => false,
+                        'sortUrl' => 'utente',
+                        'sortKey' => 'nome'
+                    ],
+                    [
+                        'label' => 'Data',
+                        'sortable' => false,
+                        'sortUrl' => 'utente',
+                        'sortKey' => 'data'
+                    ],
+                    [
+                        'label' => 'Stato',
+                        'sortable' => false,
+                        'sortUrl' => 'utente',
+                        'sortKey' => 'stato'
+                    ],
+                    [
+                        'label' => 'Azioni',
+                        'sortable' => false
+                    ],
+                ],
+                'rows' => array_map(function ($pratica) {
+                    return [
+                        'cells' => [
+                            ['content' => $pratica->getId()],
+                            ['content' => $pratica->getNome()],
+                            ['content' => $pratica->getCreatedAt()],
+                            ['content' => $pratica->getStato()],
+                            ['content' => $this->createActionsCell($pratica)],
+                        ]
+                    ];
+                }, $pratiche)
+            ]
+        ]);
+
 
     }
 

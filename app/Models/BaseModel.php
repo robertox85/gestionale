@@ -31,10 +31,11 @@ class BaseModel
         $result = $db->query($options);
         if (isset($result[0])) {
             foreach ($result[0] as $property => $value) {
-                // skip id, created_at, updated_at
-                if ($property === 'created_at' || $property === 'updated_at') {
+                // skip id, created_at, updated_at.
+                // TODO: rimosso temporaneamente
+                /*if ($property === 'created_at' || $property === 'updated_at') {
                     continue;
-                }
+                }*/
                 $setterMethod = 'set' . ucfirst(str_replace('_', '', $property));
                 if (method_exists($this, $setterMethod)) {
                     $this->$setterMethod($value);

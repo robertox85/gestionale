@@ -10,6 +10,33 @@ class Gruppo extends BaseModel
     protected int $id = 0;
     protected string $nome = '';
 
+    protected ?string $created_at;
+    protected ?string $updated_at;
+
+    //getCreatedAd
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    //getUpdatedAd
+    public function getUpdatedAt()
+    {
+        return $this->updated_at;
+    }
+
+    //setCreatedAd
+    public function setCreatedAt($created_at)
+    {
+        $this->created_at = $created_at;
+    }
+
+    //setUpdatedAd
+    public function setUpdatedAt($updated_at)
+    {
+        $this->updated_at = $updated_at;
+    }
+
     // getter and setter
     public static function addRecordToUtentiGruppi(mixed $id, mixed $gruppo)
     {

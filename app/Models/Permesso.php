@@ -9,6 +9,10 @@ class Permesso extends BaseModel
     protected int $id_permesso;
     protected string $nome;
     protected string $descrizione;
+    protected ?string $created_at;
+    protected ?string $updated_at;
+
+
 
     // getter and setter
     public function getId()
@@ -41,6 +45,25 @@ class Permesso extends BaseModel
         $this->descrizione = $descrizione;
     }
 
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    public function getUpdatedAt()
+    {
+        return $this->updated_at;
+    }
+
+    public function setCreatedAt($created_at)
+    {
+        $this->created_at = $created_at;
+    }
+
+    public function setUpdatedAt($updated_at)
+    {
+        $this->updated_at = $updated_at;
+    }
     // methods
     public static function getByUri($uri)
     {

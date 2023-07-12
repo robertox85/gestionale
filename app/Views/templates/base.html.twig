@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
 
-    {% block head %}{% endblock %}
+    {% block head %}
+    {% endblock %}
 
     <title>
         {% block title %}
-            {{ title }}
+            {% if session.utente %}
+                {{ app.name }} - {{ app.page_title }}
+            {% else %}
+                {{ app.name }}
+            {% endif %}
         {% endblock %}
     </title>
 

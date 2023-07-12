@@ -11,7 +11,32 @@ class Ruolo extends BaseModel
 {
     protected $id;
     protected  $nome;
+    protected ?string $created_at;
+    protected ?string $updated_at;
 
+    // getCreatedAd
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    // getUpdatedAd
+    public function getUpdatedAt()
+    {
+        return $this->updated_at;
+    }
+
+    // setCreatedAd
+    public function setCreatedAt($created_at)
+    {
+        $this->created_at = $created_at;
+    }
+
+    // setUpdatedAd
+    public function setUpdatedAt($updated_at)
+    {
+        $this->updated_at = $updated_at;
+    }
 
     public function getId()
     {

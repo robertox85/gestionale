@@ -10,6 +10,8 @@ class Utente extends BaseModel
     protected int $id;
     protected ?string $email;
     protected ?string $password;
+    protected ?string $created_at;
+    protected ?string $updated_at;
     protected ?int $id_ruolo = 5;
 
 
@@ -251,5 +253,59 @@ class Utente extends BaseModel
         }
 
         return true;
+    }
+
+
+    // getPraticheUtente
+    public function getPraticheUtente()
+    {
+
+        // get Gruppis and for each gruppo get pratiche
+        $gruppi = $this->getGruppi();
+        $pratiche = [];
+
+        foreach ($gruppi as $gruppo) {
+            $gruppo = new Gruppo($gruppo->id);
+            $pratiche = array_merge($pratiche, $gruppo->getPratiche());
+        }
+
+        return $pratiche;
+    }
+
+    // getCreatedAt
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    // getUpdatedAt
+    public function getUpdatedAt()
+    {
+        return $this->updated_at;
+    }
+
+    // setCreatedAt
+    public function setCreatedAt($created_at)
+    {
+        $this->created_at = $created_at;
+    }
+
+    // setUpdatedAt
+    public function setUpdatedAt($updated_at)
+    {
+        $this->updated_at = $updated_at;
+    }
+
+    public function getPraticheAssistito()
+    {
+        $db = Database::getInstance();
+        // Select Pratiche with Join Assistiti with id_utente = $this->getId()
+        $sql = "SELECT * FROM Pratiche JOIN Assistiti ON Assistiti.id_utente = :id_utente WHERE Pratiche.id = Assistiti.id_pratica";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id_utente' => $this->getId()];
+        $result = $db->query($options);
+        return $result;
+
     }
 }

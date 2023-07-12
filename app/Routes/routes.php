@@ -161,6 +161,13 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\UserController', 'createUtente']
     ]);
 
+
+    // utenti/search/{id}
+    $r->addRoute('GET', '/utenti/search/{id:\d+}', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\UserController', 'searchUtenteView']
+    ]);
+
     // Archivio
     $r->addRoute('GET', '/archivio', [
         'middleware' => new AuthenticationMiddleware(),

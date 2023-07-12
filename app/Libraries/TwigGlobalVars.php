@@ -13,6 +13,19 @@ class TwigGlobalVars
             $twig->addGlobal('session', $_SESSION);
         }
 
+        // add app variables
+        $twig->addGlobal('app', [
+            'name' => $_ENV['APP_NAME'],
+            'env' => $_ENV['APP_ENV'],
+            'url' => $_ENV['BASE_URL'],
+            'version' => $_ENV['APP_VERSION'],
+            'debug' => $_ENV['APP_DEBUG'],
+            'page_title' => Helper::getPageTitle()
+        ]);
+
+
+
+
         // add breadcrumbs
         $twig->addGlobal('breadcrumbs', Helper::generateBreadcrumb());
 

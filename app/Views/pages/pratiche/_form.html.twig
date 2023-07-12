@@ -436,15 +436,17 @@
 
             <div class="p-6 space-y-6" x-data="{
             tipo_utente: 'Persona',
-            ruolo: 'Cliente',
-            nome: '',
-            cognome: '',
-            denominazione: '',
+            UtenteRuolo: 'Cliente',
+            UtenteNome: '',
+            UtenteCognome: '',
+            UtenteDenominazione: '',
             }">
                     <!-- ruolo, tipo utente, nome, cognome, denominazione -->
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <input type="hidden" id="entity" name="entity"
-                               x-model="ruolo"
+                        <input type="hidden"
+                               id="entity"
+                               name="entity"
+                               x-model="UtenteRuolo"
                                value="Cliente">
                         <div>
                             <label for="tipo_utente"
@@ -464,29 +466,33 @@
                             </select>
                         </div>
                         <div x-show="tipo_utente == 'Persona'">
-                            <label for="nome" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            <label for="UtenteNome" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                 {{ 'Name'|trans }}
                             </label>
-                            <input type="text" name="nome" id="nome"
-                                   x-model="nome"
+                            <input type="text"
+                                   name="UtenteNome"
+                                   id="UtenteNome"
+                                   x-model="UtenteNome"
                                    class="w-full">
                         </div>
                         <div x-show="tipo_utente == 'Persona'">
-                            <label for="cognome" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            <label for="UtenteCognome" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                 {{ 'Surname'|trans }}
                             </label>
                             <input
-                                    x-model="cognome"
-                                    type="text" name="cognome" id="cognome" class="w-full">
+                                    x-model="UtenteCognome"
+                                    type="text"
+                                    name="UtenteCognome"
+                                    id="UtenteCognome" class="w-full">
                         </div>
                         <div x-show="tipo_utente == 'Azienda'" class="">
-                            <label for="denominazione"
+                            <label for="UtenteDenominazione"
                                    class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                 {{ 'Company name'|trans }}
                             </label>
                             <input
-                                    x-model="denominazione"
-                                    type="text" name="denominazione" id="denominazione" class="w-full">
+                                    x-model="UtenteDenominazione"
+                                    type="text" name="UtenteDenominazione" id="UtenteDenominazione" class="w-full">
                         </div>
                     </div>
                 </div>

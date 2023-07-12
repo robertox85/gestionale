@@ -177,9 +177,9 @@ if ($modalAddUtente !== null) {
 // on #save-modal click hide the modal
     $saveModal.addEventListener('click', () => {
         // send the form data to the server via Axios
-        let nome = $modalAddUtente.querySelector('#nome').value;
-        let cognome = $modalAddUtente.querySelector('#cognome').value;
-        let denominazione = $modalAddUtente.querySelector('#denominazione').value;
+        let nome = $modalAddUtente.querySelector('#UtenteNome').value;
+        let cognome = $modalAddUtente.querySelector('#UtenteCognome').value;
+        let denominazione = $modalAddUtente.querySelector('#UtenteDenominazione').value;
         let tipo_utente = $modalAddUtente.querySelector('#tipo_utente').value;
         let entity = $modalAddUtente.querySelector('#entity').value;
 
@@ -195,24 +195,26 @@ if ($modalAddUtente !== null) {
                     //Toastr.error(response.data.error);
                     alert(response.data.message);
                 } else {
-                    // add the new item to the list
-                    // select can be .select2 name="assistiti[]" or .select2 name="controparti[]"
-                    let $select = document.querySelector('.select2[name="' + entity + '[]"]');
-                    let $option = document.createElement('option');
-                    $option.value = response.data.id;
-                    $option.text = response.data.nome + ' ' + response.data.cognome + ' ' + response.data.denominazione + ' - ' + response.data.tipo_utente;
-                    $select.add($option);
 
-                    // select the new item
-                    $select.value = response.data.id;
-                    // trigger change event
-                    $select.dispatchEvent(new Event('change'));
+                    let $select = $('.select2[name="' + entity + '[]"]').select2();
+
+                    // create the option and append to Select2
+                    let option = new Option(response.data.nome + ' ' + response.data.cognome + ' ' + response.data.denominazione + ' - ' + response.data.tipo_utente, response.data.id, true, true);
+                    $select.append(option).trigger('change');
+
+                    // manually trigger the `select2:select` event
+                    $select.trigger({
+                        type: 'select2:select',
+                        params: {
+                            data: response.data
+                        }
+                    });
 
                     // clear the modal form
-                    $modalAddUtente.querySelector('#nome').value = '';
-                    $modalAddUtente.querySelector('#cognome').value = '';
-                    $modalAddUtente.querySelector('#denominazione').value = '';
-                    $modalAddUtente.querySelector('#tipo_utente').value = '';
+                    $modalAddUtente.querySelector('#UtenteNome').value = '';
+                    $modalAddUtente.querySelector('#UtenteCognome').value = '';
+                    $modalAddUtente.querySelector('#UtenteDenominazione').value = '';
+                    $modalAddUtente.querySelector('#tipo_utente').value = 'Persona';
                 }
 
                 modalAddUtente.hide();
