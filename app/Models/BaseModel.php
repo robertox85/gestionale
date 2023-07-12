@@ -98,14 +98,16 @@ class BaseModel
     }
 
     // generate Form
-    public function getTableName() {
+    public function getTableName()
+    {
         $className = static::class;
         $shortClassName = (new \ReflectionClass($className))->getShortName();
         $tableName = self::getPluralName($shortClassName);
         return $tableName;
     }
 
-    public function getFields() {
+    public function getFields()
+    {
         $db = Database::getInstance();
         $className = static::class;
         $shortClassName = (new \ReflectionClass($className))->getShortName();
@@ -115,7 +117,7 @@ class BaseModel
         $options = [];
         $options['query'] = $sql;
 
-        $result =  $db->query($options);
+        $result = $db->query($options);
         // convert to array
         $result = json_decode(json_encode($result), true);
         $array = [];
@@ -163,7 +165,6 @@ class BaseModel
     }
 
 
-
     public static function getAll(array $args = [])
     {
         $db = Database::getInstance();
@@ -171,10 +172,7 @@ class BaseModel
         $shortClassName = (new \ReflectionClass($className))->getShortName();
         $tableName = self::getPluralName($shortClassName);
 
-
         $sql = "SELECT * FROM " . $tableName;
-
-
 
         $options = [];
         if (!empty($args)) {
@@ -182,23 +180,11 @@ class BaseModel
             $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
             $options['order_dir'] = $args['order'];
             $options['order_by'] = $args['sort'];
-
-            // if role or status is set, add where clause
-            if (!empty($args['role']) || !empty($args['status'])) {
-                $options['where'] = [];
-                if (!empty($args['role'])) {
-                    $options['where']['role'] = $args['role'];
-                }
-                if (!empty($args['status'])) {
-                    $options['where']['status'] = $args['status'];
-                }
-            }
         }
+
         $options['query'] = $sql;
 
-        $result = $db->query($options);
-
-        return $result;
+        return $db->query($options);
     }
 
     // delete by id
@@ -219,7 +205,7 @@ class BaseModel
     }
 
     // to Array
-    private static function getPluralName(string $shortClassName)
+    public static function getPluralName(string $shortClassName)
     {
         // in Italiano
         if (substr($shortClassName, -2) === 'ca') {
@@ -306,4 +292,7 @@ class BaseModel
         }*/
         return $array;
     }
+
+    // getTableName
+
 }

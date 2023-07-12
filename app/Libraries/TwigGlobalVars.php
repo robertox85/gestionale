@@ -35,10 +35,17 @@ class TwigGlobalVars
                 // return full server path to the public folder
                 return $_ENV['BASE_URL'] . '/' . $filename;
             },
+            'navigationUrl' => function (string $routeName) {
+                // remove duplcate // from the $routeName
+                $routeName = str_starts_with($routeName, '/') ? $routeName : "/$routeName";
+                return $_ENV['BASE_URL'] . $routeName;
+
+            },
             'url' => function (string $routeName, array $params = []) {
 
                 // get the current query string
                 $currentQueryString = $_SERVER['QUERY_STRING'] ?? '';
+
 
                 $routeName = str_starts_with($routeName, '/') ? $routeName : "/$routeName";
 
@@ -57,7 +64,6 @@ class TwigGlobalVars
                 if (str_contains($url, '?route=') && !str_contains($url, 'sign-in') && !str_contains($url, 'register')) {
                     $url = explode('?', $url)[0];
                 }
-
 
                 return $url;
             },
@@ -107,7 +113,7 @@ class TwigGlobalVars
                     return $direction === 'asc' ? 'desc' : 'asc';
                 }
 
-                return 'asc';
+                return 'desc';
             },
             'getQueryParams' => function (string $param = '') {
                 $params = $_GET;

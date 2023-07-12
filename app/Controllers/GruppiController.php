@@ -13,26 +13,89 @@ class GruppiController extends BaseController
 {
     public function gruppiView()
     {
+
+        $headers = [
+            [
+                'label' => 'ID',
+                'sortable' => true,
+                'sortUrl' => 'gruppi',
+                'sortKey' => 'id'
+            ],
+            [
+                'label' => 'Nome',
+                'sortable' => true,
+                'sortUrl' => 'gruppi',
+                'sortKey' => 'nome'
+            ],
+            [
+                'label' => 'Utenti',
+                'sortable' => true,
+                'sortUrl' => 'gruppi',
+                'sortKey' => 'id_utente',
+            ],
+            [
+                'label' => 'Pratiche',
+                'sortable' => true,
+                'sortUrl' => 'gruppi',
+                'sortKey' => 'id_pratica'
+            ],
+            [
+                'label' => 'Azioni',
+                'sortable' => false
+            ],
+        ];
         $args = $this->createViewArgs();
 
-        $gruppi = Gruppo::getAll($args);
-        $gruppi = array_map(function ($gruppo) {
-            $gruppo = new Gruppo($gruppo->id);
-            return $gruppo;
-        }, $gruppi);
+        switch ($args['sort']) {
+            case 'id':
+            case 'nome':
+                $gruppi = Gruppo::getAll($args);
+                $gruppi = array_map(function ($gruppo) {
+                    return new Gruppo($gruppo->id);
+                }, $gruppi);
+                break;
+            case 'id_pratica':
+                $gruppi = $this->getAllSortedByPratiche($args);
+                break;
+            case 'id_utente':
+                $gruppi = $this->getAllSortedByUtenti($args);
+                break;
+            default:
+                $gruppi = Gruppo::getAll($args);
+                $gruppi = array_map(function ($gruppo) {
+                    return new Gruppo($gruppo->id);
+                }, $gruppi);
+        }
+
+
         $totalItems = Gruppo::getAll();
         $totalItems = count($totalItems);
         $totalPages = ceil($totalItems / $args['limit']);
 
 
+        $rows = [];
+        foreach ($gruppi as $gruppo) {
+            $rows[] = [
+                'cells' => [
+                    ['content' => $gruppo->getId()],
+                    ['content' => $gruppo->getNome()],
+                    ['content' => count($gruppo->getUtenti())],
+                    ['content' => count($gruppo->getPratiche())],
+                    ['content' => $this->createActionsCell($gruppo)],
+                ]
+            ];
+        }
+
         echo $this->view->render('gruppi.html.twig',
             [
                 'gruppi' => $gruppi,
-                'entity' => 'pratiche',
+                'entity' => 'gruppi',
                 'totalPages' => $totalPages,
                 'totalItems' => $totalItems,
                 'itemsPerPage' => $args['limit'],
                 'currentPage' => $args['currentPage'],
+                'headers' => $headers,
+                'rows' => $rows,
             ]
         );
     }
@@ -59,8 +122,9 @@ class GruppiController extends BaseController
         );
     }
 
-    private function getUtenti() {
-        $utenti= Utente::getAll();
+    private function getUtenti()
+    {
+        $utenti = Utente::getAll();
         $utenti = array_filter($utenti, function ($utente) {
             return $utente->id_ruolo != 6;
         });
@@ -98,7 +162,8 @@ class GruppiController extends BaseController
 
 
     // editGruppo POST
-    public function editGruppo() {
+    public function editGruppo()
+    {
         $id = $_POST['id_gruppo'];
 
         // Validazione dei dati
@@ -155,7 +220,7 @@ class GruppiController extends BaseController
 
             Database::beginTransaction();
 
-            try{
+            try {
                 $gruppo->removeRecordFromUtentiGruppiByGruppoId();
                 $gruppo->removeGruppoFromPraticheByGruppoId();
                 $gruppo->delete();
@@ -191,6 +256,42 @@ class GruppiController extends BaseController
                 'pratiche' => $pratiche
             ]
         );
+    }
+
+    private function getAllSortedByPratiche(array $args)
+    {
+        $args['sort'] = 'id';
+        $gruppi = Gruppo::getAll($args);
+        $gruppi = array_map(function ($gruppo) {
+            return new Gruppo($gruppo->id);
+        }, $gruppi);
+
+        $direction = $args['order'] ?? 'asc';
+        $compareFunction = $direction === 'asc'
+            ? function ($a, $b) { return count($b->getPratiche()) <=> count($a->getPratiche()); }
+            : function ($a, $b) { return count($a->getPratiche()) <=> count($b->getPratiche()); };
+
+        usort($gruppi, $compareFunction);
+
+        return $gruppi;
+    }
+
+    private function getAllSortedByUtenti(array $args)
+    {
+        $args['sort'] = 'id';
+        $gruppi = Gruppo::getAll($args);
+        $gruppi = array_map(function ($gruppo) {
+            return new Gruppo($gruppo->id);
+        }, $gruppi);
+
+        $direction = $args['order'] ?? 'asc';
+        $compareFunction = $direction === 'asc'
+            ? function ($a, $b) { return count($b->getUtenti()) <=> count($a->getUtenti()); }
+            : function ($a, $b) { return count($a->getUtenti()) <=> count($b->getUtenti()); };
+
+        usort($gruppi, $compareFunction);
+
+        return $gruppi;
     }
 
 

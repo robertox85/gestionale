@@ -1,21 +1,37 @@
-<table
-        class="w-full text-sm text-left text-gray-500 dark:text-gray-400"
-        id="table"
->
+<table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+    <tr>
+        {% for header in headers %}
+            <th scope="col" class="px-4 py-3">
+                {% if header.sortable %}
+                    <a href="{{ url(header.sortUrl, {'sort': header.sortKey, 'direction': getSortDirection(header.sortKey)}) }}">
+                        {{ header.label|trans }}
 
-    <tr >
-        {% for column in columns %}
-            <th class="px-4 py-3">{{ column }}</th>
+                        {% set direction = getQueryParams('direction') %}
+                        {% set target = getQueryParams('sort') %}
+
+                        {% if direction == 'asc' and target == header.sortKey %}
+                            <ion-icon name="arrow-up-outline"></ion-icon>
+                        {% elseif direction == 'desc' and target == header.sortKey %}
+                            <ion-icon name="arrow-down-outline"></ion-icon>
+                        {% else %}
+                            <ion-icon name="arrow-up-outline"></ion-icon>
+                        {% endif %}
+                    </a>
+                {% else %}
+                    {{ header.label|trans }}
+                {% endif %}
+            </th>
         {% endfor %}
     </tr>
     </thead>
     <tbody>
-
     {% for row in rows %}
         <tr class="border-b dark:border-gray-700">
-            {% for item in row %}
-                <td class="px-4 py-3">{{ item }}</td>
+            {% for cell in row.cells %}
+                <td class="px-4 py-3">
+                    {{ cell.content | raw }}
+                </td>
             {% endfor %}
         </tr>
     {% endfor %}

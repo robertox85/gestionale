@@ -19,14 +19,76 @@ class PraticheController extends BaseController
     public function praticheView()
     {
         $args = $this->createViewArgs();
-        $pratiche = Pratica::getAll($args);
-        $pratiche = array_map(function ($pratica) {
-            return new Pratica($pratica->id);
-        }, $pratiche);
+        $headers = [
+            [
+                'label' => 'ID',
+                'sortable' => true,
+                'sortUrl' => 'pratiche',
+                'sortKey' => 'id'
+            ],
+            [
+                'label' => 'Nr. pratica',
+                'sortable' => true,
+                'sortUrl' => 'pratiche',
+                'sortKey' => 'nr_pratica'
+            ],
+            [
+                'label' => 'Gruppo',
+                'sortable' => true,
+                'sortUrl' => 'pratiche',
+                'sortKey' => 'gruppo'
+            ],
+            [
+                'label' => 'Nome',
+                'sortable' => true,
+                'sortUrl' => 'pratiche',
+                'sortKey' => 'nome'
+            ],
+            [
+                'label' => 'Stato',
+                'sortable' => true,
+                'sortUrl' => 'pratiche',
+                'sortKey' => 'stato'
+            ],
+
+            [
+                'label' => 'Azioni',
+                'sortable' => false
+            ],
+        ];
+
+        switch ($args['sort']) {
+            case 'gruppo':
+                $pratiche = $this->getPraticheSortedByGruppo($args);
+
+                break;
+            default:
+                $pratiche = Pratica::getAll($args);
+
+                break;
+        }
+
 
         $totalPratiche = Pratica::getAll();
         $totalPratiche = count($totalPratiche);
         $totalPages = ceil($totalPratiche / $args['limit']);
+
+
+        $rows = [];
+        foreach ($pratiche as $pratica) {
+            $pratica = new Pratica($pratica->id);
+
+            $rows[] = [
+                'cells' => [
+                    ['content' => $pratica->getId()],
+                    ['content' => $pratica->getNrPratica()],
+                    ['content' => '<a class="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-500" href="/gruppi/edit/' . $pratica->getGruppo()->getId() . '">' . $pratica->getGruppo()->getNome() . '</a>'],
+                    ['content' => $pratica->getNome()],
+                    ['content' => $pratica->getStato()],
+                    ['content' => $this->createActionsCell($pratica)],
+                ]
+            ];
+        }
 
         echo $this->view->render(
             'pratiche.html.twig',
@@ -37,6 +99,8 @@ class PraticheController extends BaseController
                 'totalItems' => $totalPratiche,
                 'itemsPerPage' => $args['limit'],
                 'currentPage' => $args['currentPage'],
+                'headers' => $headers,
+                'rows' => $rows,
             ]
         );
         exit();
@@ -66,7 +130,8 @@ class PraticheController extends BaseController
     }
 
     //editPratica
-    public function editPratica() {
+    public function editPratica()
+    {
         $id_pratica = $_POST['id_pratica'];
         $pratica = new Pratica($id_pratica);
         $pratica->setNome($_POST['nome']);
@@ -134,7 +199,8 @@ class PraticheController extends BaseController
     }
 
     // praticaCreaView
-    public function praticaCreaView() {
+    public function praticaCreaView()
+    {
 
         echo $this->view->render(
             'creaPratica.html.twig',
@@ -152,15 +218,15 @@ class PraticheController extends BaseController
 
         $pratica = new Pratica();
         $pratica->setNrPratica(Pratica::generateNrPratica());
-        if(isset($_POST['nome'])) $pratica->setNome($_POST['nome']);
-        if(isset($_POST['tipologia'])) $pratica->setTipologia($_POST['tipologia']);
-        if(isset($_POST['avvocato'])) $pratica->setAvvocato($_POST['avvocato']);
-        if(isset($_POST['referente'])) $pratica->setReferente($_POST['referente']);
-        if(isset($_POST['competenza'])) $pratica->setCompetenza($_POST['competenza']);
-        if(isset($_POST['ruolo_generale'])) $pratica->setRuoloGenerale($_POST['ruolo_generale']);
-        if(isset($_POST['giudice'])) $pratica->setGiudice($_POST['giudice']);
-        if(isset($_POST['stato'])) $pratica->setStato($_POST['stato']);
-        if(isset($_POST['id_gruppo'])) $pratica->setIdGruppo($_POST['id_gruppo']);
+        if (isset($_POST['nome'])) $pratica->setNome($_POST['nome']);
+        if (isset($_POST['tipologia'])) $pratica->setTipologia($_POST['tipologia']);
+        if (isset($_POST['avvocato'])) $pratica->setAvvocato($_POST['avvocato']);
+        if (isset($_POST['referente'])) $pratica->setReferente($_POST['referente']);
+        if (isset($_POST['competenza'])) $pratica->setCompetenza($_POST['competenza']);
+        if (isset($_POST['ruolo_generale'])) $pratica->setRuoloGenerale($_POST['ruolo_generale']);
+        if (isset($_POST['giudice'])) $pratica->setGiudice($_POST['giudice']);
+        if (isset($_POST['stato'])) $pratica->setStato($_POST['stato']);
+        if (isset($_POST['id_gruppo'])) $pratica->setIdGruppo($_POST['id_gruppo']);
 
 
         // Salvare la pratica nel database (ad esempio, utilizzando un'istanza di un'API di accesso al database)
@@ -212,7 +278,7 @@ class PraticheController extends BaseController
 
         // TODO: devo prima cancellare le relazioni con le altre tabelle
         Database::beginTransaction();
-        try{
+        try {
 
             $pratica->deleteNote();
             $pratica->clearAssistiti();
@@ -233,6 +299,33 @@ class PraticheController extends BaseController
 
         // Reindirizzare l'utente alla pagina di visualizzazione della pratica appena creata
         header("Location: /pratiche");
+    }
+
+    private function getPraticheSortedByGruppo(array $args){
+
+        $args['sort'] = 'id';
+        $pratiche = Pratica::getAll($args);
+        $direction = $args['order'] ?? 'asc';
+        $compareFunction = $direction === 'asc'
+            ? function ($a, $b) {
+                $a = new Pratica($a->id);
+                $b = new Pratica($b->id);
+                return $a->getGruppo()->getNome() <=> $b->getGruppo()->getNome();
+            }
+            :
+            function ($a, $b) {
+                $a = new Pratica($a->id);
+                $b = new Pratica($b->id);
+                return $b->getGruppo()->getNome() <=> $a->getGruppo()->getNome();
+            };
+
+        usort($pratiche, $compareFunction);
+
+        return $pratiche;
+
+
+
+
     }
 
 

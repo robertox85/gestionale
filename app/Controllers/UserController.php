@@ -12,7 +12,8 @@ use App\Models\Utente;
 
 class UserController extends BaseController
 {
-    private function getGruppi(){
+    private function getGruppi()
+    {
         $gruppi = Gruppo::getAll();
         $gruppi = array_map(function ($gruppo) {
             return new Gruppo($gruppo->id);
@@ -20,7 +21,8 @@ class UserController extends BaseController
         return $gruppi;
     }
 
-    private function getUtenti($args = []) {
+    private function getUtenti($args = [])
+    {
         $utenti = Utente::getAll($args);
         $utenti = array_map(function ($utente) {
             $utente = new Utente($utente->id);
@@ -31,13 +33,94 @@ class UserController extends BaseController
         }, $utenti);
         return $utenti;
     }
+
+    private function getUtentiSortedByNome($args = [])
+    {
+        $args['sort'] = 'id';
+        $utenti = Utente::getAll($args);
+        $direction = $args['order'] ?? 'asc';
+        $compareFunction = $direction === 'asc'
+            ? function ($a, $b) {
+                $a = new Utente($a->id);
+                $b = new Utente($b->id);
+                return strcmp($a->getAnagrafica()->getNome(), $b->getAnagrafica()->getNome());
+            }
+            : function ($a, $b) {
+                $a = new Utente($a->id);
+                $b = new Utente($b->id);
+                return strcmp($b->getAnagrafica()->getNome(), $a->getAnagrafica()->getNome());
+            };
+        usort($utenti, $compareFunction);
+        $utenti = array_map(function ($utente) {
+            $utente = new Utente($utente->id);
+            $ruolo = $utente->getRuolo();
+            $ruolo = $ruolo->getNome();
+            $utente->setRuolo(strtolower($ruolo));
+            return $utente;
+        }, $utenti);
+        return $utenti;
+    }
+
     public function utentiView()
     {
         $args = $this->createViewArgs();
-        $utenti = $this->getUtenti($args);
+        $headers = [
+            [
+                'label' => 'ID',
+                'sortable' => true,
+                'sortUrl' => 'utenti',
+                'sortKey' => 'id'
+            ],
+            [
+                'label' => 'Nome',
+                'sortable' => true,
+                'sortUrl' => 'utenti',
+                'sortKey' => 'nome'
+            ],
+            [
+                'label' => 'Email',
+                'sortable' => true,
+                'sortUrl' => 'utenti',
+                'sortKey' => 'email'
+            ],
+            [
+                'label' => 'Ruolo',
+                'sortable' => true,
+                'sortUrl' => 'utenti',
+                'sortKey' => 'id_ruolo'
+            ],
+            [
+                'label' => 'Azioni',
+                'sortable' => false
+            ],
+        ];
+
+        switch ($args['sort']) {
+            case 'nome':
+                $utenti = $this->getUtentiSortedByNome($args);
+                break;
+            default:
+                $utenti = $this->getUtenti($args);
+                break;
+        }
+
         $totalItems = Utente::getAll();
         $totalItems = count($totalItems);
         $totalPages = ceil($totalItems / $args['limit']);
+
+
+        $rows = [];
+        foreach ($utenti as $utente) {
+            $rows[] = [
+                'cells' => [
+                    ['content' => $utente->getId()],
+                    ['content' => $utente->getAnagrafica()->getNome() . ' ' . $utente->getAnagrafica()->getCognome() . ' ' . $utente->getAnagrafica()->getDenominazione()],
+                    ['content' => $utente->getEmail()],
+                    ['content' => $utente->getRuolo()->getNome()],
+                    ['content' => $this->createActionsCell($utente)],
+                ]
+            ];
+        }
 
         echo $this->view->render('utenti.html.twig', [
             'utenti' => $utenti,
@@ -46,6 +129,8 @@ class UserController extends BaseController
             'totalItems' => $totalItems,
             'itemsPerPage' => $args['limit'],
             'currentPage' => $args['currentPage'],
+            'headers' => $headers,
+            'rows' => $rows,
         ]);
     }
 
@@ -241,11 +326,60 @@ class UserController extends BaseController
         }, $utenti);
         $totalItems = count($utenti);
         $totalPages = ceil($totalItems / $args['limit']);
+
+
+        $headers = [
+            [
+                'label' => 'ID',
+                'sortable' => true,
+                'sortUrl' => 'controparti',
+                'sortKey' => 'id'
+            ],
+            [
+                'label' => 'Nome',
+                'sortable' => true,
+                'sortUrl' => 'controparti',
+                'sortKey' => 'nome'
+            ],
+            [
+                'label' => 'Email',
+                'sortable' => true,
+                'sortUrl' => 'controparti',
+                'sortKey' => 'email'
+            ],
+            [
+                'label' => 'Ruolo',
+                'sortable' => true,
+                'sortUrl' => 'controparti',
+                'sortKey' => 'id_ruolo'
+            ],
+            [
+                'label' => 'Azioni',
+                'sortable' => false
+            ],
+        ];
+        $rows = [];
+        foreach ($utenti as $utente) {
+            $rows[] = [
+                'cells' => [
+                    ['content' => $utente->getId()],
+                    ['content' => $utente->getAnagrafica()->getNome() . ' ' . $utente->getAnagrafica()->getCognome() . ' ' . $utente->getAnagrafica()->getDenominazione()],
+                    ['content' => $utente->getEmail()],
+                    ['content' => $utente->getRuolo()->getNome()],
+                    ['content' => $this->createActionsCell($utente)],
+                ]
+            ];
+        }
+
+
         echo $this->view->render('utenti.html.twig', [
             'utenti' => $utenti,
             'totalItems' => $totalItems,
             'totalPages' => $totalPages,
-            'currentPage' => $args['currentPage']
+            'currentPage' => $args['currentPage'],
+            'limit' => $args['limit'],
+            'headers' => $headers,
+            'rows' => $rows,
 
         ]);
     }
@@ -263,12 +397,57 @@ class UserController extends BaseController
         }, $utenti);
         $totalItems = count($utenti);
         $totalPages = ceil($totalItems / $args['limit']);
+
+        $headers = [
+            [
+                'label' => 'ID',
+                'sortable' => true,
+                'sortUrl' => 'assistiti',
+                'sortKey' => 'id'
+            ],
+            [
+                'label' => 'Nome',
+                'sortable' => true,
+                'sortUrl' => 'assistiti',
+                'sortKey' => 'nome'
+            ],
+            [
+                'label' => 'Email',
+                'sortable' => true,
+                'sortUrl' => 'assistiti',
+                'sortKey' => 'email'
+            ],
+            [
+                'label' => 'Ruolo',
+                'sortable' => true,
+                'sortUrl' => 'assistiti',
+                'sortKey' => 'id_ruolo'
+            ],
+            [
+                'label' => 'Azioni',
+                'sortable' => false
+            ],
+        ];
+        $rows = [];
+        foreach ($utenti as $utente) {
+            $rows[] = [
+                'cells' => [
+                    ['content' => $utente->getId()],
+                    ['content' => $utente->getAnagrafica()->getNome() . ' ' . $utente->getAnagrafica()->getCognome() . ' ' . $utente->getAnagrafica()->getDenominazione()],
+                    ['content' => $utente->getEmail()],
+                    ['content' => $utente->getRuolo()->getNome()],
+                    ['content' => $this->createActionsCell($utente)],
+                ]
+            ];
+        }
+
         echo $this->view->render('utenti.html.twig', [
             'utenti' => $utenti,
             'totalItems' => $totalItems,
             'totalPages' => $totalPages,
-            'currentPage' => $args['currentPage']
-
+            'currentPage' => $args['currentPage'],
+            'headers' => $headers,
+            'rows' => $rows
         ]);
 
     }
