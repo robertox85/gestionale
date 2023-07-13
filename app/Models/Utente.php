@@ -20,6 +20,7 @@ class Utente extends BaseModel
     private string $ruolo;
 
     private array $errors = [];
+
     public function setRuolo($ruolo)
     {
         $this->ruolo = $ruolo;
@@ -113,6 +114,7 @@ class Utente extends BaseModel
         // push to errors array
         $this->errors[] = $errors;
     }
+
     public function setUsername(mixed $username)
     {
         $this->username = $username;
@@ -226,7 +228,6 @@ class Utente extends BaseModel
     }
 
 
-
     // isIncomplete
 
     public function isAnagraficaComplete()
@@ -322,7 +323,6 @@ class Utente extends BaseModel
 
         return $pratiche;
     }
-
 
 
     // Questa funzione è usata nei metodi getUtentiTableRows
@@ -435,7 +435,85 @@ class Utente extends BaseModel
     }
 
 
+    // getAllUtenti (with Anagrafica, Gruppi and Pratiche)
+    public static function getAllUtenti($args = [])
+    {
+        /*
+        $db = Database::getInstance();
+        $className = static::class;
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = self::getPluralName($shortClassName);
 
+        $sql = "SELECT * FROM " . $tableName;
+
+        $options = [];
+        if (!empty($args)) {
+            $options['limit'] = $args['limit'];
+            $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
+            $options['order_dir'] = $args['order'] ?? 'ASC';
+            $options['order_by'] = $args['sort'] ?? 'id';
+        }
+
+        $options['query'] = $sql;
+
+        // return instance of the class
+        $result = $db->query($options);
+        $array = [];
+        foreach ($result as $record) {
+            $array[] = new $className($record->id);
+        }
+        return $array;*/
+
+
+        $db = Database::getInstance();
+        $className = static::class;
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = self::getPluralName($shortClassName);
+
+        $sql = "SELECT $tableName.id AS utente_id, Anagrafiche.nome as anagrafica_nome, Gruppi.nome as gruppi_nome, Pratiche.nome as pratica_nome FROM " . $tableName;
+        // LEFT JOIN Anagrafica
+        $sql .= " LEFT JOIN Anagrafiche ON " . $tableName . ".id = Anagrafiche.id_utente";
+        // LEFT JOIN Utenti_Gruppi
+        $sql .= " LEFT JOIN Utenti_Gruppi ON " . $tableName . ".id = Utenti_Gruppi.id_utente";
+        // LEFT JOIN Gruppi
+        $sql .= " LEFT JOIN Gruppi ON Utenti_Gruppi.id_gruppo = Gruppi.id";
+        // LEFT JOIN Pratiche
+        $sql .= " LEFT JOIN Pratiche ON Gruppi.id = Pratiche.id_gruppo";
+
+        $options = [];
+
+        if (!empty($args)) {
+            $options['limit'] = $args['limit'];
+            $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
+            $options['order_dir'] = $args['order'] ?? 'ASC';
+            if ($args['sort'] == 'id') {
+                $options['order_by'] = "{$tableName}.id";
+            } elseif ($args['sort'] == 'nome') {
+                $options['order_by'] = "COALESCE(NULLIF(Anagrafiche.nome, ''), NULLIF(Anagrafiche.denominazione, ''))";
+            } elseif ($args['sort'] == 'pratiche') {
+                $options['order_by'] = 'pratiche.id';
+            } elseif ($args['sort'] == 'gruppi') {
+                $options['order_by'] = 'gruppi.id';
+            } else {
+                $options['order_by'] = $args['sort'];
+            }
+
+        }
+
+        $options['query'] = $sql;
+
+        // return instance of the class
+        $result = $db->query($options);
+        $array = [];
+        foreach ($result as $record) {
+            // remove duplicates
+            if (in_array($record->utente_id, array_column($array, 'id'))) {
+                continue;
+            }
+            $array[] = new $className($record->utente_id);
+        }
+        return $array;
+    }
 
 
 }

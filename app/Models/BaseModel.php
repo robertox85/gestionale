@@ -179,8 +179,8 @@ class BaseModel
         if (!empty($args)) {
             $options['limit'] = $args['limit'];
             $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
-            $options['order_dir'] = $args['order'];
-            $options['order_by'] = $args['sort'];
+            $options['order_dir'] = $args['order'] ?? 'ASC';
+            $options['order_by'] = $args['sort'] ?? 'id';
         }
 
         $options['query'] = $sql;

@@ -176,7 +176,7 @@ $routes = function (RouteCollector $r) {
     // Utenti
     $r->addRoute('GET', '/utenti', [
         'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\UserController', 'utentiView']
+        'handler' => ['App\Controllers\UserController', 'renderUtentiTable']
     ]);
 
     // get utenti/filters
