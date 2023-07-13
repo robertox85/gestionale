@@ -8,10 +8,6 @@ use App\Models\Gruppo;
 use App\Models\Pratica;
 use App\Models\Ruolo;
 use App\Models\Utente;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
-
 class UserController extends BaseController
 {
     private function getUtentiSortedBy(array $args, callable $sortCallback, callable $mapCallback): array
@@ -71,14 +67,12 @@ class UserController extends BaseController
 
         return $this->getUtentiSortedBy($args, $sortCallback, [$this, 'mapUtente']);
     }
-
     private function mapUtente(Utente $utente): Utente
     {
         $ruolo = $utente->getRuolo()->getNome();
         $utente->setRuolo(strtolower($ruolo));
         return $utente;
     }
-
     public function renderViewWithSorting($defaultSortFunction): void
     {
         $args = $this->createViewArgs();
@@ -115,7 +109,6 @@ class UserController extends BaseController
             'pratiche' => [$this, 'getUtentiSortedByPratiche'],
         ];
     }
-
     public function utentiView(): void
     {
         $this->renderViewWithSorting([Utente::class, 'getAll']);
@@ -197,33 +190,27 @@ class UserController extends BaseController
         ]);
     }
 
-
     public function createUtente()
     {
-        try {
-            $dati = $this->sanificaInput($_POST,['password','password_confirm']);
-            $utente = $this->creaUtente($dati);
+        $dati = $this->sanificaInput($_POST,['password','password_confirm']);
+        $utente = $this->creaUtente($dati);
 
-            if (!$utente) {
-                header('Location: /utenti/crea');
-                return;
-            }
-
-            $anagrafica = $this->creaAnagrafica($utente->getId(), $dati);
-
-            if (!$anagrafica) {
-                header('Location: /utenti/crea');
-                return;
-            }
-
-            $utente->aggiornaAssociazioniGruppo($dati['gruppi'], $utente->getId());
-
-            Helper::addSuccess('Utente creato con successo');
-            header('Location: /utenti');
-
-        } catch (\Exception $e) {
-            Helper::addError($e->getMessage());
+        if (!$utente) {
+            header('Location: /utenti/crea');
+            return;
         }
+
+        $anagrafica = $this->creaAnagrafica($utente->getId(), $dati);
+
+        if (!$anagrafica) {
+            header('Location: /utenti/crea');
+            return;
+        }
+
+        $utente->aggiornaAssociazioniGruppo($dati['gruppi'], $utente->getId());
+
+        Helper::addSuccess('Utente creato con successo');
+        header('Location: /utenti');
     }
 
     private function creaAnagrafica($utente_id, array $data)
@@ -358,14 +345,13 @@ class UserController extends BaseController
     }
     public function utentiFilters()
     {
-        $filters = $_POST['ruoli'];
+        $filters = $this->sanificaInput($_POST['ruoli']);
 
 
         // get all utenti with ruolo in filters
         $utenti = Utente::getAll();
         $utenti = array_filter($utenti, function ($utente) use ($filters) {
             if (empty($filters)) return true;
-            $utente = new Utente($utente->getId());
             return in_array($utente->getIdRuolo(), $filters);
         });
 

@@ -77,8 +77,6 @@ class PraticheController extends BaseController
 
         $rows = [];
         foreach ($pratiche as $pratica) {
-            $pratica = new Pratica($pratica->id);
-
             $rows[] = [
                 'cells' => [
                     ['content' => $pratica->getId()],
@@ -395,14 +393,14 @@ class PraticheController extends BaseController
         $direction = $args['order'] ?? 'asc';
         $compareFunction = $direction === 'asc'
             ? function ($a, $b) {
-                $a = new Pratica($a->id);
-                $b = new Pratica($b->id);
+                $a = new Pratica($a->getId());
+                $b = new Pratica($b->getId());
                 return $a->getGruppo()->getNome() <=> $b->getGruppo()->getNome();
             }
             :
             function ($a, $b) {
-                $a = new Pratica($a->id);
-                $b = new Pratica($b->id);
+                $a = new Pratica($a->getId());
+                $b = new Pratica($b->getId());
                 return $b->getGruppo()->getNome() <=> $a->getGruppo()->getNome();
             };
 

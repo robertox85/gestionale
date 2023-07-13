@@ -47,13 +47,6 @@ class GruppiController extends BaseController
         $args = $this->createViewArgs();
 
         switch ($args['sort']) {
-            case 'id':
-            case 'nome':
-                $gruppi = Gruppo::getAll($args);
-                $gruppi = array_map(function ($gruppo) {
-                    return new Gruppo($gruppo->id);
-                }, $gruppi);
-                break;
             case 'id_pratica':
                 $gruppi = $this->getAllSortedByPratiche($args);
                 break;
@@ -62,9 +55,6 @@ class GruppiController extends BaseController
                 break;
             default:
                 $gruppi = Gruppo::getAll($args);
-                $gruppi = array_map(function ($gruppo) {
-                    return new Gruppo($gruppo->id);
-                }, $gruppi);
         }
 
 

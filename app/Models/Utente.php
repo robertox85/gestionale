@@ -225,20 +225,7 @@ class Utente extends BaseModel
         return true;
     }
 
-    // getGruppi
-    public function getGruppi()
-    {
-        $db = Database::getInstance();
-        $sql = "SELECT Gruppi.id, Gruppi.nome FROM Utenti_Gruppi JOIN Gruppi ON Utenti_Gruppi.id_gruppo = Gruppi.id WHERE Utenti_Gruppi.id_utente = :id_utente";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [':id_utente' => $this->getId()];
-        $result = $db->query($options);
-        // return instance of Gruppo
-        return array_map(function ($gruppo) {
-            return new Gruppo($gruppo->id);
-        }, $result);
-    }
+
 
     // isIncomplete
 
@@ -336,19 +323,9 @@ class Utente extends BaseModel
         return $pratiche;
     }
 
-    public function getPraticheAssistito()
-    {
-        $db = Database::getInstance();
-        // Select Pratiche with Join Assistiti with id_utente = $this->getId()
-        $sql = "SELECT * FROM Pratiche JOIN Assistiti ON Assistiti.id_utente = :id_utente WHERE Pratiche.id = Assistiti.id_pratica";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [':id_utente' => $this->getId()];
-        $result = $db->query($options);
-        return $result;
 
-    }
 
+    // Questa funzione è usata nei metodi getUtentiTableRows
     public function getPratiche()
     {
         // get Gruppis and for each gruppo get pratiche
@@ -364,6 +341,21 @@ class Utente extends BaseModel
         }
 
         return $pratiche;
+    }
+
+    // Questa funzione è usata nei metodi getUtentiTableRows
+    public function getGruppi()
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT Gruppi.id, Gruppi.nome FROM Utenti_Gruppi JOIN Gruppi ON Utenti_Gruppi.id_gruppo = Gruppi.id WHERE Utenti_Gruppi.id_utente = :id_utente";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id_utente' => $this->getId()];
+        $result = $db->query($options);
+        // return instance of Gruppo
+        return array_map(function ($gruppo) {
+            return new Gruppo($gruppo->id);
+        }, $result);
     }
 
     public function preparaAggiornamento(array $data)
