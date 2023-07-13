@@ -185,9 +185,30 @@ class BaseModel
 
         $options['query'] = $sql;
 
-        return $db->query($options);
+        // return instance of the class
+        $result = $db->query($options);
+        $array = [];
+        foreach ($result as $record) {
+            $array[] = new $className($record->id);
+        }
+        return $array;
     }
 
+    // count
+    public static function getTotalCount()
+    {
+        $db = Database::getInstance();
+        $className = static::class;
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = self::getPluralName($shortClassName);
+
+        $sql = "SELECT COUNT(*) FROM " . $tableName;
+        $options = [];
+        $options['query'] = $sql;
+
+        $result = $db->query($options);
+        return $result[0]->{'COUNT(*)'};
+    }
     // delete by id
     public static function deleteById($id)
     {
@@ -294,6 +315,5 @@ class BaseModel
         return $array;
     }
 
-    // getTableName
 
 }

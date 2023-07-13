@@ -200,5 +200,10 @@ class Helper
         return $pageTitle;
     }
 
+    public static function isAjaxRequest()
+    {
+        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+    }
+
 
 }

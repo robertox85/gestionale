@@ -12,7 +12,7 @@ class AuthenticationMiddleware
 {
     protected $roles;
 
-    public function __construct(array | string $roles = [])
+    public function __construct(array|string $roles = [])
     {
         // Se è stato passato un singolo ruolo, lo trasforma in un array
         if (!is_array($roles)) {
@@ -23,14 +23,14 @@ class AuthenticationMiddleware
         if (empty($roles)) {
             $roles = Ruolo::getAll();
             $roles = array_map(function ($role) {
-                return ($role) ? strtolower($role->nome) : null;
+                return ($role) ? strtolower($role->getNome()) : null;
             }, $roles);
         }
 
         $this->roles = $roles;
     }
 
-    public function __invoke(Request $request, Response $response, $next): Response | null
+    public function __invoke(Request $request, Response $response, $next): Response|null
     {
         // Verifica se l'utente è autenticato e ha uno dei ruoli consentiti
         if ($this->isAuthenticatedUser() && $this->hasRequiredRole()) {
@@ -40,9 +40,16 @@ class AuthenticationMiddleware
             // Utente non autenticato ma rotta pubblica, passa alla gestione successiva
             return $next($request, $response);
         } else {
-            // Ruolo non autorizzato o utente non autenticato
-            Helper::addError('Devi essere autenticato per accedere a questa pagina');
-            return Helper::redirect('sign-in?returnUrl=' . urlencode('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+            if (!$this->isAuthenticatedUser()) {
+                // Ruolo non autorizzato o utente non autenticato
+                Helper::addError('Devi essere autenticato per accedere a questa pagina');
+                return Helper::redirect('sign-in?returnUrl=' . urlencode('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
+            } else {
+                //die('Non hai i permessi per accedere a questa pagina');
+                header('Location: /403');
+                exit;
+            }
+
         }
     }
 

@@ -16,6 +16,7 @@ use App\Models\Utente;
 class PraticheController extends BaseController
 {
 
+
     public function praticheView()
     {
         $args = $this->createViewArgs();
@@ -106,8 +107,92 @@ class PraticheController extends BaseController
         exit();
     }
 
+    public function miePraticheView()
+    {
+        $args = $this->createViewArgs();
+        $headers = [
+            [
+                'label' => 'ID',
+                'sortable' => true,
+                'sortUrl' => 'mie_pratiche',
+                'sortKey' => 'id'
+            ],
+            [
+                'label' => 'Nr. pratica',
+                'sortable' => true,
+                'sortUrl' => 'mie_pratiche',
+                'sortKey' => 'nr_pratica'
+            ],
+            [
+                'label' => 'Gruppo',
+                'sortable' => true,
+                'sortUrl' => 'mie_pratiche',
+                'sortKey' => 'gruppo'
+            ],
+            [
+                'label' => 'Nome',
+                'sortable' => true,
+                'sortUrl' => 'mie_pratiche',
+                'sortKey' => 'nome'
+            ],
+            [
+                'label' => 'Stato',
+                'sortable' => true,
+                'sortUrl' => 'mie_pratiche',
+                'sortKey' => 'stato'
+            ]
+        ];
+        $utente = Utente::getCurrentUser();
+        switch ($args['sort']) {
+            case 'gruppo':
+                $pratiche = $this->getPraticheSortedByGruppo($args);
+
+                break;
+            default:
+                $pratiche = $utente->getPraticheUtente();
+
+                break;
+        }
+
+
+        $totalPratiche = $utente->getPraticheUtente();
+        $totalPratiche = count($totalPratiche);
+        $totalPages = ceil($totalPratiche / $args['limit']);
+
+        $rows = [];
+        foreach ($pratiche as $pratica_id) {
+            $pratica = new Pratica($pratica_id);
+
+            $rows[] = [
+                'cells' => [
+                    ['content' => $pratica->getId()],
+                    ['content' => $pratica->getNrPratica()],
+                    ['content' => $pratica->getGruppo()->getNome()],
+                    ['content' => $pratica->getNome()],
+                    ['content' => $pratica->getStato()],
+                ]
+            ];
+        }
+
+        echo $this->view->render(
+            'pratiche.html.twig',
+            [
+                'pratiche' => $pratiche,
+                'entity' => 'pratiche',
+                'totalPages' => $totalPages,
+                'totalItems' => $totalPratiche,
+                'itemsPerPage' => $args['limit'],
+                'currentPage' => $args['currentPage'],
+                'headers' => $headers,
+                'rows' => $rows,
+            ]
+        );
+
+    }
+
     public function editPraticaView(int $id_pratica)
     {
+        /*
         $assistiti = Utente::getAssistiti();
         $assistiti = array_map(function ($assistito) {
             return new Utente($assistito->id);
@@ -116,15 +201,13 @@ class PraticheController extends BaseController
         $controparti = array_map(function ($controparte) {
             return new Utente($controparte->id);
         }, $controparti);
+        */
         echo $this->view->render(
             'editPratica.html.twig',
             [
                 'pratica' => new Pratica($id_pratica),
                 'id_pratica' => $id_pratica,
                 'gruppi' => Gruppo::getAll(),
-                'assistiti' => $assistiti,
-                'controparti' => $controparti,
-
             ]
         );
     }
@@ -136,8 +219,8 @@ class PraticheController extends BaseController
         $pratica = new Pratica($id_pratica);
         $pratica->setNome($_POST['nome']);
         $pratica->setTipologia($_POST['tipologia']);
-        $pratica->setAvvocato($_POST['avvocato']);
-        $pratica->setReferente($_POST['referente']);
+
+
         $pratica->setCompetenza($_POST['competenza']);
         $pratica->setRuoloGenerale($_POST['ruolo_generale']);
         $pratica->setGiudice($_POST['giudice']);
@@ -145,13 +228,14 @@ class PraticheController extends BaseController
         $pratica->setIdGruppo($_POST['id_gruppo']);
 
 
-        $assistiti = $_POST['assistiti'];
-        $controparti = $_POST['controparti'];
+        //$assistiti = $_POST['assistiti'];
+        //$controparti = $_POST['controparti'];
+
         $scadenze = $_POST['scadenze'];
         $udienze = $_POST['udienze'];
         $note = $_POST['note'];
 
-        $pratica->clearAssistiti();
+        /*$pratica->clearAssistiti();
         foreach ($assistiti as $assistitoData) {
             $pratica->addAssistito($assistitoData);
         }
@@ -159,7 +243,7 @@ class PraticheController extends BaseController
         $pratica->clearControparti();
         foreach ($controparti as $controparteData) {
             $pratica->addControparte($controparteData);
-        }
+        }*/
 
         $pratica->clearScadenze();
         foreach ($scadenze as $scadenzaData) {
@@ -220,8 +304,8 @@ class PraticheController extends BaseController
         $pratica->setNrPratica(Pratica::generateNrPratica());
         if (isset($_POST['nome'])) $pratica->setNome($_POST['nome']);
         if (isset($_POST['tipologia'])) $pratica->setTipologia($_POST['tipologia']);
-        if (isset($_POST['avvocato'])) $pratica->setAvvocato($_POST['avvocato']);
-        if (isset($_POST['referente'])) $pratica->setReferente($_POST['referente']);
+
+
         if (isset($_POST['competenza'])) $pratica->setCompetenza($_POST['competenza']);
         if (isset($_POST['ruolo_generale'])) $pratica->setRuoloGenerale($_POST['ruolo_generale']);
         if (isset($_POST['giudice'])) $pratica->setGiudice($_POST['giudice']);
@@ -234,11 +318,12 @@ class PraticheController extends BaseController
 
 
         // Creare o aggiornare gli assistiti, le controparti, le scadenze, le udienze associati alla pratica
-        $assistiti = $_POST['assistiti'];
-        $controparti = $_POST['controparti'];
+        //$assistiti = $_POST['assistiti'];
+        //$controparti = $_POST['controparti'];
         $scadenze = $_POST['scadenze'];
         $udienze = $_POST['udienze'];
 
+        /*
         foreach ($assistiti as $assistitoData) {
             $pratica->addAssistito($assistitoData);
         }
@@ -246,7 +331,7 @@ class PraticheController extends BaseController
         foreach ($controparti as $controparteData) {
             $pratica->addControparte($controparteData);
         }
-
+        */
 
         foreach ($scadenze as $scadenzaData) {
             $scadenza = new Scadenza();
@@ -281,14 +366,16 @@ class PraticheController extends BaseController
         try {
 
             $pratica->deleteNote();
-            $pratica->clearAssistiti();
-            $pratica->clearControparti();
+            //$pratica->clearAssistiti();
+            //$pratica->clearControparti();
             $pratica->deleteUdienze();
             $pratica->deleteScadenze();
 
             $pratica->delete();
 
             Database::commit();
+
+            Helper::addSuccess('Pratica eliminata con successo');
 
         } catch (\Exception $e) {
             Database::rollBack();

@@ -1,4 +1,4 @@
-<div class="grid sm:grid-cols-3 md:gap-24">
+<div class="">
     <div class="grid sm:col-span-2 sm:grid-cols-2 gap-4 sm:gap-6">
 
         <!-- Testo: Nome pratica -->
@@ -24,7 +24,30 @@
                    placeholder="{{ 'Type typology'|trans }}">
         </div>
 
-        <!-- Testo: Avvocato -->
+
+
+        <!-- Multi Select: Assegna gruppo -->
+        <div>
+            <label for="id_gruppo">
+                {{ 'Assign group'|trans }}
+            </label>
+
+            <select id="id_gruppo" name="id_gruppo" required="" class="select2">
+                <option selected="" value="" disabled>{{ 'Select a group'|trans }}</option>
+                {% for gruppo in gruppi %}
+                    <option
+                            {% if pratica.getIdGruppo() is same as gruppo.id %}
+                                selected
+                            {% endif %}
+                            value="{{ gruppo.id }}">{{ gruppo.nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+
+
+
+        <!--
         <div>
             <label for="avvocato">
                 {{ 'Lawyer'|trans }}
@@ -35,7 +58,7 @@
                    value="{{ pratica.getAvvocato() }}"
                    placeholder="{{ 'Type lawyer name'|trans }}">
         </div>
-        <!-- Testo: Referente -->
+
         <div>
             <label for="referente">
                 {{ 'Referent'|trans }}
@@ -46,6 +69,7 @@
                    value="{{ pratica.getReferente() }}"
                    placeholder="{{ 'Type referent name'|trans }}">
         </div>
+        -->
         <!-- Testo: Competenza -->
         <div>
             <label for="competenza">
@@ -79,7 +103,37 @@
                    placeholder="{{ 'Type judge name'|trans }}">
         </div>
 
-
+        <!-- Select: Stato -->
+        <div>
+            <label for="stato">
+                {{ 'Status'|trans }}
+            </label>
+            <select id="stato" name="stato">
+                <option selected="" disabled>{{ 'Select a status'|trans }}</option>
+                <option
+                        {% if pratica.getStato() == 'aperta' %}
+                            selected
+                        {% endif %}
+                        value="aperta">
+                    {{ 'Open'|trans }}
+                </option>
+                <option
+                        {% if pratica.getStato() == 'chiusa' %}
+                            selected
+                        {% endif %}
+                        value="chiusa">
+                    {{ 'Closed'|trans }}
+                </option>
+                <option
+                        {% if pratica.getStato() == 'sospesa' %}
+                            selected
+                        {% endif %}
+                        value="sospesa">
+                    {{ 'Suspended'|trans }}
+                </option>
+            </select>
+        </div>
+<!--
         <div>
 
             <label for="assistiti" class="flex items-center justify-between">
@@ -140,7 +194,7 @@
             </select>
 
         </div>
-
+-->
 
         <div
                 {% if pratica.getScadenze() is not empty %}
@@ -345,59 +399,6 @@
                 {{ 'Add Note'|trans }}</button>
         </div>
 
-    </div>
-
-    <div class="flex flex-col gap-4 sm:gap-6">
-
-        <!-- Select: Stato -->
-        <div>
-            <label for="stato">
-                {{ 'Status'|trans }}
-            </label>
-            <select id="stato" name="stato">
-                <option selected="" disabled>{{ 'Select a status'|trans }}</option>
-                <option
-                        {% if pratica.getStato() == 'aperta' %}
-                            selected
-                        {% endif %}
-                        value="aperta">
-                    {{ 'Open'|trans }}
-                </option>
-                <option
-                        {% if pratica.getStato() == 'chiusa' %}
-                            selected
-                        {% endif %}
-                        value="chiusa">
-                    {{ 'Closed'|trans }}
-                </option>
-                <option
-                        {% if pratica.getStato() == 'sospesa' %}
-                            selected
-                        {% endif %}
-                        value="sospesa">
-                    {{ 'Suspended'|trans }}
-                </option>
-            </select>
-        </div>
-
-        <!-- Multi Select: Assegna gruppo -->
-        <div>
-            <label for="id_gruppo">
-                {{ 'Assign group'|trans }}
-            </label>
-
-            <select id="id_gruppo" name="id_gruppo" required="" class="select2">
-                <option selected="" value="" disabled>{{ 'Select a group'|trans }}</option>
-                {% for gruppo in gruppi %}
-                    <option
-                            {% if pratica.getIdGruppo() is same as gruppo.id %}
-                                selected
-                            {% endif %}
-                            value="{{ gruppo.id }}">{{ gruppo.nome }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
         <div class="sm:col-span-2 text-right">
 
             <div class="fixed right-6 bottom-6 group">
@@ -408,7 +409,6 @@
             </div>
 
         </div>
-
     </div>
 </div>
 

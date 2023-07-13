@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Libraries\ErrorHandler;
 use App\Libraries\Helper;
 use App\Models\Utente;
 
@@ -9,10 +10,6 @@ class AuthController extends BaseController
 {
     public function signInView(): void
     {
-        // if user is already logged in, redirect to home
-        if (isset($_SESSION['utente'])) {
-            Helper::addWarning('You are already logged in');
-        }
         echo $this->view->render('signin.html.twig');
     }
 
@@ -34,9 +31,14 @@ class AuthController extends BaseController
             $user = Utente::getByPropertyName('email', $email);
 
             if (!$user) {
-                Helper::addError('Login failed');
-                Helper::redirect('sign-in');
+                $user = Utente::getByPropertyName('username', $email);
+
+                if (!$user) {
+                    Helper::addError('Login failed');
+                    Helper::redirect('sign-in');
+                }
             }
+
 
             /*
             if (!password_verify($password, $user->getPassword())) {

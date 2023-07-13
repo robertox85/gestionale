@@ -8,6 +8,8 @@ use App\Libraries\Database;
 class Utente extends BaseModel
 {
     protected int $id;
+
+    protected ?string $username;
     protected ?string $email;
     protected ?string $password;
     protected ?string $created_at;
@@ -17,37 +19,21 @@ class Utente extends BaseModel
 
     private string $ruolo;
 
-    public static function getControparti($args = [])
-    {
-        $db = Database::getInstance();
-        $sql = "SELECT * FROM Utenti WHERE id_ruolo = 6";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [];
-        $controparti = $db->query($options);
-        return $controparti;
-    }
-
-    public static function getAssistiti()
-    {
-        $db = Database::getInstance();
-        $sql = "SELECT * FROM Utenti WHERE id_ruolo = 5";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [];
-        $assistiti = $db->query($options);
-        return $assistiti;
-    }
-
+    private array $errors = [];
     public function setRuolo($ruolo)
     {
         $this->ruolo = $ruolo;
     }
 
-   // constructor
+    // constructor
     public function getId()
     {
         return $this->id;
+    }
+
+    public function getUsername()
+    {
+        return $this->username;
     }
 
     public function getEmail()
@@ -91,6 +77,84 @@ class Utente extends BaseModel
         return $this->id_ruolo;
     }
 
+    // getCreatedAt
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+
+    // getUpdatedAt
+    public function getUpdatedAt()
+    {
+        return $this->updated_at;
+    }
+
+    // setCreatedAt
+    public function setCreatedAt($created_at)
+    {
+        $this->created_at = $created_at;
+    }
+
+    // setUpdatedAt
+    public function setUpdatedAt($updated_at)
+    {
+        $this->updated_at = $updated_at;
+    }
+
+    // getErrors
+    public function getErrors()
+    {
+        return $this->errors;
+    }
+
+    //setErrors
+    public function setErrors($errors)
+    {
+        // push to errors array
+        $this->errors[] = $errors;
+    }
+    public function setUsername(mixed $username)
+    {
+        $this->username = $username;
+    }
+
+
+    public static function getControparti($args = [])
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT * FROM Utenti WHERE id_ruolo = 6";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [];
+        $controparti = $db->query($options);
+        return array_map(function ($controparte) {
+            return new Utente($controparte->id);
+        }, $controparti);
+    }
+
+    public static function getAssistiti()
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT * FROM Utenti WHERE id_ruolo = 5";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [];
+        $assistiti = $db->query($options);
+        return array_map(function ($assistito) {
+            return new Utente($assistito->id);
+        }, $assistiti);
+    }
+
+    public static function getCurrentUser()
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT * FROM Utenti WHERE id = :id";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id' => $_SESSION['utente']['id']];
+        $user = $db->query($options);
+        return new Utente($user[0]->id);
+    }
 
     public function verifyPassword($password)
     {
@@ -170,11 +234,13 @@ class Utente extends BaseModel
         $options['query'] = $sql;
         $options['params'] = [':id_utente' => $this->getId()];
         $result = $db->query($options);
-        return $result;
+        // return instance of Gruppo
+        return array_map(function ($gruppo) {
+            return new Gruppo($gruppo->id);
+        }, $result);
     }
 
     // isIncomplete
-
 
     public function isAnagraficaComplete()
     {
@@ -188,7 +254,7 @@ class Utente extends BaseModel
             return false;
         }
 
-        if($anagrafica->getTipoUtente() === 'Azienda'){
+        if ($anagrafica->getTipoUtente() === 'Azienda') {
             if ($anagrafica->getDenominazione() === null) {
                 return false;
             }
@@ -237,7 +303,6 @@ class Utente extends BaseModel
         }
 
 
-
         return true;
     }
 
@@ -265,35 +330,10 @@ class Utente extends BaseModel
         $pratiche = [];
 
         foreach ($gruppi as $gruppo) {
-            $gruppo = new Gruppo($gruppo->id);
             $pratiche = array_merge($pratiche, $gruppo->getPratiche());
         }
 
         return $pratiche;
-    }
-
-    // getCreatedAt
-    public function getCreatedAt()
-    {
-        return $this->created_at;
-    }
-
-    // getUpdatedAt
-    public function getUpdatedAt()
-    {
-        return $this->updated_at;
-    }
-
-    // setCreatedAt
-    public function setCreatedAt($created_at)
-    {
-        $this->created_at = $created_at;
-    }
-
-    // setUpdatedAt
-    public function setUpdatedAt($updated_at)
-    {
-        $this->updated_at = $updated_at;
     }
 
     public function getPraticheAssistito()
@@ -308,4 +348,102 @@ class Utente extends BaseModel
         return $result;
 
     }
+
+    public function getPratiche()
+    {
+        // get Gruppis and for each gruppo get pratiche
+        $gruppi = $this->getGruppi();
+        $pratiche = [];
+
+        foreach ($gruppi as $gruppo) {
+            $praticheIds = $gruppo->getPratiche();
+            foreach ($praticheIds as $praticaId) {
+                $pratica = new Pratica($praticaId);
+                $pratiche[] = $pratica;
+            }
+        }
+
+        return $pratiche;
+    }
+
+    public function preparaAggiornamento(array $data)
+    {
+        // Setta le proprietà dell'utente
+        $this->settaProprietaUtente($data);
+
+        // Controlla e setta la password, se presente
+        if (!$this->controllaEsettaPassword($data)) {
+            return false;
+        }
+
+        // Prepara l'anagrafica
+        $anagrafica = $this->preparaAnagrafica($data);
+        if ($anagrafica === false) {
+            return false;
+        }
+
+        // Aggiorna le associazioni gruppo
+        $this->aggiornaAssociazioniGruppo($data['gruppi']);
+
+        // Aggiorna l'anagrafica
+        $anagrafica->update();
+
+        return true;
+    }
+
+    private function settaProprietaUtente(array $data)
+    {
+        $this->setUsername($data['username']);
+        $this->setEmail($data['email']);
+        $this->setIdRuolo($data['ruolo']);
+    }
+
+    public function controllaEsettaPassword(array $data)
+    {
+        if ($data['password'] != '' && $data['password'] == $data['password_confirm']) {
+            if (Utente::isValidPassword($data['password'])) {
+                $this->setPassword($data['password']);
+                return true;
+            } else {
+                $this->setErrors('La password deve essere lunga almeno 8 caratteri e deve contenere almeno una lettera maiuscola, una minuscola e un numero');
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private function preparaAnagrafica(array $data)
+    {
+        $anagrafica = $this->getAnagrafica();
+        if ($anagrafica === false || $anagrafica === null) {
+            $this->setErrors('Errore nel caricamento dell\'anagrafica');
+            return false;
+        }
+
+        // Setta le proprietà dell'anagrafica
+        $anagrafica->setProprieta($data);
+
+        return $anagrafica;
+    }
+
+    public function aggiornaAssociazioniGruppo(array|null $gruppi, int|null $user_id = null)
+    {
+        // skip if gruppi is empty, null, or is not an array
+        if (empty($gruppi) || !is_array($gruppi)) {
+            return;
+        }
+
+        // if user_id is null, use $this->getId()
+        $user_id = ($user_id === null) ? $this->getId() : $user_id;
+        Gruppo::removeRecordFromUtentiGruppiByUtenteId($user_id);
+        foreach ($gruppi as $gruppo) {
+            Gruppo::addRecordToUtentiGruppi($user_id, $gruppo);
+        }
+    }
+
+
+
+
+
 }

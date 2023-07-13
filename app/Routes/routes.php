@@ -12,18 +12,9 @@ use App\Middleware\MiddlewareStack;
 
 $routes = function (RouteCollector $r) {
 
-    $middlewareStack = new MiddlewareStack();
-
-    $middlewareStack->add(new AuthenticationMiddleware(
-            [
-                'amministratore',
-                'dominus'
-            ]
-        )
-    );
-    $middlewareStack->add(new AuthorizationMiddleware('visualizza_pratiche'));
 
     // Rotte pubbliche
+    $r->addRoute('GET', '/403', ['App\Controllers\ErrorController', 'forbiddenView']);
     $r->addRoute('GET', '/404', ['App\Controllers\ErrorController', 'notFoundView']);
     $r->addRoute('GET', '/405', ['App\Controllers\ErrorController', 'notAllowedView']);
     $r->addRoute('GET', '/500', ['App\Controllers\ErrorController', 'internalErrorView']);
@@ -36,8 +27,8 @@ $routes = function (RouteCollector $r) {
     $r->addRoute('GET', '/sign-out', ['App\Controllers\AuthController', 'signOutUser']);
 
     // Registrazione
-    $r->addRoute('GET', '/sign-up', ['App\Controllers\AuthController', 'signUpView']);
-    $r->addRoute('POST', '/sign-up', ['App\Controllers\AuthController', 'signUpUser']);
+    //$r->addRoute('GET', '/sign-up', ['App\Controllers\AuthController', 'signUpView']);
+    //$r->addRoute('POST', '/sign-up', ['App\Controllers\AuthController', 'signUpUser']);
 
     // Usa l'istanza di AuthenticationMiddleware per le tue rotte che richiedono autenticazione
     $r->addRoute('GET', '/', [
@@ -45,41 +36,98 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\HomeController', 'homeView']
     ]);
 
+    $middlewareStack = new MiddlewareStack();
+    $middlewareStack->add(new AuthenticationMiddleware(
+            [
+                'amministratore',
+                'dominus',
+                'segretaria',
+            ]
+        )
+    );
+    $middlewareStack->add(new AuthorizationMiddleware('visualizza_pratiche'));
+
     // Pratiche
     $r->addRoute('GET', '/pratiche', [
         'middleware' => [$middlewareStack],
         'handler' => ['App\Controllers\PraticheController', 'praticheView']
     ]);
 
+    $middlewareStack = new MiddlewareStack();
+    $middlewareStack->add(new AuthenticationMiddleware(
+            [
+                'amministratore',
+                'referente',
+                'cliente',
+            ]
+        )
+    );
+    $middlewareStack->add(new AuthorizationMiddleware('visualizza_pratiche'));
+
+    $r->addRoute('GET', '/mie_pratiche', [
+        'middleware' => [$middlewareStack],
+        'handler' => ['App\Controllers\PraticheController', 'miePraticheView']
+    ]);
+
+    $middlewareStack = new MiddlewareStack();
+    $middlewareStack->add(new AuthenticationMiddleware(
+            [
+                'amministratore',
+                'dominus',
+                'segretaria',
+            ]
+        )
+    );
+    $middlewareStack->add(new AuthorizationMiddleware('modifica_pratiche'));
+
+
     // Pratica
     $r->addRoute('GET', '/pratiche/edit/{id:\d+}', [
-        'middleware' => new AuthenticationMiddleware(),
+        'middleware' => [$middlewareStack],
         'handler' => ['App\Controllers\PraticheController', 'editPraticaView']
     ]);
 
     $r->addRoute('POST', '/pratiche/edit', [
-        'middleware' => new AuthenticationMiddleware(),
+        'middleware' => [$middlewareStack],
         'handler' => ['App\Controllers\PraticheController', 'editPratica']
     ]);
 
+    $middlewareStack = new MiddlewareStack();
+    $middlewareStack->add(new AuthenticationMiddleware(
+            [
+                'amministratore',
+                'dominus',
+                'segretaria',
+            ]
+        )
+    );
+    $middlewareStack->add(new AuthorizationMiddleware('elimina_pratiche'));
     $r->addRoute('GET', '/pratiche/delete/{id:\d+}', [
-        'middleware' => new AuthenticationMiddleware(),
+        'middleware' => [$middlewareStack],
         'handler' => ['App\Controllers\PraticheController', 'deletePratica']
     ]);
 
+    $middlewareStack = new MiddlewareStack();
+    $middlewareStack->add(new AuthenticationMiddleware(
+            [
+                'amministratore',
+                'dominus',
+                'segretaria',
+            ]
+        )
+    );
+    $middlewareStack->add(new AuthorizationMiddleware('crea_pratica'));
+
+
     // pratiche/crea
     $r->addRoute('GET', '/pratiche/crea', [
-        'middleware' => new AuthenticationMiddleware(
-            ['amministratore', 'dominus']
-        ),
+        'middleware' => [$middlewareStack],
         'handler' => ['App\Controllers\PraticheController', 'praticaCreaView']
     ]);
 
     // pratiche/crea POST
     $r->addRoute('POST', '/pratiche/crea', [
-        'middleware' => new AuthenticationMiddleware(
-            ['amministratore', 'dominus']
-        ),
+        'middleware' => [$middlewareStack],
         'handler' => ['App\Controllers\PraticheController', 'createPratica']
     ]);
 
@@ -129,6 +177,12 @@ $routes = function (RouteCollector $r) {
     $r->addRoute('GET', '/utenti', [
         'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\UserController', 'utentiView']
+    ]);
+
+    // get utenti/filters
+    $r->addRoute('POST', '/utenti/filtro', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\UserController', 'utentiFilters']
     ]);
 
     // Utente
@@ -262,7 +316,6 @@ $routes = function (RouteCollector $r) {
         'middleware' => new AuthenticationMiddleware('amministratore'),
         'handler' => ['App\Controllers\SettingsController', 'eliminaPermesso']
     ]);
-
 
     // rotta pubblica
     $r->addRoute('GET', '/public', ['App\Controllers\HomeController', 'publicView']);

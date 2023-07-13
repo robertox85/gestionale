@@ -14,6 +14,9 @@ class Gruppo extends BaseModel
     protected ?string $updated_at;
 
     //getCreatedAd
+    private $count_utenti;
+    private array $pratiche;
+
     public function getCreatedAt()
     {
         return $this->created_at;
@@ -164,6 +167,29 @@ class Gruppo extends BaseModel
         }, $result);
 
         return $result;
+    }
+
+    public function setCountUtenti($getCountUtenti)
+    {
+        $this->count_utenti = $getCountUtenti;
+    }
+
+    public function getCountUtenti()
+    {
+        $db = Database::getInstance();
+        // Ottengo il numero di utenti del ruolo
+        $sql = "SELECT COUNT(*) AS count FROM Gruppi JOIN Utenti_Gruppi ON Gruppi.id = Utenti_Gruppi.id_gruppo WHERE Gruppi.id = :id_gruppo";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id_gruppo' => $this->getId()];
+        $result = $db->query($options);
+        $this->setCountUtenti($result[0]->count);
+        return $this->count_utenti;
+    }
+
+    public function setPratiche(array $getPratiche)
+    {
+        $this->pratiche = $getPratiche;
     }
 
 }

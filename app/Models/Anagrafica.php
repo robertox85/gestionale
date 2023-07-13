@@ -238,4 +238,22 @@ class Anagrafica extends BaseModel
         $result = $db->query($options);
         return $result ? $result[0]->id_gruppo : false;
     }
+
+    public function setProprieta(array $data)
+    {
+        if(isset($data['nome'])) $this->setNome($data['nome']);
+        if(isset($data['cognome'])) $this->setCognome($data['cognome']);
+        if(isset($data['denominazione'])) $this->setDenominazione($data['denominazione']);
+        if(isset($data['indirizzo'])) $this->setIndirizzo($data['indirizzo']);
+        if(isset($data['cap'])) $this->setCap($data['cap']);
+        if(isset($data['citta'])) $this->setCitta($data['citta']);
+        if(isset($data['provincia'])) $this->setProvincia($data['provincia']);
+        if(isset($data['telefono'])) $this->setTelefono($data['telefono']);
+        if(isset($data['cellulare'])) $this->setCellulare($data['cellulare']);
+        if(isset($data['pec'])) $this->setPec($data['pec']);
+        if(isset($data['codice_fiscale'])) $this->setCodiceFiscale($data['codice_fiscale']);
+        if(isset($data['partita_iva'])) $this->setPartitaIva($data['partita_iva']);
+        if(isset($data['tipo_utente'])) $this->setTipoUtente($data['tipo_utente']);
+        if(isset($data['note'])) $this->setNote($data['note']);
+    }
 }

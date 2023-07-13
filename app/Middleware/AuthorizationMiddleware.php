@@ -2,6 +2,8 @@
 
 namespace App\Middleware;
 
+use App\Controllers\ErrorController;
+use App\Libraries\Helper;
 use App\Models\Utente;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
@@ -36,10 +38,10 @@ class AuthorizationMiddleware
             // Utente autorizzato, prosegui
             $response = $next($request, $response);
         } else {
-            // Utente non autorizzato, reindirizza o restituisci una risposta di errore
-            // ...
 
-            echo "Non hai i permessi per accedere a questa pagina";
+            // Utente non autorizzato, mostra un errore
+            header('Location: /403');
+            exit;
         }
     }
 }

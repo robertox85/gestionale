@@ -19,4 +19,9 @@ class ErrorController extends BaseController
         echo $this->view->render('500.html.twig');
     }
 
+    public function forbiddenView()
+    {
+        echo $this->view->render('403.html.twig');
+    }
+
 }

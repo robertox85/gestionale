@@ -45,6 +45,25 @@ abstract class BaseController
         ];
     }
 
+    protected function getPagination($args = [])
+    {
+        $db = Database::getInstance();
+        $className = get_called_class();
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = strtolower(str_replace('Controller', '', $shortClassName));
+
+        $sql = "SELECT * FROM " . $tableName;
+
+        $options = [];
+        $options['limit'] = $args['limit'];
+        $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
+        $options['order_dir'] = $args['order'];
+        $options['order_by'] = $args['sort'];
+        $options['query'] = $sql;
+
+        return $db->query($options);
+    }
+
     protected function createActionsCell($entity)
     {
         // if is Utenti, return only view and edit
@@ -83,5 +102,21 @@ abstract class BaseController
         // get name from entity
         $tableName = $entity->getTableName();
         return '<a href="/' . strtolower($tableName) . '/search/' . $entity->getId() . '" class="text-xl "><ion-icon name="search-outline" role="img" class="md hydrated text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-500"></ion-icon></a>';
+    }
+
+
+    public function sanificaInput(array $dati, array $ignore_keys = [])
+    {
+        $sanitized = [];
+        foreach ($dati as $key => $value) {
+            if (in_array($key, $ignore_keys)) {
+                $sanitized[$key] = $value;
+            } else if (is_array($value)) {
+                $sanitized[$key] = $this->sanificaInput($value);
+            } else {
+                $sanitized[$key] = trim(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
+            }
+        }
+        return $sanitized;
     }
 }

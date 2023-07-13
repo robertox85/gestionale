@@ -12,8 +12,9 @@
             <ul class="space-y-2">
 
 
+                {% if session.utente.id_ruolo in ['5'] %}
                 <li>
-                    <a href="{{ url('/pratiche') }}"
+                    <a href="{{ url('/mie_pratiche') }}"
                        class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
                         <ion-icon name="document-text"
                                   class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
@@ -23,7 +24,10 @@
                     </a>
                 </li>
 
+                {% endif %}
+
                 {% if session.utente.id_ruolo in ['1'] %}
+
 
                     <li>
                         <a href="{{ navigationUrl('/') }}"
@@ -34,6 +38,17 @@
 
                             <span class="ml-3">
                             {{ 'Overview'|trans }}
+                        </span>
+                        </a>
+                    </li>
+
+                    <li>
+                        <a href="{{ url('/pratiche') }}"
+                           class="flex items-center p-2 text-base font-medium text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group">
+                            <ion-icon name="document-text"
+                                      class="w-5 h-5 text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></ion-icon>
+                            <span class="ml-3">
+                            {{ 'Practices'|trans }}
                         </span>
                         </a>
                     </li>

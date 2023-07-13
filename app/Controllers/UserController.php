@@ -4,472 +4,264 @@ namespace App\Controllers;
 
 use App\Libraries\Helper;
 use App\Models\Anagrafica;
-use App\Models\Assistito;
-use App\Models\Controparte;
 use App\Models\Gruppo;
 use App\Models\Pratica;
 use App\Models\Ruolo;
 use App\Models\Utente;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
 class UserController extends BaseController
 {
-    private function getGruppi()
-    {
-        $gruppi = Gruppo::getAll();
-        $gruppi = array_map(function ($gruppo) {
-            return new Gruppo($gruppo->id);
-        }, $gruppi);
-        return $gruppi;
-    }
-
-    private function getUtenti($args = [])
-    {
-        $utenti = Utente::getAll($args);
-        $utenti = array_map(function ($utente) {
-            $utente = new Utente($utente->id);
-            $ruolo = $utente->getRuolo();
-            $ruolo = $ruolo->getNome();
-            $utente->setRuolo(strtolower($ruolo));
-            return $utente;
-        }, $utenti);
-        return $utenti;
-    }
-
-    private function getUtentiSortedByNome($args = [])
+    private function getUtentiSortedBy(array $args, callable $sortCallback, callable $mapCallback): array
     {
         $args['sort'] = 'id';
         $utenti = Utente::getAll($args);
+
+        usort($utenti, $sortCallback);
+
+        $utenti = array_map($mapCallback, $utenti);
+
+        return $utenti;
+    }
+    private function sortCallbackByMethod(string $method): callable
+    {
+        return function ($a, $b) use ($method) {
+            $a = new Utente($a->getId());
+            $b = new Utente($b->getId());
+            $a = $a->$method();
+            $b = $b->$method();
+            if (empty($a) && empty($b)) return 0;
+            if (empty($a)) return 1;
+            if (empty($b)) return -1;
+            return $a[0]->getId() - $b[0]->getId();
+        };
+    }
+    private function getUtentiSortedByGruppi(array $args): array
+    {
+        $sortCallback = $this->sortCallbackByMethod('getGruppi');
+
+        $mapCallback = function ($utente) {
+            return new Utente($utente->getId());
+        };
+
+        return $this->getUtentiSortedBy($args, $sortCallback, $mapCallback);
+    }
+    private function getUtentiSortedByPratiche(array $args): array
+    {
+        $sortCallback = $this->sortCallbackByMethod('getPratiche');
+
+        $mapCallback = function ($utente) {
+            return new Utente($utente->getId());
+        };
+
+        return $this->getUtentiSortedBy($args, $sortCallback, $mapCallback);
+    }
+    private function getUtentiSortedByNome(array $args): array
+    {
         $direction = $args['order'] ?? 'asc';
-        $compareFunction = $direction === 'asc'
+        $sortCallback = $direction === 'asc'
             ? function ($a, $b) {
-                $a = new Utente($a->id);
-                $b = new Utente($b->id);
                 return strcmp($a->getAnagrafica()->getNome(), $b->getAnagrafica()->getNome());
             }
             : function ($a, $b) {
-                $a = new Utente($a->id);
-                $b = new Utente($b->id);
                 return strcmp($b->getAnagrafica()->getNome(), $a->getAnagrafica()->getNome());
             };
-        usort($utenti, $compareFunction);
-        $utenti = array_map(function ($utente) {
-            $utente = new Utente($utente->id);
-            $ruolo = $utente->getRuolo();
-            $ruolo = $ruolo->getNome();
-            $utente->setRuolo(strtolower($ruolo));
-            return $utente;
-        }, $utenti);
-        return $utenti;
+
+        return $this->getUtentiSortedBy($args, $sortCallback, [$this, 'mapUtente']);
     }
 
-    public function utentiView()
+    private function mapUtente(Utente $utente): Utente
+    {
+        $ruolo = $utente->getRuolo()->getNome();
+        $utente->setRuolo(strtolower($ruolo));
+        return $utente;
+    }
+
+    public function renderViewWithSorting($defaultSortFunction): void
     {
         $args = $this->createViewArgs();
-        $headers = [
-            [
-                'label' => 'ID',
-                'sortable' => true,
-                'sortUrl' => 'utenti',
-                'sortKey' => 'id'
-            ],
-            [
-                'label' => 'Nome',
-                'sortable' => true,
-                'sortUrl' => 'utenti',
-                'sortKey' => 'nome'
-            ],
-            [
-                'label' => 'Email',
-                'sortable' => true,
-                'sortUrl' => 'utenti',
-                'sortKey' => 'email'
-            ],
-            [
-                'label' => 'Ruolo',
-                'sortable' => true,
-                'sortUrl' => 'utenti',
-                'sortKey' => 'id_ruolo'
-            ],
-            [
-                'label' => 'Azioni',
-                'sortable' => false
-            ],
-        ];
+        $sortFunctions = $this->getSortFunctions();
+        $sortFunction = $sortFunctions[$args['sort']] ?? $defaultSortFunction;
+        $this->renderUtentiViewWithSortFunction($sortFunction, $args);
+    }
+    private function renderUtentiViewWithSortFunction(array $sortFunction, array $args): void
+    {
+        $utenti = call_user_func($sortFunction, $args);
 
-        switch ($args['sort']) {
-            case 'nome':
-                $utenti = $this->getUtentiSortedByNome($args);
-                break;
-            default:
-                $utenti = $this->getUtenti($args);
-                break;
-        }
-
-        $totalItems = Utente::getAll();
-        $totalItems = count($totalItems);
+        $totalItems = Utente::getTotalCount();
         $totalPages = ceil($totalItems / $args['limit']);
-
-
-        $rows = [];
-        foreach ($utenti as $utente) {
-            $rows[] = [
-                'cells' => [
-                    ['content' => $utente->getId()],
-                    ['content' => $utente->getAnagrafica()->getNome() . ' ' . $utente->getAnagrafica()->getCognome() . ' ' . $utente->getAnagrafica()->getDenominazione()],
-                    ['content' => $utente->getEmail()],
-                    ['content' => $utente->getRuolo()->getNome()],
-                    ['content' => $this->createActionsCell($utente)],
-                ]
-            ];
-        }
 
         echo $this->view->render('utenti.html.twig', [
             'utenti' => $utenti,
             'entity' => 'utenti',
-            'totalPages' => $totalPages,
-            'totalItems' => $totalItems,
-            'itemsPerPage' => $args['limit'],
-            'currentPage' => $args['currentPage'],
-            'headers' => $headers,
-            'rows' => $rows,
+            'pagination' => [
+                'totalPages' => $totalPages,
+                'totalItems' => $totalItems,
+                'itemsPerPage' => $args['limit'],
+                'currentPage' => $args['currentPage'],
+            ],
+            'headers' => $this->getUtentiTableHeader(),
+            'rows' => $this->getUtentiTableRows($utenti),
+            'filters' => $this->getFilters()
         ]);
     }
-
-    public function utenteView($id)
+    public function getSortFunctions()
     {
-        $utente = new Utente($id);
+        return [
+            'nome' => [$this, 'getUtentiSortedByNome'],
+            'gruppi' => [$this, 'getUtentiSortedByGruppi'],
+            'pratiche' => [$this, 'getUtentiSortedByPratiche'],
+        ];
+    }
 
-        //$utente = $utente->toArray();
+    public function utentiView(): void
+    {
+        $this->renderViewWithSorting([Utente::class, 'getAll']);
+    }
+    public function contropartiView(): void
+    {
+        $this->renderViewWithSorting([Utente::class, 'getControparti']);
+    }
+    public function assistitiView(): void
+    {
+        $this->renderViewWithSorting([Utente::class, 'getAssistiti']);
+    }
+    public function utenteView($id): void
+    {
         echo $this->view->render('editUtente.html.twig', [
-            'utente' => $utente,
+            'utente' => new Utente($id),
             'ruoli' => Ruolo::getAll(),
-            'gruppi' => $this->getGruppi()
+            'gruppi' => Gruppo::getAll()
         ]);
     }
-
-    public function editUtente()
+    public function editUtente(): void
     {
-        $id = $_POST['id_utente'];
-        $utente = new Utente($id);
-        $utente->setEmail($_POST['email']);
-        $utente->setIdRuolo($_POST['ruolo']);
-
-        if ($_POST['password'] != '' && $_POST['password'] != $_POST['password_confirm']) {
-            Helper::addError('Le password non coincidono');
-            header('Location: /utenti/edit/' . $id);
-            return;
-        }
-
-        if ($_POST['password'] != '' && $_POST['password'] == $_POST['password_confirm']) {
-            if (Utente::isValidPassword($_POST['password'])) {
-                $utente->setPassword($_POST['password']);
-            } else {
-                Helper::addError('La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale');
-                header('Location: /utenti/edit/' . $id);
-                return;
+        $utente = new Utente($_POST['id_utente']);
+        $dati = $this->sanificaInput($_POST, ['password', 'password_confirm']);
+        $result = $utente->preparaAggiornamento($dati);
+        if ($result === true) {
+            $utente->update();
+            Helper::addSuccess('Utente aggiornato con successo');
+            header('Location: /utenti');
+            exit;
+        } else {
+            $errors = $utente->getErrors();
+            foreach ($errors as $item) {
+                Helper::addError($item);
             }
+            header('Location: /utenti/edit/' . $utente->getId());
+            exit;
         }
-
-        // Anagrafica ha come parametri: nome, cognome, indirizzo, cap, citta provincia, telefono, cellulare, pec, codice_fiscale, partita_iva, note e id_utente.
-        $anagrafica = $utente->getAnagrafica();
-        if ($anagrafica === false || $anagrafica === null) {
-            // Gestisci l'errore qui, ad esempio potresti mostrare un messaggio di errore e interrompere l'esecuzione
-            $utente->update();
-            Helper::addWarning('Anagrafica non trovata per l\'utente specificato. Ho aggiornato solo i dati di login');
-            header('Location: /utenti/edit/' . $id);
-            return;
-        }
-        if (isset($_POST['nome'])) $anagrafica->setNome($_POST['nome']);
-        if (isset($_POST['cognome'])) $anagrafica->setCognome($_POST['cognome']);
-        if (isset($_POST['denominazione'])) $anagrafica->setDenominazione($_POST['denominazione']);
-        if (isset($_POST['indirizzo'])) $anagrafica->setIndirizzo($_POST['indirizzo']);
-        if (isset($_POST['cap'])) $anagrafica->setCap($_POST['cap']);
-        if (isset($_POST['citta'])) $anagrafica->setCitta($_POST['citta']);
-        if (isset($_POST['provincia'])) $anagrafica->setProvincia($_POST['provincia']);
-        if (isset($_POST['telefono'])) $anagrafica->setTelefono($_POST['telefono']);
-        if (isset($_POST['cellulare'])) $anagrafica->setCellulare($_POST['cellulare']);
-        if (isset($_POST['pec'])) $anagrafica->setPec($_POST['pec']);
-        if (isset($_POST['codice_fiscale'])) $anagrafica->setCodiceFiscale($_POST['codice_fiscale']);
-        if (isset($_POST['partita_iva'])) $anagrafica->setPartitaIva($_POST['partita_iva']);
-        if (isset($_POST['note'])) $anagrafica->setNote($_POST['note']);
-        if (isset($_POST['tipo_utente'])) $anagrafica->setTipoUtente($_POST['tipo_utente']);
-
-        Gruppo::removeRecordFromUtentiGruppiByUtenteId($id);
-        foreach ($_POST['gruppi'] as $gruppo) {
-            Gruppo::addRecordToUtentiGruppi($id, $gruppo);
-        }
-
-        try {
-            $utente->update();
-            $anagrafica->update();
-            Helper::addSuccess('Utente modificato con successo');
-        } catch (\Exception $e) {
-            Helper::addError($e->getMessage());
-        }
-
-        header('Location: /utenti/');
+    }
+    public function deleteUtente($id)
+    {
+        $this->deleteUserAndRelatedRecords($id);
+        $this->redirectToReferer();
     }
 
-    public function deleteUtente($id)
+    private function deleteUserAndRelatedRecords($id)
     {
         $utente = new Utente($id);
         if ($utente->getAnagrafica() !== false) {
             $utente->getAnagrafica()->delete();
         }
-        Assistito::removeRecordFromAssistitiByUtenteId($id);
-        Controparte::removeRecordFromContropartiByUtenteId($id);
         Gruppo::removeRecordFromUtentiGruppiByUtenteId($id);
         $utente->delete();
+    }
 
-        // if is controparti or assistiti view redirect to controparti or assistiti
-        if (strpos($_SERVER['HTTP_REFERER'], 'controparti') !== false) {
-            header('Location: /controparti');
-            return;
-        }
+    private function redirectToReferer()
+    {
+        $redirectPaths = [
+            'controparti' => '/controparti',
+            'assistiti' => '/assistiti'
+        ];
 
-        if (strpos($_SERVER['HTTP_REFERER'], 'assistiti') !== false) {
-            header('Location: /assistiti');
-            return;
+        foreach($redirectPaths as $key => $path) {
+            if (strpos($_SERVER['HTTP_REFERER'], $key) !== false) {
+                header('Location: ' . $path);
+                exit;
+            }
         }
 
         header('Location: /utenti');
+        exit;
     }
 
     public function utenteCreaView()
     {
         echo $this->view->render('creaUtente.html.twig', [
             'ruoli' => Ruolo::getAll(),
-            'gruppi' => $this->getGruppi(),
+            'gruppi' => Gruppo::getAll()
         ]);
     }
+
 
     public function createUtente()
     {
         try {
-            $utente = new Utente();
-            $utente->setEmail($_POST['email']);
-            $utente->setIdRuolo($_POST['ruolo']);
+            $dati = $this->sanificaInput($_POST,['password','password_confirm']);
+            $utente = $this->creaUtente($dati);
 
-            if ($_POST['password'] != '' && $_POST['password'] != $_POST['password_confirm']) {
-                Helper::addError('Le password non coincidono');
+            if (!$utente) {
                 header('Location: /utenti/crea');
                 return;
             }
 
-            if ($_POST['password'] != '' && $_POST['password'] == $_POST['password_confirm']) {
-                if (Utente::isValidPassword($_POST['password'])) {
-                    $utente->setPassword($_POST['password']);
-                } else {
-                    Helper::addError('La password deve contenere almeno 8 caratteri, una lettera maiuscola, una lettera minuscola, un numero e un carattere speciale');
-                    header('Location: /utenti/crea');
-                    return;
-                }
-            }
+            $anagrafica = $this->creaAnagrafica($utente->getId(), $dati);
 
-            $utente_id = $utente->save();
-            if (!$utente_id) {
-                Helper::addError('Errore nella creazione dell\'utente');
-                header('Location: /utenti');
-                return;
-            }
-
-
-            // Anagrafica ha come parametri: nome, cognome, indirizzo, cap, citta provincia, telefono, cellulare, pec, codice_fiscale, partita_iva, note e id_utente.
-            $anagrafica = new Anagrafica();
-            $anagrafica->setIdUtente($utente_id);
-            if (isset($_POST['nome'])) $anagrafica->setNome($_POST['nome']);
-            if (isset($_POST['cognome'])) $anagrafica->setCognome($_POST['cognome']);
-            if (isset($_POST['denominazione'])) $anagrafica->setDenominazione($_POST['denominazione']);
-            if (isset($_POST['indirizzo'])) $anagrafica->setIndirizzo($_POST['indirizzo']);
-            if (isset($_POST['cap'])) $anagrafica->setCap($_POST['cap']);
-            if (isset($_POST['citta'])) $anagrafica->setCitta($_POST['citta']);
-            if (isset($_POST['provincia'])) $anagrafica->setProvincia($_POST['provincia']);
-            if (isset($_POST['telefono'])) $anagrafica->setTelefono($_POST['telefono']);
-            if (isset($_POST['cellulare'])) $anagrafica->setCellulare($_POST['cellulare']);
-            if (isset($_POST['pec'])) $anagrafica->setPec($_POST['pec']);
-            if (isset($_POST['codice_fiscale'])) $anagrafica->setCodiceFiscale($_POST['codice_fiscale']);
-            if (isset($_POST['partita_iva'])) $anagrafica->setPartitaIva($_POST['partita_iva']);
-            if (isset($_POST['note'])) $anagrafica->setNote($_POST['note']);
-            if (isset($_POST['tipo_utente'])) $anagrafica->setTipoUtente($_POST['tipo_utente']);
-
-
-            foreach ($_POST['gruppi'] as $gruppo) {
-                $gruppo = new Gruppo($gruppo);
-                $gruppo->addUtente($utente_id);
-            }
-
-            $anagrafica_id = $anagrafica->save();
-            if (!$anagrafica_id) {
-                Helper::addError('Errore nella creazione dell\'anagrafica');
+            if (!$anagrafica) {
                 header('Location: /utenti/crea');
                 return;
             }
+
+            $utente->aggiornaAssociazioniGruppo($dati['gruppi'], $utente->getId());
+
+            Helper::addSuccess('Utente creato con successo');
+            header('Location: /utenti');
+
         } catch (\Exception $e) {
             Helper::addError($e->getMessage());
         }
-
-        Helper::addSuccess('Utente creato con successo');
-        header('Location: /utenti');
     }
 
-
-    // contropartiView
-    public function contropartiView()
+    private function creaAnagrafica($utente_id, array $data)
     {
-        $args = $this->createViewArgs();
-        $utenti = Utente::getControparti();
-        $utenti = array_map(function ($utente) {
-            $utente = new Utente($utente->id);
-            $ruolo = $utente->getRuolo();
-            $ruolo = $ruolo->getNome();
-            $utente->setRuolo(strtolower($ruolo));
-            return $utente;
-        }, $utenti);
-        $totalItems = count($utenti);
-        $totalPages = ceil($totalItems / $args['limit']);
+        $anagrafica = new Anagrafica();
+        $anagrafica->setIdUtente($utente_id);
+        $anagrafica->setProprieta($data);
 
-
-        $headers = [
-            [
-                'label' => 'ID',
-                'sortable' => true,
-                'sortUrl' => 'controparti',
-                'sortKey' => 'id'
-            ],
-            [
-                'label' => 'Nome',
-                'sortable' => true,
-                'sortUrl' => 'controparti',
-                'sortKey' => 'nome'
-            ],
-            [
-                'label' => 'Email',
-                'sortable' => true,
-                'sortUrl' => 'controparti',
-                'sortKey' => 'email'
-            ],
-            [
-                'label' => 'Ruolo',
-                'sortable' => true,
-                'sortUrl' => 'controparti',
-                'sortKey' => 'id_ruolo'
-            ],
-            [
-                'label' => 'Azioni',
-                'sortable' => false
-            ],
-        ];
-        $rows = [];
-        foreach ($utenti as $utente) {
-            $rows[] = [
-                'cells' => [
-                    ['content' => $utente->getId()],
-                    ['content' => $utente->getAnagrafica()->getNome() . ' ' . $utente->getAnagrafica()->getCognome() . ' ' . $utente->getAnagrafica()->getDenominazione()],
-                    ['content' => $utente->getEmail()],
-                    ['content' => $utente->getRuolo()->getNome()],
-                    ['content' => $this->createActionsCell($utente)],
-                ]
-            ];
+        $anagrafica_id = $anagrafica->save();
+        if (!$anagrafica_id) {
+            Helper::addError('Errore nella creazione dell\'anagrafica');
+            return false;
         }
 
-
-        echo $this->view->render('utenti.html.twig', [
-            'utenti' => $utenti,
-            'totalItems' => $totalItems,
-            'totalPages' => $totalPages,
-            'currentPage' => $args['currentPage'],
-            'limit' => $args['limit'],
-            'headers' => $headers,
-            'rows' => $rows,
-
-        ]);
+        return $anagrafica;
     }
 
-    public function assistitiView()
+    private function creaUtente(array $data)
     {
-        $args = $this->createViewArgs();
-        $utenti = Utente::getAssistiti();
-        $utenti = array_map(function ($utente) {
-            $utente = new Utente($utente->id);
-            $ruolo = $utente->getRuolo();
-            $ruolo = $ruolo->getNome();
-            $utente->setRuolo(strtolower($ruolo));
-            return $utente;
-        }, $utenti);
-        $totalItems = count($utenti);
-        $totalPages = ceil($totalItems / $args['limit']);
+        $utente = new Utente();
+        $utente->setEmail($data['email']);
+        $utente->setUsername($data['username']);
+        $utente->setIdRuolo($data['ruolo']);
 
-        $headers = [
-            [
-                'label' => 'ID',
-                'sortable' => true,
-                'sortUrl' => 'assistiti',
-                'sortKey' => 'id'
-            ],
-            [
-                'label' => 'Nome',
-                'sortable' => true,
-                'sortUrl' => 'assistiti',
-                'sortKey' => 'nome'
-            ],
-            [
-                'label' => 'Email',
-                'sortable' => true,
-                'sortUrl' => 'assistiti',
-                'sortKey' => 'email'
-            ],
-            [
-                'label' => 'Ruolo',
-                'sortable' => true,
-                'sortUrl' => 'assistiti',
-                'sortKey' => 'id_ruolo'
-            ],
-            [
-                'label' => 'Gruppi',
-                'sortable' => true,
-                'sortUrl' => 'assistiti',
-                'sortKey' => 'gruppi'
-            ],
-
-            [
-                'label' => 'Pratiche',
-                'sortable' => true,
-                'sortUrl' => 'assistiti',
-                'sortKey' => 'pratiche'
-            ],
-
-            [
-                'label' => 'Azioni',
-                'sortable' => false
-            ],
-        ];
-        $rows = [];
-        foreach ($utenti as $utente) {
-            $rows[] = [
-                'cells' => [
-                    ['content' => $utente->getId()],
-                    ['content' => $utente->getAnagrafica()->getNome() . ' ' . $utente->getAnagrafica()->getCognome() . ' ' . $utente->getAnagrafica()->getDenominazione()],
-                    ['content' => $utente->getEmail()],
-                    ['content' => $utente->getRuolo()->getNome()],
-                    ['content' => count($utente->getGruppi())],
-                    ['content' => count($utente->getPraticheAssistito())],
-                    ['content' => $this->createActionsCell($utente)],
-                ]
-            ];
+        if (!$utente->controllaEsettaPassword($data)) {
+            return false;
         }
 
-        echo $this->view->render('utenti.html.twig', [
-            'utenti' => $utenti,
-            'totalItems' => $totalItems,
-            'totalPages' => $totalPages,
-            'currentPage' => $args['currentPage'],
-            'headers' => $headers,
-            'rows' => $rows
-        ]);
+        $utente_id = $utente->save();
 
+        if (!$utente_id) {
+            Helper::addError('Errore nella creazione dell\'utente');
+            return false;
+        }
+
+        return $utente;
     }
 
-    // searchUtente (id)
     public function searchUtenteView($id)
     {
         $utente = Utente::getById($id);
@@ -480,79 +272,215 @@ class UserController extends BaseController
             return;
         }
 
-        $anagrafica = $utente->getAnagrafica();
-        $ruolo = $utente->getRuolo();
+        $pratiche = [];
+
+        // foreach gruppo get pratiche
         $gruppi = $utente->getGruppi();
-        $gruppi = array_map(function ($gruppo) {
-            $gruppo = new Gruppo($gruppo->id);
-            return $gruppo->getId();
-        }, $gruppi);
+        foreach ($gruppi as $gruppo) {
+            $pratiche = array_merge($pratiche, $gruppo->getPratiche());
+        }
 
+        $pratiche = array_unique($pratiche, SORT_REGULAR);
+        $pratiche = array_map(function ($pratica) {
+            $pratica = new Pratica($pratica);
+            return $pratica;
+        }, $pratiche);
 
-        switch ($utente->getIdRuolo()):
-            case '5':
-                $pratiche = $utente->getPraticheAssistito();
-                $pratiche = array_map(function ($pratica) {
-                    return new Pratica($pratica->id);
-                }, $pratiche);
-                break;
-            default:
-                $pratiche = $utente->getPraticheUtente();
-                $pratiche = array_map(function ($pratica_id) {
-                    return new Pratica($pratica_id);
-                }, $pratiche);
-                break;
-        endswitch;
-
+        $headers = [
+            [
+                'label' => 'ID',
+                'sortable' => true,
+                'sortUrl' => 'pratiche',
+                'sortKey' => 'id'
+            ],
+            [
+                'label' => 'Nome',
+                'sortable' => true,
+                'sortUrl' => 'pratiche',
+                'sortKey' => 'nome'
+            ],
+            [
+                'label' => 'Creata il',
+                'sortable' => true,
+                'sortUrl' => 'pratiche',
+                'sortKey' => 'data'
+            ],
+            [
+                'label' => 'Azioni',
+                'sortable' => false
+            ],
+        ];
+        $rows = [];
+        foreach ($pratiche as $pratica) {
+            $rows[] = [
+                'cells' => [
+                    ['content' => $pratica->getId()],
+                    ['content' => $pratica->getNome()],
+                    ['content' => $pratica->getCreatedAt()],
+                    ['content' => $this->createActionsCell($pratica)],
+                ]
+            ];
+        }
 
         echo $this->view->render('utente.html.twig', [
             'utente' => $utente,
-            'pratiche' => [
-                'headers' => [
-                    [
-                        'label' => 'ID',
-                        'sortable' => false,
-                        'sortUrl' => 'utente',
-                        'sortKey' => 'id'
-                    ],
-                    [
-                        'label' => 'Nome',
-                        'sortable' => false,
-                        'sortUrl' => 'utente',
-                        'sortKey' => 'nome'
-                    ],
-                    [
-                        'label' => 'Data',
-                        'sortable' => false,
-                        'sortUrl' => 'utente',
-                        'sortKey' => 'data'
-                    ],
-                    [
-                        'label' => 'Stato',
-                        'sortable' => false,
-                        'sortUrl' => 'utente',
-                        'sortKey' => 'stato'
-                    ],
-                    [
-                        'label' => 'Azioni',
-                        'sortable' => false
-                    ],
-                ],
-                'rows' => array_map(function ($pratica) {
-                    return [
-                        'cells' => [
-                            ['content' => $pratica->getId()],
-                            ['content' => $pratica->getNome()],
-                            ['content' => $pratica->getCreatedAt()],
-                            ['content' => $pratica->getStato()],
-                            ['content' => $this->createActionsCell($pratica)],
-                        ]
-                    ];
-                }, $pratiche)
-            ]
+            'headers' => $headers,
+            'rows' => $rows
         ]);
 
 
+    }
+    private function getFilters()
+    {
+        // get all ruoli and foreach ruolo get count utenti with that ruolo
+        $ruoli = Ruolo::getAll();
+        $ruoli = array_map(function ($ruolo) {
+            $ruolo = new Ruolo($ruolo->getId());
+            $ruolo->setCountUtenti($ruolo->getCountUtenti());
+            return $ruolo;
+        }, $ruoli);
+
+
+        // gruppi
+        $gruppi = Gruppo::getAll();
+        $gruppi = array_map(function ($gruppo) {
+            $gruppo = new Gruppo($gruppo->getId());
+            $gruppo->setCountUtenti($gruppo->getCountUtenti());
+            return $gruppo;
+        }, $gruppi);
+
+
+        $filters = [
+            'ruoli' => $ruoli,
+        ];
+
+        return $filters;
+    }
+    public function utentiFilters()
+    {
+        $filters = $_POST['ruoli'];
+
+
+        // get all utenti with ruolo in filters
+        $utenti = Utente::getAll();
+        $utenti = array_filter($utenti, function ($utente) use ($filters) {
+            if (empty($filters)) return true;
+            $utente = new Utente($utente->getId());
+            return in_array($utente->getIdRuolo(), $filters);
+        });
+
+        echo $this->view->render('utenti.html.twig', [
+            'filters' => $this->getFilters(),
+            'totalItems' => count($utenti),
+            'totalPages' => 1,
+            'currentPage' => 1,
+            'headers' => [
+                [
+                    'label' => 'ID',
+                    'sortable' => true,
+                    'sortUrl' => 'utenti',
+                    'sortKey' => 'id'
+                ],
+                [
+                    'label' => 'Nome',
+                    'sortable' => true,
+                    'sortUrl' => 'utenti',
+                    'sortKey' => 'nome'
+                ],
+                [
+                    'label' => 'Email',
+                    'sortable' => true,
+                    'sortUrl' => 'utenti',
+                    'sortKey' => 'email'
+                ],
+                [
+                    'label' => 'Ruolo',
+                    'sortable' => true,
+                    'sortUrl' => 'utenti',
+                    'sortKey' => 'id_ruolo'
+                ],
+
+                [
+                    'label' => 'Azioni',
+                    'sortable' => false
+                ],
+            ],
+            'rows' => array_map(function ($utente) {
+                $utente = new Utente($utente->getId());
+                return [
+                    'cells' => [
+                        ['content' => $utente->getId()],
+                        ['content' => $utente->getAnagrafica()->getNome() . ' ' . $utente->getAnagrafica()->getCognome() . ' ' . $utente->getAnagrafica()->getDenominazione()],
+                        ['content' => $utente->getEmail()],
+                        ['content' => $utente->getRuolo()->getNome()],
+                        ['content' => $this->createActionsCell($utente)],
+                    ]
+                ];
+            }, $utenti)
+        ]);
+    }
+
+    private function getUtentiTableHeader()
+    {
+        return [
+            [
+                'label' => 'ID',
+                'sortable' => true,
+                'sortUrl' => 'utenti',
+                'sortKey' => 'id'
+            ],
+            [
+                'label' => 'Nome',
+                'sortable' => true,
+                'sortUrl' => 'utenti',
+                'sortKey' => 'nome'
+            ],
+            [
+                'label' => 'Email',
+                'sortable' => true,
+                'sortUrl' => 'utenti',
+                'sortKey' => 'email'
+            ],
+            [
+                'label' => 'Gruppi',
+                'sortable' => true,
+                'sortUrl' => 'utenti',
+                'sortKey' => 'gruppi'
+            ],
+            [
+                'label' => 'Pratiche',
+                'sortable' => true,
+                'sortUrl' => 'utenti',
+                'sortKey' => 'pratiche'
+            ],
+            [
+                'label' => 'Ruolo',
+                'sortable' => true,
+                'sortUrl' => 'utenti',
+                'sortKey' => 'id_ruolo'
+            ],
+
+            [
+                'label' => 'Azioni',
+                'sortable' => false
+            ],
+        ];
+    }
+    private function getUtentiTableRows(array $utenti)
+    {
+        return array_map(function ($utente) {
+            return [
+                'cells' => [
+                    ['content' => $utente->getId()],
+                    ['content' => $utente->getAnagrafica()->getNome() . ' ' . $utente->getAnagrafica()->getCognome() . ' ' . $utente->getAnagrafica()->getDenominazione()],
+                    ['content' => $utente->getEmail()],
+                    ['content' => count($utente->getGruppi())],
+                    ['content' => count($utente->getPratiche())],
+                    ['content' => $utente->getRuolo()->getNome()],
+                    ['content' => $this->createActionsCell($utente)],
+                ]
+            ];
+        }, $utenti);
     }
 
 

@@ -12,8 +12,7 @@ class Pratica extends BaseModel
     protected ?string $nome;
     protected ?string $tipologia;
     protected ?string $stato;
-    protected ?string $avvocato;
-    protected ?string $referente;
+
     protected ?string $competenza;
     protected ?string $ruolo_generale;
     protected ?string $giudice;
@@ -71,26 +70,6 @@ class Pratica extends BaseModel
     public function setStato($stato)
     {
         $this->stato = $stato;
-    }
-
-    public function getAvvocato()
-    {
-        return $this->avvocato;
-    }
-
-    public function setAvvocato($avvocato)
-    {
-        $this->avvocato = $avvocato;
-    }
-
-    public function getReferente()
-    {
-        return $this->referente;
-    }
-
-    public function setReferente($referente)
-    {
-        $this->referente = $referente;
     }
 
     public function getCompetenza()

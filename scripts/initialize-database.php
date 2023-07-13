@@ -55,6 +55,7 @@ try {
         -- Creazione della tabella Utenti
         CREATE TABLE IF NOT EXISTS Utenti (
           id INT PRIMARY KEY AUTO_INCREMENT NOT NULL,
+          username VARCHAR(50),
           email VARCHAR(100),
           password VARCHAR(100),
           id_ruolo INT,
@@ -103,8 +104,6 @@ try {
           nome VARCHAR(50),
           tipologia VARCHAR(50),
           stato ENUM('aperta', 'chiusa', 'sospesa') NOT NULL DEFAULT 'aperta',
-          avvocato VARCHAR(50),
-          referente VARCHAR(50),
           competenza VARCHAR(50),
           ruolo_generale VARCHAR(50),
           giudice VARCHAR(50),
@@ -231,27 +230,27 @@ try {
   (6, 'Controparte');
 
 -- Inserimento di dati nella tabella Utente , crea 20 utenti
-INSERT IGNORE INTO Utenti (id, email, password, id_ruolo) VALUES
-  (1, 'mario@example.com', 'password123', 1), /* Amministratore  */ 
-  (2, 'luca@example.com', 'password456', 3), /* Referente  */ 
-  (3, 'laura@example.com', 'password789', 5), /* Cliente  */
-  (4, 'matteo@example.com', 'password789', 6), /* Controparte  */
-  (5, 'anna@example.com', 'password456', 2),  /* Dominus  */
-  (6, 'franco@example.com', 'password789', 4), /* Segreteria  */
-  (7, 'chiara@example.com', 'password321', 1),
-  (8, 'davide@example.com', 'password654', 3),
-  (9, 'elena@example.com', 'password987', 2),
-  (10, 'giovanni@example.com', 'password741', 1),
-  (11, 'simone@example.com', 'password852', 3),
-  (12, 'francesca@example.com', 'password963', 4),
-  (13, 'giacomo@example.com', 'password123', 1),
-  (14, 'luigi@example.com', 'password456', 3),
-  (15, 'sofia@example.com', 'password789', 2),
-  (16, 'massimo@example.com', 'password321', 1),
-  (17, 'giulia@example.com', 'password654', 4),
-  (18, 'antonio@example.com', 'password987', 1),
-  (19, 'silvia@example.com', 'password741', 3),
-  (20, 'federico@example.com', 'password852', 2);
+INSERT IGNORE INTO Utenti (id, username, email, password, id_ruolo) VALUES
+  (1, 'admin', 'mario@example.com', 'password123', 1), /* Amministratore  */ 
+  (2, 'referente', 'luca@example.com', 'password456', 3), /* Referente  */ 
+  (3, 'cliente', 'laura@example.com', 'password789', 5), /* Cliente  */
+  (4, 'controparte', 'matteo@example.com', 'password789', 6), /* Controparte  */
+  (5, 'dominus', 'anna@example.com', 'password456', 2),  /* Dominus  */
+  (6, 'Segreteria', 'franco@example.com', 'password789', 4), /* Segreteria  */
+  (7, '', 'chiara@example.com', 'password321', 1),
+  (8, '', 'davide@example.com', 'password654', 3),
+  (9, '', 'elena@example.com', 'password987', 2),
+  (10,'',  'giovanni@example.com', 'password741', 1),
+  (11,'',  'simone@example.com', 'password852', 3),
+  (12,'',  'francesca@example.com', 'password963', 4),
+  (13,'',  'giacomo@example.com', 'password123', 1),
+  (14,'',  'luigi@example.com', 'password456', 3),
+  (15,'',  'sofia@example.com', 'password789', 2),
+  (16,'',  'massimo@example.com', 'password321', 1),
+  (17,'',  'giulia@example.com', 'password654', 4),
+  (18,'',  'antonio@example.com', 'password987', 1),
+  (19,'',  'silvia@example.com', 'password741', 3),
+  (20,'',  'federico@example.com', 'password852', 2);
 
   
 
@@ -288,8 +287,17 @@ INSERT IGNORE INTO Anagrafiche (id, nome, cognome, indirizzo, cap, citta, provin
 
 INSERT IGNORE INTO Permessi (id, nome, descrizione) VALUES
     (1, 'visualizza_pratiche', 'Visualizza tutte le pratiche'),
-    (5, 'visualizza_pratiche_gruppo', 'Visualizza le pratiche del gruppo'),
-    (41, 'visualizza_pratiche_cliente', 'Visualizza le proprie pratiche');
+    (2, 'modifica_pratiche', 'Modifica tutte le pratiche'),
+    (3, 'elimina_pratiche', 'Elimina tutte le pratiche'),
+    (4, 'crea_pratica', 'Crea nuova pratica'),
+    (5, 'visualizza_pratiche_proprie', 'Visualizza le proprie pratiche'),
+    (6, 'modifica_pratiche_proprie', 'Modifica le proprie pratiche'),
+    (7, 'elimina_pratiche_proprie', 'Elimina le proprie pratiche'),
+    (8, 'crea_pratica_propria', 'Crea nuova pratica'),
+    (9, 'visualizza_pratiche_gruppo', 'Visualizza le pratiche del gruppo'),
+    (10, 'modifica_pratiche_gruppo', 'Modifica le pratiche del gruppo'),
+    (11, 'elimina_pratiche_gruppo', 'Elimina le pratiche del gruppo'),
+    (12, 'crea_pratica_gruppo', 'Crea nuova pratica');
  
 ");
 
@@ -323,24 +331,24 @@ INSERT IGNORE INTO Gruppi (id, nome) VALUES
 
 
 -- Inserimento di una pratica legata al sottogruppo e alla controparte
-INSERT IGNORE INTO Pratiche (id, nr_pratica, nome, tipologia, stato, avvocato, referente, competenza, ruolo_generale, giudice, id_gruppo) VALUES 
-(1, 'P001', 'Pratica 1', 'Civile', 'Aperta', 'Avvocato 1', 'Referente 1', 'Competenza 1', 'Ruolo Generale 1', 'Giudice 1', 1),
-(2, 'P002', 'Pratica 2', 'Penale', 'Aperta', 'Avvocato 2', 'Referente 2', 'Competenza 2', 'Ruolo Generale 2', 'Giudice 2', 2),
-(3, 'P003', 'Pratica 3', 'Civile', 'Aperta', 'Avvocato 3', 'Referente 3', 'Competenza 3', 'Ruolo Generale 3', 'Giudice 3', 3),
-(4, 'P004', 'Pratica 4', 'Penale', 'Aperta', 'Avvocato 4', 'Referente 4', 'Competenza 4', 'Ruolo Generale 4', 'Giudice 4', 4),
-(5, 'P005', 'Pratica 5', 'Civile', 'Aperta', 'Avvocato 5', 'Referente 5', 'Competenza 5', 'Ruolo Generale 5', 'Giudice 5', 5),
-(6, 'P006', 'Pratica 6', 'Penale', 'Aperta', 'Avvocato 6', 'Referente 6', 'Competenza 6', 'Ruolo Generale 6', 'Giudice 6', 6),
-(7, 'P007', 'Pratica 7', 'Civile', 'Aperta', 'Avvocato 7', 'Referente 7', 'Competenza 7', 'Ruolo Generale 7', 'Giudice 7', 7),
-(8, 'P008', 'Pratica 8', 'Penale', 'Aperta', 'Avvocato 8', 'Referente 8', 'Competenza 8', 'Ruolo Generale 8', 'Giudice 8', 8),
-(9, 'P009', 'Pratica 9', 'Civile', 'Aperta', 'Avvocato 9', 'Referente 9', 'Competenza 9', 'Ruolo Generale 9', 'Giudice 9', 9),
-(10, 'P010', 'Pratica 10', 'Penale', 'Aperta', 'Avvocato 10', 'Referente 10', 'Competenza 10', 'Ruolo Generale 10', 'Giudice 10', 10),
-(11, 'P011', 'Pratica 11', 'Civile', 'Aperta', 'Avvocato 11', 'Referente 11', 'Competenza 11', 'Ruolo Generale 11', 'Giudice 11', 11),
-(12, 'P012', 'Pratica 12', 'Penale', 'Aperta', 'Avvocato 12', 'Referente 12', 'Competenza 12', 'Ruolo Generale 12', 'Giudice 12', 12),
-(13, 'P013', 'Pratica 13', 'Civile', 'Aperta', 'Avvocato 13', 'Referente 13', 'Competenza 13', 'Ruolo Generale 13', 'Giudice 13', 13),
-(14, 'P014', 'Pratica 14', 'Penale', 'Aperta', 'Avvocato 14', 'Referente 14', 'Competenza 14', 'Ruolo Generale 14', 'Giudice 14', 14),
-(15, 'P015', 'Pratica 15', 'Civile', 'Aperta', 'Avvocato 15', 'Referente 15', 'Competenza 15', 'Ruolo Generale 15', 'Giudice 15', 15),
-(16, 'P016', 'Pratica 16', 'Penale', 'Aperta', 'Avvocato 16', 'Referente 16', 'Competenza 16', 'Ruolo Generale 16', 'Giudice 16', 16),
-(17, 'P017', 'Pratica 17', 'Civile', 'Aperta', 'Avvocato 17', 'Referente 17', 'Competenza 17', 'Ruolo Generale 17', 'Giudice 17', 17);
+INSERT IGNORE INTO Pratiche (id, nr_pratica, nome, tipologia, stato, competenza, ruolo_generale, giudice, id_gruppo) VALUES 
+(1, 'P001', 'Pratica 1', 'Civile', 'Aperta', 'Competenza 1', 'Ruolo Generale 1', 'Giudice 1', 1),
+(2, 'P002', 'Pratica 2', 'Penale', 'Aperta', 'Competenza 2', 'Ruolo Generale 2', 'Giudice 2', 2),
+(3, 'P003', 'Pratica 3', 'Civile', 'Aperta', 'Competenza 3', 'Ruolo Generale 3', 'Giudice 3', 3),
+(4, 'P004', 'Pratica 4', 'Penale', 'Aperta', 'Competenza 4', 'Ruolo Generale 4', 'Giudice 4', 4),
+(5, 'P005', 'Pratica 5', 'Civile', 'Aperta', 'Competenza 5', 'Ruolo Generale 5', 'Giudice 5', 5),
+(6, 'P006', 'Pratica 6', 'Penale', 'Aperta', 'Competenza 6', 'Ruolo Generale 6', 'Giudice 6', 6),
+(7, 'P007', 'Pratica 7', 'Civile', 'Aperta', 'Competenza 7', 'Ruolo Generale 7', 'Giudice 7', 7),
+(8, 'P008', 'Pratica 8', 'Penale', 'Aperta', 'Competenza 8', 'Ruolo Generale 8', 'Giudice 8', 8),
+(9, 'P009', 'Pratica 9', 'Civile', 'Aperta', 'Competenza 9', 'Ruolo Generale 9', 'Giudice 9', 9),
+(10, 'P010', 'Pratica 10', 'Penale', 'Aperta', 'Competenza 10', 'Ruolo Generale 10', 'Giudice 10', 10),
+(11, 'P011', 'Pratica 11', 'Civile', 'Aperta', 'Competenza 11', 'Ruolo Generale 11', 'Giudice 11', 11),
+(12, 'P012', 'Pratica 12', 'Penale', 'Aperta', 'Competenza 12', 'Ruolo Generale 12', 'Giudice 12', 12),
+(13, 'P013', 'Pratica 13', 'Civile', 'Aperta', 'Competenza 13', 'Ruolo Generale 13', 'Giudice 13', 13),
+(14, 'P014', 'Pratica 14', 'Penale', 'Aperta', 'Competenza 14', 'Ruolo Generale 14', 'Giudice 14', 14),
+(15, 'P015', 'Pratica 15', 'Civile', 'Aperta', 'Competenza 15', 'Ruolo Generale 15', 'Giudice 15', 15),
+(16, 'P016', 'Pratica 16', 'Penale', 'Aperta', 'Competenza 16', 'Ruolo Generale 16', 'Giudice 16', 16),
+(17, 'P017', 'Pratica 17', 'Civile', 'Aperta', 'Competenza 17', 'Ruolo Generale 17', 'Giudice 17', 17);
 
 
 
@@ -404,6 +412,14 @@ INSERT IGNORE INTO Note
 (15, 'Nota 15', 'Testo nota 15', 'Privata', 15),
 (16, 'Nota 16', 'Testo nota 16', 'Privata', 16),
 (17, 'Nota 17', 'Testo nota 17', 'Privata', 17);
+
+-- Inserimento di un permetto legato all ruolo
+INSERT IGNORE INTO Ruoli_Permessi(id, ruolo_id, permesso_id) VALUES
+(3,5,1),
+(21,1,1),
+(22,1,2),
+(23,1,3),
+(24,1,4);
 
 ");
 

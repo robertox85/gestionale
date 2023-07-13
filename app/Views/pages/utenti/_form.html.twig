@@ -3,6 +3,16 @@
 </h3>
 
 <div class="grid sm:grid-cols-2 gap-4 sm:gap-6 mt-4">
+
+    <div class="mb-4">
+        <label for="username" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
+            {{ 'Username'|trans }}
+        </label>
+        <input type="username" name="username" id="username" value="{{ utente.username }}"
+               class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">
+    </div>
+
+
     <div class="mb-4">
         <label for="email" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
             {{ 'Email'|trans }}
