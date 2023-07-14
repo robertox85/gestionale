@@ -306,112 +306,32 @@ INSERT IGNORE INTO Permessi (id, nome, descrizione) VALUES
 
 -- Inserimento di un gruppo
 INSERT IGNORE INTO Gruppi (id, nome) VALUES 
-(1, 'Gruppo A'),
-(2, 'Gruppo B'),
-(3, 'Gruppo C'),
-(4, 'Gruppo D'),
-(5, 'Gruppo E'),
-(6, 'Gruppo F'),
-(7, 'Gruppo G'),
-(8, 'Gruppo H'),
-(9, 'Gruppo I'),
-(10, 'Gruppo L'),
-(11, 'Gruppo M'),
-(12, 'Gruppo N'),
-(13, 'Gruppo O'),
-(14, 'Gruppo P'),
-(15, 'Gruppo Q'),
-(16, 'Gruppo R'),
-(17, 'Gruppo S'),
-(18, 'Gruppo T'),
-(19, 'Gruppo U'),
-(20, 'Gruppo V');
+(1, 'A'),
+(2, 'B'),
+(3, 'C'),
+(4, 'D'),
+(5, 'E'),
+(6, 'F'),
+(7, 'G'),
+(8, 'H'),
+(9, 'I'),
+(10, 'L'),
+(11, 'M'),
+(12, 'N'),
+(13, 'O'),
+(14, 'P'),
+(15, 'Q'),
+(16, 'R'),
+(17, 'S'),
+(18, 'T'),
+(19, 'U'),
+(20, 'V');
 -- 
 
 
 
 -- Inserimento di una pratica legata al sottogruppo e alla controparte
-INSERT IGNORE INTO Pratiche (id, nr_pratica, nome, tipologia, stato, competenza, ruolo_generale, giudice, id_gruppo) VALUES 
-(1, 'P001', 'Pratica 1', 'Civile', 'Aperta', 'Competenza 1', 'Ruolo Generale 1', 'Giudice 1', 1),
-(2, 'P002', 'Pratica 2', 'Penale', 'Aperta', 'Competenza 2', 'Ruolo Generale 2', 'Giudice 2', 2),
-(3, 'P003', 'Pratica 3', 'Civile', 'Aperta', 'Competenza 3', 'Ruolo Generale 3', 'Giudice 3', 3),
-(4, 'P004', 'Pratica 4', 'Penale', 'Aperta', 'Competenza 4', 'Ruolo Generale 4', 'Giudice 4', 4),
-(5, 'P005', 'Pratica 5', 'Civile', 'Aperta', 'Competenza 5', 'Ruolo Generale 5', 'Giudice 5', 5),
-(6, 'P006', 'Pratica 6', 'Penale', 'Aperta', 'Competenza 6', 'Ruolo Generale 6', 'Giudice 6', 6),
-(7, 'P007', 'Pratica 7', 'Civile', 'Aperta', 'Competenza 7', 'Ruolo Generale 7', 'Giudice 7', 7),
-(8, 'P008', 'Pratica 8', 'Penale', 'Aperta', 'Competenza 8', 'Ruolo Generale 8', 'Giudice 8', 8),
-(9, 'P009', 'Pratica 9', 'Civile', 'Aperta', 'Competenza 9', 'Ruolo Generale 9', 'Giudice 9', 9),
-(10, 'P010', 'Pratica 10', 'Penale', 'Aperta', 'Competenza 10', 'Ruolo Generale 10', 'Giudice 10', 10),
-(11, 'P011', 'Pratica 11', 'Civile', 'Aperta', 'Competenza 11', 'Ruolo Generale 11', 'Giudice 11', 11),
-(12, 'P012', 'Pratica 12', 'Penale', 'Aperta', 'Competenza 12', 'Ruolo Generale 12', 'Giudice 12', 12),
-(13, 'P013', 'Pratica 13', 'Civile', 'Aperta', 'Competenza 13', 'Ruolo Generale 13', 'Giudice 13', 13),
-(14, 'P014', 'Pratica 14', 'Penale', 'Aperta', 'Competenza 14', 'Ruolo Generale 14', 'Giudice 14', 14),
-(15, 'P015', 'Pratica 15', 'Civile', 'Aperta', 'Competenza 15', 'Ruolo Generale 15', 'Giudice 15', 15),
-(16, 'P016', 'Pratica 16', 'Penale', 'Aperta', 'Competenza 16', 'Ruolo Generale 16', 'Giudice 16', 16),
-(17, 'P017', 'Pratica 17', 'Civile', 'Aperta', 'Competenza 17', 'Ruolo Generale 17', 'Giudice 17', 17);
 
-
-
--- Inserimento di una scadenza legata alla pratica
-INSERT IGNORE INTO Scadenze (id, data, motivo, id_pratica) VALUES 
-(1, '2023-06-30', 'Scadenza 1', 1),
-(2, '2023-07-31', 'Scadenza 2', 2),
-(3, '2023-08-31', 'Scadenza 3', 3),
-(4, '2023-09-30', 'Scadenza 4', 4),
-(5, '2023-10-31', 'Scadenza 5', 5),
-(6, '2023-11-30', 'Scadenza 6', 6),
-(7, '2023-12-31', 'Scadenza 7', 7),
-(8, '2024-01-31', 'Scadenza 8', 8),
-(9, '2024-02-28', 'Scadenza 9', 9),
-(10, '2024-03-31', 'Scadenza 10', 10),
-(11, '2024-04-30', 'Scadenza 11', 11),
-(12, '2024-05-31', 'Scadenza 12', 12),
-(13, '2024-06-30', 'Scadenza 13', 13),
-(14, '2024-07-31', 'Scadenza 14', 14),
-(15, '2024-08-31', 'Scadenza 15', 15),
-(16, '2024-09-30', 'Scadenza 16', 16),
-(17, '2024-10-31', 'Scadenza 17', 17);
-
-
--- Inserimento di un'udienza legata alla pratica
-INSERT IGNORE INTO Udienze (id, descrizione, data, id_pratica) VALUES 
-(1, 'Udienza 1', '2023-07-15', 1),
-(2, 'Udienza 2', '2023-08-15', 2),
-(3, 'Udienza 3', '2023-09-15', 3),
-(4, 'Udienza 4', '2023-10-15', 4),
-(5, 'Udienza 5', '2023-11-15', 5),
-(6, 'Udienza 6', '2023-12-15', 6),
-(7, 'Udienza 7', '2024-01-15', 7),
-(8, 'Udienza 8', '2024-02-15', 8),
-(9, 'Udienza 9', '2024-03-15', 9),
-(10, 'Udienza 10', '2024-04-15', 10),
-(11, 'Udienza 11', '2024-05-15', 11),
-(12, 'Udienza 12', '2024-06-15', 12),
-(13, 'Udienza 13', '2024-07-15', 13),
-(14, 'Udienza 14', '2024-08-15', 14),
-(15, 'Udienza 15', '2024-09-15', 15),
-(16, 'Udienza 16', '2024-10-15', 16),
-(17, 'Udienza 17', '2024-11-15', 17);
-
--- Inserimento di una nota legata alla pratica
-INSERT IGNORE INTO Note 
-(id, tipologia, descrizione, visibilita, id_pratica) VALUES (1, 'Nota 1', 'Testo nota 1', 'Privata', 1),
-(2, 'Nota 2', 'Testo nota 2', 'Privata', 2),
-(3, 'Nota 3', 'Testo nota 3', 'Privata', 3),
-(4, 'Nota 4', 'Testo nota 4', 'Privata', 4),
-(5, 'Nota 5', 'Testo nota 5', 'Privata', 5),
-(6, 'Nota 6', 'Testo nota 6', 'Privata', 6),
-(7, 'Nota 7', 'Testo nota 7', 'Privata', 7),
-(8, 'Nota 8', 'Testo nota 8', 'Privata', 8),
-(9, 'Nota 9', 'Testo nota 9', 'Privata', 9),
-(10, 'Nota 10', 'Testo nota 10', 'Privata', 10),
-(11, 'Nota 11', 'Testo nota 11', 'Privata', 11),
-(12, 'Nota 12', 'Testo nota 12', 'Privata', 12),
-(13, 'Nota 13', 'Testo nota 13', 'Privata', 13),
-(14, 'Nota 14', 'Testo nota 14', 'Privata', 14),
-(15, 'Nota 15', 'Testo nota 15', 'Privata', 15),
-(16, 'Nota 16', 'Testo nota 16', 'Privata', 16),
-(17, 'Nota 17', 'Testo nota 17', 'Privata', 17);
 
 -- Inserimento di un permetto legato all ruolo
 INSERT IGNORE INTO Ruoli_Permessi(id, ruolo_id, permesso_id) VALUES

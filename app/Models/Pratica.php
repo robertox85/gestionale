@@ -208,10 +208,16 @@ class Pratica extends BaseModel
     {
         $db = Database::getInstance();
 
-        $sql = "SELECT MAX(CAST(nr_pratica AS UNSIGNED)) AS max_nr_pratica, LEFT(G.nome, 1) AS first_letter 
-            FROM Pratiche P 
-            LEFT JOIN Gruppi G ON P.id_gruppo = G.id 
-            WHERE P.id_gruppo = :id_gruppo";
+        // Nota: assumiamo che 'nr_pratica' sia una stringa e che la struttura sia 'P####GA', 'P####GB', ecc.
+        $sql = "SELECT 
+                MAX(CAST(SUBSTRING(nr_pratica, 2, 4) AS UNSIGNED)) AS max_nr_pratica,
+                LEFT(G.nome, 1) AS first_letter 
+            FROM 
+                Pratiche P 
+            LEFT JOIN 
+                Gruppi G ON P.id_gruppo = G.id 
+            WHERE 
+                P.id_gruppo = :id_gruppo";
 
         $options = [
             'query' => $sql,
@@ -221,7 +227,9 @@ class Pratica extends BaseModel
         $maxNrPratica = $result[0]->max_nr_pratica ?? 0;
         $firstLetter = $result[0]->first_letter ?? '';
         $nextNrPratica = $maxNrPratica + 1;
-        return 'P'.sprintf('%04d', $nextNrPratica).'G'.$firstLetter;
+
+        // Restituisce una stringa formattata con la struttura 'P####G[lettera]'
+        return sprintf('P%04dG%s', $nextNrPratica, $firstLetter);
     }
     public static function getAllPratiche(array $args = [])
     {

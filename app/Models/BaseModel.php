@@ -384,6 +384,7 @@ class BaseModel
     // setProperties
     public function setFieldIfExistInPost($class, $field)
     {
+        //$class = self::class;
         $setField = str_replace('_', '', $field);
         $setter = 'set' . ucfirst($setField);
         $data = $this->sanificaInput($_POST);

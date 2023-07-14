@@ -115,7 +115,7 @@ class UserController extends BaseController
         $pratiche = [];
         foreach ($gruppi as $gruppo) {
             $gruppo = new Gruppo($gruppo->id);
-            if ($gruppo->getPratiche() !== false) {
+            if ($gruppo->getPratiche() !== false && !empty($gruppo->getPratiche())) {
                 $hasPratiche = true;
                 $pratiche[] = $gruppo->getPratiche();
             }
@@ -158,6 +158,7 @@ class UserController extends BaseController
             $this->args['where']['id_utente'] = $id;
             foreach ($pratiche as $pratica) {
                 $pratica = new Pratica($pratica[0]);
+                $nrPratica = $pratica->getNrPratica();
                 $table->addRow(
                     [
                         'cells' => [
@@ -225,14 +226,14 @@ class UserController extends BaseController
             return;
         }
 
-        $anagrafica = $this->creaAnagrafica($utente->getId(), $dati);
+        $anagrafica = $this->creaAnagrafica($utente->getId(), $_POST);
 
         if (!$anagrafica) {
             header('Location: /utenti/crea');
             return;
         }
 
-        $utente->aggiornaAssociazioniGruppo($dati['gruppi'], $utente->getId());
+        $utente->aggiornaAssociazioniGruppo($_POST['gruppi'], $utente->getId());
 
         Helper::addSuccess('Utente creato con successo');
         $this->redirectToReferer();
