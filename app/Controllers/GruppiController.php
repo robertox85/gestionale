@@ -117,6 +117,7 @@ class GruppiController extends BaseController
         }
 
         header('Location: /gruppi');
+        exit;
     }
     public function editGruppo(): void
     {
@@ -153,6 +154,7 @@ class GruppiController extends BaseController
         Helper::addSuccess('Gruppo modificato con successo');
 
         header('Location: /gruppi/');
+        exit;
     }
     public function deleteGruppo($id): void
     {
@@ -172,10 +174,14 @@ class GruppiController extends BaseController
 
             Database::commit();
 
-            header('Location: /gruppi');
+            Helper::addSuccess('Gruppo eliminato con successo');
+
         } catch (\Exception $e) {
             echo $e->getMessage();
         }
+
+        header('Location: /gruppi');
+        exit;
     }
 
     // Helpers

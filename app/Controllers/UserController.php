@@ -92,6 +92,7 @@ class UserController extends BaseController
                 'currentPage' => $this->args['currentPage'],
             ],
         ]);
+        exit;
     }
     public function contropartiView(): void
     {
@@ -158,7 +159,6 @@ class UserController extends BaseController
             $this->args['where']['id_utente'] = $id;
             foreach ($pratiche as $pratica) {
                 $pratica = new Pratica($pratica[0]);
-                $nrPratica = $pratica->getNrPratica();
                 $table->addRow(
                     [
                         'cells' => [
@@ -182,6 +182,7 @@ class UserController extends BaseController
             'rows' => ($hasPratiche) ? $table->getRows() : [],
             'hasPratiche' => $hasPratiche
         ]);
+        exit;
     }
     public function utenteCreaView(): void
     {
@@ -189,6 +190,7 @@ class UserController extends BaseController
             'ruoli' => Ruolo::getAll(),
             'gruppi' => Gruppo::getAll()
         ]);
+        exit;
     }
 
     // Actions
@@ -237,7 +239,8 @@ class UserController extends BaseController
 
         Helper::addSuccess('Utente creato con successo');
         $this->redirectToReferer();
-        //header('Location: /utenti');
+        header('Location: /utenti');
+        exit;
     }
 
     // Private methods

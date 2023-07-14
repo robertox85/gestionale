@@ -114,16 +114,6 @@ class PraticheController extends BaseController
     }
     public function editPraticaView(int $id_pratica)
     {
-        /*
-        $assistiti = Utente::getAssistiti();
-        $assistiti = array_map(function ($assistito) {
-            return new Utente($assistito->id);
-        }, $assistiti);
-        $controparti = Utente::getControparti();
-        $controparti = array_map(function ($controparte) {
-            return new Utente($controparte->id);
-        }, $controparti);
-        */
         echo $this->view->render(
             'editPratica.html.twig',
             [
@@ -151,7 +141,7 @@ class PraticheController extends BaseController
         $this->createAndSaveNote($pratica);
 
         Helper::addSuccess('Pratica creata con successo');
-        header("Location: /pratiche/edit/" . $pratica->getId());
+        header('Location: /pratiche');
         exit();
     }
 
@@ -167,7 +157,8 @@ class PraticheController extends BaseController
         $this->createAndSaveNote($pratica);
 
         Helper::addSuccess('Pratica aggiornata con successo');
-        header('Location: /pratiche/edit/' . $pratica->getId());
+        header('Location: /pratiche');
+        exit();
 
     }
     public function deletePratica(int $id_pratica)
@@ -191,12 +182,12 @@ class PraticheController extends BaseController
         } catch (\Exception $e) {
             Database::rollBack();
             echo $e->getMessage();
-            header('Location: /pratiche');
         }
 
 
         // Reindirizzare l'utente alla pagina di visualizzazione della pratica appena creata
         header("Location: /pratiche");
+        exit();
     }
 
     // Private methods
