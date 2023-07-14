@@ -313,6 +313,86 @@ if ($modalAddPermessi !== null) {
 }
 
 
+const $modalAddGruppi = document.getElementById('modalAddGruppi');
+if ($modalAddGruppi !== null) {
+    // options with default values
+    const options = {
+        placement: 'center',
+        backdrop: 'dynamic',
+        backdropClasses: 'bg-gray-900 bg-opacity-50 dark:bg-opacity-80 fixed inset-0 z-40',
+        closable: true,
+        onHide: () => {
+            console.log('modal is hidden');
+        },
+        onShow: () => {
+            console.log('modal is shown');
+        },
+        onToggle: () => {
+            console.log('modal has been toggled');
+        }
+    };
+
+    // init the modal menu
+    const modalAddGruppi = new Modal($modalAddGruppi, options);
+    // on #add-assistito click show the modal
+    document.getElementById('add-gruppo').addEventListener('click', () => {
+        modalAddGruppi.show();
+    });
+
+    const $closeModal = document.getElementsByClassName('close-modal');
+
+    // on #close-modal click hide the modal
+    for (let i = 0; i < $closeModal.length; i++) {
+        $closeModal[i].addEventListener('click', () => {
+            modalAddPermessi.hide();
+        });
+    }
+
+    const $saveModal = document.getElementById('save-modal');
+    // on #save-modal click hide the modal
+    $saveModal.addEventListener('click', () => {
+        // send the form data to the server via Axios
+        let nome_gruppo = $modalAddGruppi.querySelector('#nome_gruppo').value;
+        let utenti = [];
+        let pratiche = [];
+        let utentiSelect = $modalAddGruppi.querySelector('#utenti');
+        let praticheSelect = $modalAddGruppi.querySelector('#pratiche');
+        for (let i = 0; i < utentiSelect.length; i++) {
+            if (utentiSelect[i].selected) {
+                utenti.push(utentiSelect[i].value);
+            }
+        }
+        for (let i = 0; i < praticheSelect.length; i++) {
+            if (praticheSelect[i].selected) {
+                pratiche.push(praticheSelect[i].value);
+            }
+        }
+
+        axios.post('/creaGruppoAjax', {
+            nome_gruppo: nome_gruppo ? nome_gruppo : '',
+            utenti: utenti ? utenti : '',
+            pratiche: pratiche ? pratiche : '',
+        })
+            .then(response => {
+                if (response.data.error) {
+                    //Toastr.error(response.data.error);
+                    alert(response.data.message);
+                } else {
+                    // clear the modal form
+                    $modalAddPermessi.querySelector('#nome').value = '';
+                    $modalAddPermessi.querySelector('#utenti').value = '';
+                    $modalAddPermessi.querySelector('#pratiche').value = '';
+                }
+
+                modalAddGruppi.hide();
+            })
+            .catch(error => {
+                console.error(error);
+            });
+    });
+}
+
+
 var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
 var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
 

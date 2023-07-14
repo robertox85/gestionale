@@ -31,10 +31,7 @@ $routes = function (RouteCollector $r) {
     //$r->addRoute('POST', '/sign-up', ['App\Controllers\AuthController', 'signUpUser']);
 
     // Usa l'istanza di AuthenticationMiddleware per le tue rotte che richiedono autenticazione
-    $r->addRoute('GET', '/', [
-        'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\HomeController', 'homeView']
-    ]);
+    $r->addRoute('GET', '/', ['App\Controllers\HomeController', 'homeView']);
 
     $middlewareStack = new MiddlewareStack();
     $middlewareStack->add(new AuthenticationMiddleware(
@@ -131,42 +128,6 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\PraticheController', 'createPratica']
     ]);
 
-    // Assistiti
-    $r->addRoute('GET', '/assistiti', [
-        'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\UserController', 'assistitiView']
-    ]);
-
-    // Assistito
-    $r->addRoute('GET', '/assistito/{id:\d+}', [
-        'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\UserController', 'assistitoView']
-    ]);
-
-    // Controparti
-    $r->addRoute('GET', '/controparti', [
-        'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\UserController', 'contropartiView']
-    ]);
-
-    // Controparte
-    $r->addRoute('GET', '/controparte/{id:\d+}', [
-        'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\UserController', 'controparteView']
-    ]);
-
-    // Collaboratori
-    $r->addRoute('GET', '/collaboratori', [
-        'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\UserController', 'collaboratoriView']
-    ]);
-
-    // Collaboratore
-    $r->addRoute('GET', '/collaboratore/{id:\d+}', [
-        'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\UserController', 'collaboratoreView']
-    ]);
-
     // Ricerca
     $r->addRoute('GET', '/ricerca', [
         'middleware' => new AuthenticationMiddleware(),
@@ -176,14 +137,27 @@ $routes = function (RouteCollector $r) {
     // Utenti
     $r->addRoute('GET', '/utenti', [
         'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\UserController', 'renderUtentiTable']
+        'handler' => ['App\Controllers\UserController', 'utentiView']
     ]);
 
-    // get utenti/filters
-    $r->addRoute('POST', '/utenti/filtro', [
+
+    $r->addRoute('POST', '/utenti', [
         'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\UserController', 'utentiFilters']
+        'handler' => ['App\Controllers\UserController', 'utentiView']
     ]);
+
+
+    // Assistiti
+    $r->addRoute('GET', '/controparti', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\UserController', 'contropartiView']
+    ]);
+
+    $r->addRoute('GET', '/assistiti', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\UserController', 'assistitiView']
+    ]);
+
 
     // Utente
     $r->addRoute('GET', '/utenti/edit/{id:\d+}', [
@@ -215,12 +189,6 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\UserController', 'createUtente']
     ]);
 
-
-    // utenti/search/{id}
-    $r->addRoute('GET', '/utenti/search/{id:\d+}', [
-        'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\UserController', 'searchUtenteView']
-    ]);
 
     // Archivio
     $r->addRoute('GET', '/archivio', [
@@ -254,6 +222,13 @@ $routes = function (RouteCollector $r) {
         'handler' => ['App\Controllers\GruppiController', 'creaGruppoView']
     ]);
 
+
+    // creaGruppoAjax
+    $r->addRoute('POST', '/creaGruppoAjax', [
+        'middleware' => new AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\GruppiController', 'creaGruppoAjax']
+    ]);
+
     $r->addRoute('POST', '/gruppi/crea', [
         'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\GruppiController', 'creaGruppo']
@@ -269,11 +244,6 @@ $routes = function (RouteCollector $r) {
     $r->addRoute('GET', '/gruppi/edit/{id:\d+}', [
         'middleware' => new AuthenticationMiddleware(),
         'handler' => ['App\Controllers\GruppiController', 'editGruppoView']
-    ]);
-
-    $r->addRoute('GET', '/gruppi/view/{id:\d+}', [
-        'middleware' => new AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\GruppiController', 'viewGruppo']
     ]);
 
     $r->addRoute('POST', '/gruppi/edit', [

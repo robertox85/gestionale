@@ -28,6 +28,7 @@
                 </div>
                 <div class="w-full md:w-auto flex flex-col md:flex-row space-y-2 md:space-y-0 items-stretch md:items-center justify-end md:space-x-3 flex-shrink-0">
 
+                    {% if filters %}
 
                     <button id="filterDropdownButton" data-dropdown-toggle="filterDropdown"
                             class="w-full md:w-auto flex items-center justify-center py-2 px-4 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-primary-700 focus:z-10 focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
@@ -41,8 +42,9 @@
                         <h6 class="mb-3 text-sm font-medium text-gray-900 dark:text-white">
                             {{ 'Filtra per ruolo' | trans }}
                         </h6>
-                        <form name="filterForm" action="{{ url('utenti/filtro') }}" method="POST">
+                        <form name="filterForm" method="POST" action="{{ url('utenti') }}">
                             <input type="hidden" name="csrf_token" value="{{ csrf_token('filter') }}">
+                            <input type="hidden" name="filter" value="1">
 
                             <ul class="space-y-2 text-sm" aria-labelledby="filterDropdownButton">
 
@@ -52,6 +54,7 @@
                                                 id="ruolo-{{ ruolo.getId() }}"
                                                 name="ruoli[]"
                                                 type="checkbox" value="{{ ruolo.getId() }}"
+                                                {% if ruolo.getId() in selectedRoles %}checked{% endif %}
                                                 class="w-4 h-4 bg-gray-100 border-gray-300 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
                                         <label for="ruolo-{{ ruolo.getId() }}"
                                                class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100 mb-0 ">
@@ -61,27 +64,7 @@
                                 {% endfor %}
 
                             </ul>
-
-
-                            <ul class="space-y-2 text-sm" aria-labelledby="filterDropdownButton">
-
-                                {% for gruppo in filters.gruppi %}
-                                    <li class="flex items-center">
-                                        <input
-                                                id="ruolo-{{ gruppo.getId() }}"
-                                                name="ruoli[]"
-                                                type="checkbox" value="{{ gruppo.getId() }}"
-                                                class="w-4 h-4 bg-gray-100 border-gray-300 rounded text-primary-600 focus:ring-primary-500 dark:focus:ring-primary-600 dark:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500">
-                                        <label for="ruolo-{{ gruppo.getId() }}"
-                                               class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-100 mb-0 ">
-                                            {{ gruppo.getNome() }} ({{ gruppo.getCountUtenti() }})
-                                        </label>
-                                    </li>
-                                {% endfor %}
-
-                            </ul>
-
-                            <!-- Separator -->
+                             <!-- Separator -->
                             <hr class="my-4 border-gray-200 dark:border-gray-600">
                             <!-- Apply button -->
                             <button type="submit"
@@ -96,6 +79,7 @@
 
                     </div>
 
+                    {% endif %}
 
                     <form action="{{ url('admin/utenti/export') }}" method="POST">
 

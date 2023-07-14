@@ -197,6 +197,11 @@ class Helper
 
         $pageTitle = rtrim($pageTitle, ' - ');
 
+        // if PageTitle is empty, set it to Home
+        if (empty($pageTitle)) {
+            $pageTitle = 'Home';
+        }
+
         return $pageTitle;
     }
 

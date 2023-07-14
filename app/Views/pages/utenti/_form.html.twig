@@ -191,13 +191,15 @@
         <label for="gruppi" class="block mb-2 text-sm text-gray-600 dark:text-gray-400">
             {{ 'Groups'|trans }}
         </label>
+
         <select class="select2" name="gruppi[]" multiple="multiple">
             {% for gruppo in gruppi %}
                 <option
-                        {% if gruppo.getId() in utente.getGruppi() | json_encode() %}
-                            selected
+                        {% if gruppo is defined %}
+                            {% if gruppo.getId() in utente.getGruppi() | json_encode() %}
+                                selected
+                            {% endif %}
                         {% endif %}
-
                         value="{{ gruppo.getId() }}">
                     {{ gruppo.getNome() }}
                 </option>
@@ -213,18 +215,19 @@
                   class="block w-full px-4 py-2 border rounded-lg text-gray-900 dark:bg-gray-700 dark:text-gray-300 dark:border-gray-600 focus:border-blue-500 focus:outline-none">{{ utente.getAnagrafica().getNote() }}</textarea>
     </div>
 
-
-    <!-- Gruppo di appartenenza -->
-
-
-
-
-
-
-
-
-
 </div>
+
+{% if hasPratiche %}
+<hr class="my-8">
+    <p class=" text-xl font-bold mb-4 mt-8">
+        {{ 'Practices associated with the user'|trans }}
+    </p>
+<div class="overflow-x-auto">
+    {% include 'table.html.twig' with {'headers': headers, 'rows': rows} %}
+</div>
+
+{% endif %}
+
 
 <div class="fixed right-6 bottom-6 group ">
     <button type="submit"  class="submit">

@@ -67,7 +67,7 @@ class AuthenticationMiddleware
 
         //$user = Utente::findByIdUtente($_SESSION['utente']['id']);
         $user = new Utente($_SESSION['utente']['id']);
-        $ruolo = $user->getRuolo();
+        $ruolo = $user->getRuoloObj();
         if ($ruolo !== null) {
             $nomeRuolo = $ruolo->getNome();
             $userRole = strtolower(str_replace(' ', '_', $nomeRuolo));

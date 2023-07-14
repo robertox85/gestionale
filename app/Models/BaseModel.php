@@ -166,6 +166,42 @@ class BaseModel
     }
 
 
+    /*
+     * Metodo getAll():
+     *
+     * Questo metodo accetta un array di argomenti per definire la query SQL per ottenere dati dal database.
+     *
+     * Gli argomenti sono:
+     *
+     * 'where' => Questa è un'opzione per aggiungere una clausola WHERE alla query SQL. Deve essere un array associativo,
+     *            dove la chiave è il nome del campo nel database e il valore può essere una stringa o un array.
+     *
+     * 'operator' => Questo è l'operatore da utilizzare nella clausola WHERE. Può essere uno dei seguenti:
+     *               '=', '!=', '<', '>', '<=', '>=', 'IN', 'NOT IN'.
+     *               Tieni presente che '!=' e 'NOT IN' sono per le disuguaglianze.
+     *               L'operatore di disuguaglianza '!=' accetta un singolo valore, mentre 'NOT IN' può accettare un array di valori.
+     *
+     * Esempi di uso:
+     *
+     * // Ottieni tutti gli utenti con un ruolo diverso da 6
+     * $utenti = Utente::getAll([
+     *     'where' => [
+     *         'id_ruolo' => '6',
+     *         'operator' => '!='
+     *     ]
+     * ]);
+     *
+     * // Ottieni tutti gli utenti il cui ruolo non è tra 1, 2 e 6
+     * $utenti = Utente::getAll([
+     *     'where' => [
+     *         'id_ruolo' => [1, 2, 6],
+     *         'operator' => 'NOT IN'
+     *     ]
+     * ]);
+     *
+     * Assicurati di utilizzare l'operatore corretto in base al tipo e al numero dei valori che stai passando.
+     */
+
     public static function getAll(array $args = [])
     {
         $db = Database::getInstance();
@@ -176,11 +212,35 @@ class BaseModel
         $sql = "SELECT * FROM " . $tableName;
 
         $options = [];
-        if (!empty($args)) {
+
+        if(!empty($args['limit'])) {
             $options['limit'] = $args['limit'];
+        }
+
+        if(!empty($args['currentPage'])) {
             $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
-            $options['order_dir'] = $args['order'] ?? 'ASC';
-            $options['order_by'] = $args['sort'] ?? 'id';
+        }
+
+        if(!empty($args['order'])) {
+            $options['order_dir'] = $args['order'];
+        }
+
+        if(!empty($args['sort'])) {
+            $options['order_by'] = $args['sort'];
+        }
+
+        if (isset($args['where']['id_ruolo'])) {
+            $operator = $args['where']['operator'] ?? '=';
+            if (is_array($args['where']['id_ruolo'])) {
+                $placeholders = implode(',', array_fill(0, count($args['where']['id_ruolo']), '?'));
+                $sql .= " WHERE $tableName.id_ruolo $operator ($placeholders)";
+                foreach ($args['where']['id_ruolo'] as $key => $value) {
+                    $options['params'][] = $value;
+                }
+            } else {
+                $sql .= " WHERE $tableName.id_ruolo $operator ?";
+                $options['params'][] = $args['where']['id_ruolo'];
+            }
         }
 
         $options['query'] = $sql;
@@ -195,7 +255,7 @@ class BaseModel
     }
 
     // count
-    public static function getTotalCount()
+    public static function getTotalCount($args = [])
     {
         $db = Database::getInstance();
         $className = static::class;
@@ -203,6 +263,13 @@ class BaseModel
         $tableName = self::getPluralName($shortClassName);
 
         $sql = "SELECT COUNT(*) FROM " . $tableName;
+
+        // if there are args add where clause
+        if (isset($args['where']['id_ruolo']) && is_array($args['where']['id_ruolo'])) {
+            $ruoli = implode(',', array_map('intval', $args['where']['id_ruolo']));
+            $sql .= " WHERE $tableName.id_ruolo IN ($ruoli)";
+        }
+
         $options = [];
         $options['query'] = $sql;
 
@@ -304,7 +371,6 @@ class BaseModel
         }
         return $array;
     }
-
     private function getProperties()
     {
         $array = get_object_vars($this);
@@ -315,5 +381,33 @@ class BaseModel
         return $array;
     }
 
+    // setProperties
+    public function setFieldIfExistInPost($class, $field)
+    {
+        $setField = str_replace('_', '', $field);
+        $setter = 'set' . ucfirst($setField);
+        $data = $this->sanificaInput($_POST);
+        if (isset($_POST[$field])) {
+            $class->$setter($data[$field]);
+        }
+    }
+
+    public function sanificaInput(array|null $dati = null , array $ignore_keys = [])
+    {
+        if (is_null($dati)) {
+            return [];
+        }
+        $sanitized = [];
+        foreach ($dati as $key => $value) {
+            if (in_array($key, $ignore_keys)) {
+                $sanitized[$key] = $value;
+            } else if (is_array($value)) {
+                $sanitized[$key] = $this->sanificaInput($value);
+            } else {
+                $sanitized[$key] = trim(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
+            }
+        }
+        return $sanitized;
+    }
 
 }

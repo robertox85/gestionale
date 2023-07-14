@@ -38,8 +38,8 @@
                                 {% endif %}
                             {% endif %}
                             value="{{ utente.getId() }}">
-                        {{ utente.getAnagrafica().nome }} {{ utente.getAnagrafica().cognome }}
-                        - {{ utente.getRuolo().nome }}
+                        {{ utente.getAnagrafica().nome }} {{ utente.getAnagrafica().cognome }} {{ utente.getAnagrafica().getDenominazione() }}
+                        - {{ utente.getRuoloObj().nome }}
                     </option>
                 {% endfor %}
             </select>
@@ -53,12 +53,12 @@
                 {% for pratica in pratiche %}
                     <option
                             {% if gruppo is defined %}
-                                {% if pratica.id in gruppo.getPratiche()  %}
+                                {% if pratica.getId() in gruppo.getPratiche()  %}
                                     selected
                                 {% endif %}
                             {% endif %}
-                            value="{{ pratica.id }}">
-                        {{ pratica.nome }}
+                            value="{{ pratica.getId() }}">
+                        {{ pratica.getNome() }}
                     </option>
                 {% endfor %}
             </select>

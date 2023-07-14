@@ -16,6 +16,7 @@ class Ruolo extends BaseModel
     protected ?string $updated_at;
 
     private ?int $countUtenti;
+    private ?array $permessi;
 
     // getCreatedAd
     public function getCreatedAt()
@@ -39,6 +40,23 @@ class Ruolo extends BaseModel
     public function setUpdatedAt($updated_at)
     {
         $this->updated_at = $updated_at;
+    }
+
+
+
+    public function setCountUtenti($countUtenti)
+    {
+        $this->countUtenti = $countUtenti;
+    }
+
+    public function getPermessi()
+    {
+        return $this->permessi;
+    }
+
+    public function setPermessi($permessi)
+    {
+        $this->permessi = $permessi;
     }
 
     public function getId()
@@ -164,10 +182,7 @@ class Ruolo extends BaseModel
         return $result[0]->count;
     }
 
-    public function setCountUtenti($getCountUtenti)
-    {
-        $this->countUtenti = $getCountUtenti;
-    }
+
 
 
 }

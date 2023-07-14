@@ -2,49 +2,47 @@
 
 namespace App\Controllers;
 
-use Twig\Environment;
+use App\Libraries\Auth;
+use App\Libraries\Table;
 use App\Libraries\TwigConfigurator;
 use App\Libraries\TwigGlobalVars;
-use App\Libraries\Database;
+use Twig\Environment;
 
 abstract class BaseController
 {
     protected Environment $view;
 
+    protected Table $table;
+    protected array $args;
+    protected array $filters;
+
+    protected Auth $auth;
 
     public function __construct()
     {
         $this->view = TwigConfigurator::configure();
+        $this->args = $this->getArgsArray();
+        $this->auth = new Auth();
         TwigGlobalVars::addGlobals($this->view);
     }
 
-    protected function createViewArgs()
-    {
-        $limit = $_GET['limit'] ?? 10;
-        $currentPage = $_GET['page'] ?? 1;
-        $sort = $_GET['sort'] ?? 'id';
-        $direction = $_GET['direction'] ?? 'asc';
 
+    public function getArgsArray()
+    {
         return [
-            'limit' => $limit,
-            'currentPage' => $currentPage,
-            'sort' => $sort,
-            'order' => $direction,
+            'limit' => $_GET['limit'] ?? 10,
+            'currentPage' => $_GET['page'] ?? 1,
+            'sort' =>$_GET['sort'] ?? 'id',
+            'order' => $_GET['direction'] ?? 'asc',
         ];
     }
 
     protected function createActionsCell($entity)
     {
-        // if is Utenti, return only view and edit
-        if ($entity->getTableName() === 'Utenti') {
-            return $this->createSearchCell($entity) . $this->createEditCell($entity) . $this->createDeleteCell($entity);
-        }
-
         return $this->createEditCell($entity) . $this->createDeleteCell($entity);
-
     }
 
-    private function createEditCell($entity)
+    protected function createEditCell($entity)
     {
         // get name from entity
         $tableName = $entity->getTableName();
@@ -64,23 +62,5 @@ abstract class BaseController
         // get name from entity
         $tableName = $entity->getTableName();
         return '<a href="/' . strtolower($tableName) . '/search/' . $entity->getId() . '" class="text-xl "><ion-icon name="search-outline" role="img" class="md hydrated text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-500"></ion-icon></a>';
-    }
-
-    public function sanificaInput(array|null $dati = null , array $ignore_keys = [])
-    {
-        if (is_null($dati)) {
-            return [];
-        }
-        $sanitized = [];
-        foreach ($dati as $key => $value) {
-            if (in_array($key, $ignore_keys)) {
-                $sanitized[$key] = $value;
-            } else if (is_array($value)) {
-                $sanitized[$key] = $this->sanificaInput($value);
-            } else {
-                $sanitized[$key] = trim(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
-            }
-        }
-        return $sanitized;
     }
 }

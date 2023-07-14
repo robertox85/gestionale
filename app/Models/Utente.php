@@ -21,6 +21,20 @@ class Utente extends BaseModel
 
     private array $errors = [];
 
+    private static function getWhereClause(mixed $filters)
+    {
+        $where = '';
+        $params = [];
+        if (isset($filters['filters']) && $filters['filters'] != '') {
+            // $filters['filters']['ruoli']
+            $where .= ' WHERE ';
+            $where .= 'ruoli.id = :ruoli';
+            // is an array of ruoli id
+            $params[':ruoli'] = $filters['filters']['ruoli'];
+        }
+        return ['where' => $where, 'params' => $params];
+    }
+
     public function setRuolo($ruolo)
     {
         $this->ruolo = $ruolo;
@@ -120,33 +134,10 @@ class Utente extends BaseModel
         $this->username = $username;
     }
 
-
-    public static function getControparti($args = [])
+    public function getRuolo()
     {
-        $db = Database::getInstance();
-        $sql = "SELECT * FROM Utenti WHERE id_ruolo = 6";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [];
-        $controparti = $db->query($options);
-        return array_map(function ($controparte) {
-            return new Utente($controparte->id);
-        }, $controparti);
+        return $this->ruolo;
     }
-
-    public static function getAssistiti()
-    {
-        $db = Database::getInstance();
-        $sql = "SELECT * FROM Utenti WHERE id_ruolo = 5";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [];
-        $assistiti = $db->query($options);
-        return array_map(function ($assistito) {
-            return new Utente($assistito->id);
-        }, $assistiti);
-    }
-
     public static function getCurrentUser()
     {
         $db = Database::getInstance();
@@ -175,7 +166,7 @@ class Utente extends BaseModel
 
     }
 
-    public function getRuolo()
+    public function getRuoloObj()
     {
         return Ruolo::getById($this->getRuoloId());
     }
@@ -321,6 +312,11 @@ class Utente extends BaseModel
             $pratiche = array_merge($pratiche, $gruppo->getPratiche());
         }
 
+        // return instances of Pratica
+        array_walk($pratiche, function (&$pratica) {
+            $pratica = new Pratica($pratica);
+        });
+
         return $pratiche;
     }
 
@@ -353,10 +349,13 @@ class Utente extends BaseModel
         $options['params'] = [':id_utente' => $this->getId()];
         $result = $db->query($options);
         // return instance of Gruppo
-        return array_map(function ($gruppo) {
+        /*return array_map(function ($gruppo) {
             return new Gruppo($gruppo->id);
-        }, $result);
+        }, $result);*/
+        return $result;
     }
+    
+    
 
     public function preparaAggiornamento(array $data)
     {
@@ -436,49 +435,36 @@ class Utente extends BaseModel
 
 
     // getAllUtenti (with Anagrafica, Gruppi and Pratiche)
-    public static function getAllUtenti($args = [])
+    public static function getAllUtenti(array $args = [])
     {
-        /*
         $db = Database::getInstance();
-        $className = static::class;
-        $shortClassName = (new \ReflectionClass($className))->getShortName();
-        $tableName = self::getPluralName($shortClassName);
-
-        $sql = "SELECT * FROM " . $tableName;
-
-        $options = [];
-        if (!empty($args)) {
-            $options['limit'] = $args['limit'];
-            $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
-            $options['order_dir'] = $args['order'] ?? 'ASC';
-            $options['order_by'] = $args['sort'] ?? 'id';
-        }
-
-        $options['query'] = $sql;
-
-        // return instance of the class
-        $result = $db->query($options);
-        $array = [];
-        foreach ($result as $record) {
-            $array[] = new $className($record->id);
-        }
-        return $array;*/
-
-
-        $db = Database::getInstance();
-        $className = static::class;
-        $shortClassName = (new \ReflectionClass($className))->getShortName();
-        $tableName = self::getPluralName($shortClassName);
-
-        $sql = "SELECT $tableName.id AS utente_id, Anagrafiche.nome as anagrafica_nome, Gruppi.nome as gruppi_nome, Pratiche.nome as pratica_nome FROM " . $tableName;
-        // LEFT JOIN Anagrafica
-        $sql .= " LEFT JOIN Anagrafiche ON " . $tableName . ".id = Anagrafiche.id_utente";
-        // LEFT JOIN Utenti_Gruppi
-        $sql .= " LEFT JOIN Utenti_Gruppi ON " . $tableName . ".id = Utenti_Gruppi.id_utente";
-        // LEFT JOIN Gruppi
+        $sql = "SELECT Utenti.id AS utente_id, Anagrafiche.nome as anagrafica_nome, 
+        COUNT(DISTINCT Gruppi.id) as count_gruppi, 
+        COUNT(DISTINCT Pratiche.id) as count_pratiche FROM Utenti";
+// LEFT JOIN Anagrafica
+        $sql .= " LEFT JOIN Anagrafiche ON Utenti.id = Anagrafiche.id_utente";
+// LEFT JOIN Utenti_Gruppi
+        $sql .= " LEFT JOIN Utenti_Gruppi ON Utenti.id = Utenti_Gruppi.id_utente";
+// LEFT JOIN Gruppi
         $sql .= " LEFT JOIN Gruppi ON Utenti_Gruppi.id_gruppo = Gruppi.id";
-        // LEFT JOIN Pratiche
+// LEFT JOIN Pratiche
         $sql .= " LEFT JOIN Pratiche ON Gruppi.id = Pratiche.id_gruppo";
+
+        // WHERE
+        // if $args['filters'] is not empty, add WHERE clause
+        if (!empty($args['where'])) {
+            $sql .= " WHERE ";
+            // id_ruolo is in array of ruoli
+
+
+            if (isset($args['where']['id_ruolo']) && is_array($args['where']['id_ruolo'])) {
+                $ruoli = implode(',', array_map('intval', $args['where']['id_ruolo']));
+                $sql .= "Utenti.id_ruolo IN ($ruoli)";
+            }
+        }
+
+        $sql .= " GROUP BY Utenti.id, Anagrafiche.nome, Anagrafiche.denominazione";
+
 
         $options = [];
 
@@ -487,18 +473,19 @@ class Utente extends BaseModel
             $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
             $options['order_dir'] = $args['order'] ?? 'ASC';
             if ($args['sort'] == 'id') {
-                $options['order_by'] = "{$tableName}.id";
+                $options['order_by'] = "Utenti.id";
             } elseif ($args['sort'] == 'nome') {
                 $options['order_by'] = "COALESCE(NULLIF(Anagrafiche.nome, ''), NULLIF(Anagrafiche.denominazione, ''))";
             } elseif ($args['sort'] == 'pratiche') {
-                $options['order_by'] = 'pratiche.id';
+                $options['order_by'] = 'count_pratiche';
             } elseif ($args['sort'] == 'gruppi') {
-                $options['order_by'] = 'gruppi.id';
+                $options['order_by'] = 'count_gruppi';
             } else {
                 $options['order_by'] = $args['sort'];
             }
 
         }
+
 
         $options['query'] = $sql;
 
@@ -506,13 +493,38 @@ class Utente extends BaseModel
         $result = $db->query($options);
         $array = [];
         foreach ($result as $record) {
-            // remove duplicates
-            if (in_array($record->utente_id, array_column($array, 'id'))) {
-                continue;
-            }
-            $array[] = new $className($record->utente_id);
+            $array[] = new Utente($record->utente_id);
         }
+        // ora però se ci sono meno utenti dei limiti impostati, devo recuperare gli utenti mancanti
         return $array;
+    }
+
+    public function getGruppiCount()
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT COUNT(*) as count FROM Utenti_Gruppi WHERE id_utente = :id_utente";
+        $options = [
+            'query' => $sql,
+            'params' => [
+                ':id_utente' => $this->getId()
+            ]
+        ];
+        $result = $db->query($options);
+        return $result[0]->count;
+    }
+
+    public function getPraticheCount()
+    {
+        $db = Database::getInstance();
+        $sql = "SELECT COUNT(*) as count FROM Pratiche WHERE id_gruppo IN (SELECT id_gruppo FROM Utenti_Gruppi WHERE id_utente = :id_utente)";
+        $options = [
+            'query' => $sql,
+            'params' => [
+                ':id_utente' => $this->getId()
+            ]
+        ];
+        $result = $db->query($options);
+        return $result[0]->count;
     }
 
 

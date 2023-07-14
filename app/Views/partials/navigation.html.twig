@@ -30,70 +30,57 @@
             <!-- {% include ('search.html.twig') with { 'class': 'hidden md:block md:pl-2' } %}-->
 
         </div>
-        <div class="flex items-center lg:order-2">
-            <!-- <button
-                    type="button"
-                    data-drawer-toggle="drawer-navigation"
-                    aria-controls="drawer-navigation"
-                    class="p-2 mr-1 text-gray-500 rounded-lg md:hidden hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-            >
-                <span class="sr-only">Toggle search</span>
 
-                <ion-icon name="search-outline" class="w-6 h-6 text-xl"></ion-icon>
-            </button>-->
+        <div class="flex items-center lg:order-2">
+
             <button id="theme-toggle" type="button"
                     class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-4 focus:ring-gray-200 dark:focus:ring-gray-700 rounded-lg text-sm p-2.5">
                 <ion-icon id="theme-toggle-dark-icon" name="moon" class="w-5 h-5 text-xl hidden"></ion-icon>
                 <ion-icon id="theme-toggle-light-icon" name="sunny" class="w-5 h-5 text-xl hidden"></ion-icon>
             </button>
-
-            <button
-                    type="button"
-                    class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-                    id="user-menu-button"
-                    aria-expanded="false"
-                    data-dropdown-toggle="dropdown"
-            >
+            {% if session.utente %}
+                <button
+                        type="button"
+                        class="flex mx-3 text-sm bg-gray-800 rounded-full md:mr-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
+                        id="user-menu-button"
+                        aria-expanded="false"
+                        data-dropdown-toggle="dropdown"
+                >
                 <span class="sr-only">
                     {{ 'User menu'|trans }}
                 </span>
-                <img
-                        class="w-8 h-8 rounded-full"
-                        src="https://ui-avatars.com/api/?name={{ session.utente.nome ~ ' ' ~ session.utente.cognome ~ ' ' ~ session.utente.denominazione }}&color=7F9CF5&background=EBF4FF"
-                        alt="{{ session.utente.nome ~ ' ' ~ session.utente.cognome ~ ' ' ~ session.utente.denominazione }}"
-                />
-            </button>
+                    <img
+                            class="w-8 h-8 rounded-full"
+                            src="https://ui-avatars.com/api/?name={{ session.utente.nome ~ ' ' ~ session.utente.cognome ~ ' ' ~ session.utente.denominazione }}&color=7F9CF5&background=EBF4FF"
+                            alt="{{ session.utente.nome ~ ' ' ~ session.utente.cognome ~ ' ' ~ session.utente.denominazione }}"
+                    />
+                </button>
 
-            <div id="dropdown" class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y
+                <div id="dropdown" class="hidden z-50 my-4 w-56 text-base list-none bg-white rounded divide-y
                 divide-gray-100 shadow rounded-xl">
-                <div class="py-3 px-4">
-                    <a href="{{ url('utenti/edit/'~ session.utente.id) }}">
-              <span class="block text-sm font-semibold text-gray-900 dark:text-white">
+                    <div class="py-3 px-4">
+                        <a href="{{ url('utenti/edit/'~ session.utente.id) }}">
+                            <span class="block text-sm font-semibold text-gray-900 dark:text-white">
+                                {{ session.utente.nome ~ ' ' ~ session.utente.cognome  ~ '' ~ session.utente.denominazione }}
+                            </span>
+                            <span class="block text-sm text-gray-900 truncate dark:text-white">
+                            {{ session.utente.email }}
+                            </span>
+                        </a>
+                    </div>
 
-                      {{ session.utente.nome ~ ' ' ~ session.utente.cognome  ~ '' ~ session.utente.denominazione }}
-
-              </span>
-                        <span class="block text-sm text-gray-900 truncate dark:text-white">
-                        {{ session.utente.email }}
-                    </span>
-                    </a>
+                    <ul class="py-1 text-gray-700 dark:text-gray-300" aria-labelledby="dropdown">
+                        <li>
+                            <a href="{{ url('/sign-out') }}"  class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
+                                {{ 'Sign out'|trans }}
+                            </a>
+                        </li>
+                    </ul>
                 </div>
 
-                <ul
-
-                        class="py-1 text-gray-700 dark:text-gray-300"
-                        aria-labelledby="dropdown"
-                >
-                    <li>
-                        <a href="{{ url('/sign-out') }}"
-                           class="block py-2 px-4 text-sm hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
-                        >
-                            {{ 'Sign out'|trans }}
-                        </a>
-                    </li>
-                </ul>
-            </div>
+            {% endif %}
 
         </div>
+
     </div>
 </nav>

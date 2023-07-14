@@ -22,96 +22,100 @@ class Pratica extends BaseModel
     private $created_at;
     private $updated_at;
 
+
+    // getter and setter
     public function getId()
     {
         return $this->id;
     }
-
-    public function setId($id)
+    public function setId($id): void
     {
         $this->id = $id;
     }
-
-    public function getNrPratica()
+    public function getNrPratica(): ?string
     {
         return $this->nr_pratica;
     }
-
-    public function setNrPratica($nr_pratica)
+    public function setNrPratica($nr_pratica): void
     {
         $this->nr_pratica = $nr_pratica;
     }
-
-    public function getNome()
+    public function getNome(): ?string
     {
         return $this->nome;
     }
-
-    public function setNome($nome)
+    public function setNome($nome): void
     {
         $this->nome = $nome;
     }
-
-    public function getTipologia()
+    public function getTipologia(): ?string
     {
         return $this->tipologia;
     }
-
-    public function setTipologia($tipologia)
+    public function setTipologia($tipologia): void
     {
         $this->tipologia = $tipologia;
     }
-
-    public function getStato()
+    public function getStato(): ?string
     {
         return $this->stato;
     }
-
-    public function setStato($stato)
+    public function setStato($stato): void
     {
         $this->stato = $stato;
     }
-
     public function getCompetenza()
     {
         return $this->competenza;
     }
-
     public function setCompetenza($competenza)
     {
         $this->competenza = $competenza;
     }
-
     public function getRuoloGenerale()
     {
         return $this->ruolo_generale;
     }
-
     public function setRuoloGenerale($ruolo_generale)
     {
         $this->ruolo_generale = $ruolo_generale;
     }
-
     public function getGiudice()
     {
         return $this->giudice;
     }
-
     public function setGiudice($giudice)
     {
         $this->giudice = $giudice;
     }
-
     public function getIdGruppo()
     {
         return $this->id_gruppo;
     }
-
     public function setIdGruppo($id_gruppo)
     {
         $this->id_gruppo = $id_gruppo;
     }
+    public function getCreatedAt()
+    {
+        return $this->created_at;
+    }
+    public function getUpdatedAt()
+    {
+        return $this->updated_at;
+    }
+    public function setCreatedAt($created_at)
+    {
+        $this->created_at = $created_at;
+    }
 
+    public function setUpdatedAt($updated_at)
+    {
+        $this->updated_at = $updated_at;
+    }
+
+
+    // Actions
     public function deleteNote()
     {
         $db = Database::getInstance();
@@ -122,7 +126,6 @@ class Pratica extends BaseModel
         $options['params'] = [':id_pratica' => $this->getId()];
         return $db->query($options);
     }
-
     public function deleteUdienze()
     {
         $db = Database::getInstance();
@@ -133,7 +136,6 @@ class Pratica extends BaseModel
         $options['params'] = [':id_pratica' => $this->getId()];
         return $db->query($options);
     }
-
     public function deleteScadenze()
     {
         $db = Database::getInstance();
@@ -144,14 +146,10 @@ class Pratica extends BaseModel
         $options['params'] = [':id_pratica' => $this->getId()];
         return $db->query($options);
     }
-
-    // getGruppo
-    public function getGruppo()
+    public function getGruppoObj(): ?Gruppo
     {
         return new Gruppo($this->getIdGruppo()) ?? null;
     }
-
-    // clearScadenze
     public function clearScadenze()
     {
         $db = Database::getInstance();
@@ -161,45 +159,6 @@ class Pratica extends BaseModel
         $options['params'] = [':id_pratica' => $this->getId()];
         return $db->query($options);
     }
-    public function addScadenza(mixed $scadenza)
-    {
-        $db = Database::getInstance();
-        $sql = "INSERT INTO Scadenze (id_pratica, data, motivo) VALUES (:id_pratica, :data, :motivo)";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [
-            ':id_pratica' => $this->getId(),
-            ':data' => $scadenza->getData(),
-            ':motivo' => $scadenza->getMotivo()
-        ];
-        return $db->query($options);
-    }
-
-    public static function generateNrPratica()
-    {
-        $db = Database::getInstance();
-        $sql = "SELECT MAX(CAST(nr_pratica AS UNSIGNED)) AS max_nr_pratica FROM Pratiche";
-        $options = [
-            'query' => $sql,
-            'params' => []
-        ];
-        $result = $db->query($options);
-        $maxNrPratica = $result[0]->max_nr_pratica ?? 0;
-        $nextNrPratica = $maxNrPratica + 1;
-        return sprintf('%04d', $nextNrPratica); // Formatta il numero come stringa con zeri iniziali
-    }
-
-    public function getScadenze()
-    {
-        $db = Database::getInstance();
-        $sql = "SELECT * FROM Scadenze WHERE id_pratica = :id_pratica";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [':id_pratica' => $this->getId()];
-        return $db->query($options);
-    }
-
-    // clearUdienze
     public function clearUdienze()
     {
         $db = Database::getInstance();
@@ -209,33 +168,6 @@ class Pratica extends BaseModel
         $options['params'] = [':id_pratica' => $this->getId()];
         return $db->query($options);
     }
-    // getUdienze
-    public function getUdienze()
-    {
-        $db = Database::getInstance();
-        $sql = "SELECT * FROM Udienze WHERE id_pratica = :id_pratica";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [':id_pratica' => $this->getId()];
-        return $db->query($options);
-    }
-
-    // addUdienza
-    public function addUdienza(mixed $udienza)
-    {
-        $db = Database::getInstance();
-        $sql = "INSERT INTO Udienze (id_pratica, data, descrizione) VALUES (:id_pratica, :data_udienza, :descrizione)";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [
-            ':id_pratica' => $this->getId(),
-            ':data_udienza' => $udienza->getData(),
-            ':descrizione' => $udienza->getDescrizione()
-        ];
-        return $db->query($options);
-    }
-
-    // clearNote
     public function clearNote()
     {
         $db = Database::getInstance();
@@ -245,25 +177,24 @@ class Pratica extends BaseModel
         $options['params'] = [':id_pratica' => $this->getId()];
         return $db->query($options);
     }
-    // addNote
-    public function addNota( mixed $note)
-    {
+
+    public function getUdienze() {
         $db = Database::getInstance();
-        $sql = "INSERT INTO Note (id_pratica, tipologia, descrizione, visibilita) VALUES (:id_pratica, :tipologia, :testo, :visibilita)";
+        $sql = "SELECT * FROM Udienze WHERE id_pratica = :id_pratica";
         $options = [];
         $options['query'] = $sql;
-        $options['params'] = [
-            ':id_pratica' => $this->getId(),
-            ':tipologia' => $note['tipologia'],
-            ':testo' => $note['testo'],
-            ':visibilita' => $note['visibilita']
-        ];
+        $options['params'] = [':id_pratica' => $this->getId()];
         return $db->query($options);
     }
-
-    // getNote
-    public function getNote()
-    {
+    public function getScadenze() {
+        $db = Database::getInstance();
+        $sql = "SELECT * FROM Scadenze WHERE id_pratica = :id_pratica";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id_pratica' => $this->getId()];
+        return $db->query($options);
+    }
+    public function getNote(){
         $db = Database::getInstance();
         $sql = "SELECT * FROM Note WHERE id_pratica = :id_pratica";
         $options = [];
@@ -272,107 +203,80 @@ class Pratica extends BaseModel
         return $db->query($options);
     }
 
-    // addAssistito
-    public function addAssistito(mixed $id_utente)
+    // Static methods
+    public static function generateNrPratica($groupId)
     {
-        // Assistito è un Utente con ruolo cliente
         $db = Database::getInstance();
-        $sql = "INSERT INTO Assistiti (id_pratica, id_utente) VALUES (:id_pratica, :id_utente)";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [
-            ':id_pratica' => $this->getId(),
-            ':id_utente' => $id_utente
+
+        $sql = "SELECT MAX(CAST(nr_pratica AS UNSIGNED)) AS max_nr_pratica, LEFT(G.nome, 1) AS first_letter 
+            FROM Pratiche P 
+            LEFT JOIN Gruppi G ON P.id_gruppo = G.id 
+            WHERE P.id_gruppo = :id_gruppo";
+
+        $options = [
+            'query' => $sql,
+            'params' => [':id_gruppo' => $groupId]
         ];
-
-        return $db->query($options);
+        $result = $db->query($options);
+        $maxNrPratica = $result[0]->max_nr_pratica ?? 0;
+        $firstLetter = $result[0]->first_letter ?? '';
+        $nextNrPratica = $maxNrPratica + 1;
+        return 'P'.sprintf('%04d', $nextNrPratica).'G'.$firstLetter;
     }
-
-    // getAssistiti
-    public function getAssistiti()
+    public static function getAllPratiche(array $args = [])
     {
         $db = Database::getInstance();
-        // Make a JOIN with Utenti and Anagrafiche
-        $sql = "SELECT Anagrafiche.id_utente, nome,cognome,denominazione,tipo_utente FROM Assistiti INNER JOIN Utenti ON Assistiti.id_utente = Utenti.id INNER JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id WHERE Assistiti.id_pratica = :id_pratica";
+        $className = static::class;
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = self::getPluralName($shortClassName);
+
+        $sql = "SELECT * FROM " . $tableName;
+
         $options = [];
+
+        if (!empty($args)) {
+            $options['limit'] = $args['limit'];
+            $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
+            $options['order_dir'] = $args['order'] ?? 'ASC';
+            if ($args['sort'] == 'id') {
+                $options['order_by'] = "Pratiche.id";
+            } elseif($args['sort'] == 'gruppo') {
+                $options['order_by'] = "Gruppi.nome";
+            } else {
+                $options['order_by'] = "Pratiche." . $args['sort'];
+            }
+        }
+
+        if(!empty($args['limit'])) {
+            $options['limit'] = $args['limit'];
+        }
+
+        if(!empty($args['currentPage'])) {
+            $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
+        }
+
+        if(!empty($args['order'])) {
+            $options['order_dir'] = $args['order'];
+        }
+
+        if(!empty($args['sort'])) {
+            if ($args['sort'] == 'id') {
+                $options['order_by'] = "Pratiche.id";
+            } elseif($args['sort'] == 'gruppo') {
+                $options['order_by'] = "Gruppi.nome";
+            } else {
+                $options['order_by'] = "Pratiche." . $args['sort'];
+            }
+        }
+
         $options['query'] = $sql;
-        $options['params'] = [':id_pratica' => $this->getId()];
-        return $db->query($options);
+
+        // return instance of the class
+        $result = $db->query($options);
+        $array = [];
+        foreach ($result as $record) {
+            $array[] = new $className($record->id);
+        }
+        return $array;
     }
-
-    // clearAssistiti
-    public function clearAssistiti()
-    {
-        $db = Database::getInstance();
-        $sql = "DELETE FROM Assistiti WHERE id_pratica = :id_pratica";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [
-            ':id_pratica' => $this->id
-        ];
-        return $db->query($options);
-    }
-
-    // addControparte
-    public function addControparte(mixed $id_utente)
-    {
-        // Controparte è un Utente con ruolo cliente. Se non esiste, viene prima creato
-        $db = Database::getInstance();
-        $sql = "INSERT INTO Controparti (id_pratica, id_utente) VALUES (:id_pratica, :id_utente)";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [
-            ':id_pratica' => $this->getId(),
-            ':id_utente' => $id_utente
-        ];
-
-        return $db->query($options);
-    }
-
-    // getControparti
-    public function getControparti()
-    {
-        $db = Database::getInstance();
-        // Make a JOIN with Utenti and Anagrafiche
-        $sql = "SELECT Anagrafiche.id_utente,nome,cognome,denominazione,tipo_utente FROM Controparti INNER JOIN Utenti ON Controparti.id_utente = Utenti.id INNER JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id WHERE Controparti.id_pratica = :id_pratica";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [':id_pratica' => $this->id];
-        return $db->query($options);
-    }
-
-    // clearControparti
-    public function clearControparti()
-    {
-        $db = Database::getInstance();
-        $sql = "DELETE FROM Controparti WHERE id_pratica = :id_pratica";
-        $options = [];
-        $options['query'] = $sql;
-        $options['params'] = [
-            ':id_pratica' => $this->id
-        ];
-        return $db->query($options);
-    }
-
-    public function getCreatedAt()
-    {
-        return $this->created_at;
-    }
-
-    public function getUpdatedAt()
-    {
-        return $this->updated_at;
-    }
-
-    public function setUpdatedAt($updated_at)
-    {
-        $this->updated_at = $updated_at;
-    }
-
-    public function setCreatedAt($created_at)
-    {
-        $this->created_at = $created_at;
-    }
-
-
 }

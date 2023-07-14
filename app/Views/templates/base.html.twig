@@ -37,31 +37,24 @@
 <div class="antialiased bg-gray-50 dark:bg-gray-900">
 
 
-    {% if session.utente %}
+    <!-- Top Navigation -->
+    {% include('navigation.html.twig') %}
 
-        <!-- Top Navigation -->
-        {% include('navigation.html.twig') %}
-
-        <!-- Sidebar -->
-        {% include('sidebar.html.twig') %}
-
-    {% endif %}
+    <!-- Sidebar -->
+    {% include('sidebar.html.twig') %}
 
 
-    <main class="{% if session.utente %} md:ml-48 {% endif %} h-screen pt-20 px-4">
-
-        <!-- if is not login page -->
-        {% if not isLoginPage() %}
-            {% include('breadcrumb.html.twig') %}
-        {% endif %}
-
-
+    <main class="md:ml-48 h-screen pt-20 px-4">
 
         {% if session.utente %}
             {% include('alerts.html.twig') %}
         {% endif %}
 
-        {% block content %}{% endblock %}
+        {% block content %}
+            
+        {% endblock %}
+
+
 
     </main>
 </div>

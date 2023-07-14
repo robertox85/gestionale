@@ -89,7 +89,7 @@ class Database
         // costruisce la query
         $sql = $options['query'];
 
-        if ($options['where'] !== null && is_array($options['where'])) {
+        /*if ($options['where'] !== null && is_array($options['where'])) {
             // $options['where'] come array associativo
             $whereConditions = [];
             foreach ($options['where'] as $key => $value) {
@@ -97,7 +97,28 @@ class Database
             }
             $whereClause = implode(' AND ', $whereConditions);
             $sql .= " WHERE {$whereClause}";
+        }*/
+
+        if ($options['where'] !== null && is_array($options['where'])) {
+            // $options['where'] as associative array
+            $whereConditions = [];
+            foreach ($options['where'] as $key => $value) {
+                if(is_array($value)) {
+                    // If the value is an array, we assume the first element is the operator
+                    $operator = $value[0];
+                    $actualValue = $value[1];
+                } else {
+                    // If it's not an array, we assume the operator is =
+                    $operator = '=';
+                    $actualValue = $value;
+                }
+                $whereConditions[] = "{$key} {$operator} '{$actualValue}'";
+            }
+            $whereClause = implode(' AND ', $whereConditions);
+            $sql .= " WHERE {$whereClause}";
         }
+
+
 
         if ($options['order_by'] !== null) {
             $sql .= " ORDER BY {$options['order_by']} {$options['order_dir']}";

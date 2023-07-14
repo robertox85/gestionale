@@ -3,6 +3,7 @@
 namespace App\Controllers;
 
 use App\Libraries\Helper;
+use App\Libraries\Table;
 use App\Models\Gruppo;
 
 use App\Libraries\Database;
@@ -11,97 +12,75 @@ use App\Models\Utente;
 
 class GruppiController extends BaseController
 {
-    public function gruppiView()
+    public function __construct()
     {
-
-        $headers = [
+        parent::__construct();
+        $this->table = new Table(
             [
-                'label' => 'ID',
-                'sortable' => true,
-                'sortUrl' => 'gruppi',
-                'sortKey' => 'id'
-            ],
-            [
-                'label' => 'Nome',
-                'sortable' => true,
-                'sortUrl' => 'gruppi',
-                'sortKey' => 'nome'
-            ],
-            [
-                'label' => 'Utenti',
-                'sortable' => true,
-                'sortUrl' => 'gruppi',
-                'sortKey' => 'id_utente',
-            ],
-            [
-                'label' => 'Pratiche',
-                'sortable' => true,
-                'sortUrl' => 'gruppi',
-                'sortKey' => 'id_pratica'
-            ],
-            [
-                'label' => 'Azioni',
-                'sortable' => false
-            ],
-        ];
-        $args = $this->createViewArgs();
-
-        switch ($args['sort']) {
-            case 'id_pratica':
-                $gruppi = $this->getAllSortedByPratiche($args);
-                break;
-            case 'id_utente':
-                $gruppi = $this->getAllSortedByUtenti($args);
-                break;
-            default:
-                $gruppi = Gruppo::getAll($args);
-        }
-
-
-        $totalItems = Gruppo::getAll();
-        $totalItems = count($totalItems);
-        $totalPages = ceil($totalItems / $args['limit']);
-
-
-        $rows = [];
-        foreach ($gruppi as $gruppo) {
-            $rows[] = [
-                'cells' => [
-                    ['content' => $gruppo->getId()],
-                    ['content' => $gruppo->getNome()],
-                    ['content' => count($gruppo->getUtenti())],
-                    ['content' => count($gruppo->getPratiche())],
-                    ['content' => $this->createActionsCell($gruppo)],
-                ]
-            ];
-        }
-
-        echo $this->view->render('gruppi.html.twig',
-            [
-                'gruppi' => $gruppi,
-                'entity' => 'gruppi',
-                'totalPages' => $totalPages,
-                'totalItems' => $totalItems,
-                'itemsPerPage' => $args['limit'],
-                'currentPage' => $args['currentPage'],
-                'headers' => $headers,
-                'rows' => $rows,
+                [
+                    'label' => 'ID',
+                    'sortable' => true,
+                    'sortUrl' => 'gruppi',
+                    'sortKey' => 'id'
+                ],
+                [
+                    'label' => 'Nome',
+                    'sortable' => true,
+                    'sortUrl' => 'gruppi',
+                    'sortKey' => 'nome'
+                ],
+                [
+                    'label' => 'Utenti',
+                    'sortable' => true,
+                    'sortUrl' => 'gruppi',
+                    'sortKey' => 'utenti',
+                ],
+                [
+                    'label' => 'Pratiche',
+                    'sortable' => true,
+                    'sortUrl' => 'gruppi',
+                    'sortKey' => 'pratiche'
+                ],
+                [
+                    'label' => 'Azioni',
+                    'sortable' => false
+                ],
             ]
         );
     }
 
-    public function creaGruppoView()
+    // Views
+    public function gruppiView(): void
+    {
+
+        $this->buildTableRows();
+
+        $totalItems = Gruppo::getTotalCount();
+
+        echo $this->view->render('gruppi.html.twig',
+            [
+                'entity' => 'gruppi',
+                'headers' => $this->table->getHeaders(),
+                'rows' => $this->table->getRows(),
+                'pagination' => [
+                    'totalPages' => ceil($totalItems / $this->args['limit']), // Necessario calcolarlo in base alla tua logica di paginazione
+                    'totalItems' => $totalItems,
+                    'itemsPerPage' => $this->args['limit'],
+                    'currentPage' => $this->args['currentPage'],
+                ],
+            ]
+        );
+    }
+    public function creaGruppoView(): void
     {
         echo $this->view->render(
             'creaGruppo.html.twig',
             [
-                'utenti' => $this->getUtenti()
+                'utenti' => $this->getUtenti(),
             ]
         );
     }
-
-    // editGruppoView
-    public function editGruppoView(int $id_gruppo)
+    public function editGruppoView(int $id_gruppo): void
     {
         echo $this->view->render('editGruppo.html.twig',
             [
@@ -112,59 +91,42 @@ class GruppiController extends BaseController
         );
     }
 
-    private function getUtenti()
-    {
-        $utenti = Utente::getAll();
-        $utenti = array_filter($utenti, function ($utente) {
-            return $utente->id_ruolo != 6;
-        });
-        $utenti = array_map(function ($utente) {
-            return new Utente($utente->id);
-        }, $utenti);
-        return $utenti;
+    // Actions
+    public function creaGruppoAjax() {
+
+        $request_body = file_get_contents('php://input');
+        $data = json_decode($request_body, true);
+        $this->creaGruppo($data);
+
+        return json_encode(['success' => true]);
     }
-
-    // creaGruppo POST
-    public function creaGruppo()
+    public function creaGruppo($data = null): void
     {
-        try {
-            // Validazione dei dati
-            $nomeGruppo = $_POST['nome_gruppo'];
-            $utenti = $_POST['utenti'];
-            $gruppo = new Gruppo();
-            $gruppo->setNome($nomeGruppo);
+        // Validazione dei dati
+        if (!$data) $data = $_POST;
+        $gruppo = new Gruppo();
+        $data = $gruppo->sanificaInput($data);
+        $gruppo->setNome($data['nome_gruppo']);
 
-            $gruppoId = $gruppo->save();
-
-            foreach ($utenti as $id_utente) {
-                $gruppo = new Gruppo($gruppoId);
-                $gruppo->addUtente($id_utente);
-            }
-
+        $gruppoId = $gruppo->save();
+        if($gruppoId) {
+            $this->addUtentiToGruppo($gruppoId, $data['utenti']);
             Helper::addSuccess('Gruppo creato con successo');
-
-            header('Location: /gruppi');
-        } catch (\Exception $e) {
-            // Gestione delle eccezioni
-            echo $e->getMessage();
+        } else {
+            Helper::addError('Errore durante la creazione del gruppo');
         }
+
+        header('Location: /gruppi');
     }
-
-
-    // editGruppo POST
-    public function editGruppo()
+    public function editGruppo(): void
     {
-        $id = $_POST['id_gruppo'];
+        // Creazione del gruppo
+        $gruppo = new Gruppo($_POST['id_gruppo']);
 
         // Validazione dei dati
-        $nomeGruppo = $_POST['nome_gruppo'];
-        $utenti = $_POST['utenti'];
-        $pratiche = $_POST['pratiche'];
+        $data = $gruppo->sanificaInput($_POST);
 
-
-        // Creazione del gruppo
-        $gruppo = new Gruppo($id);
-        $gruppo->setNome($nomeGruppo);
+        $gruppo->setNome($data['nome_gruppo']);
 
 
         // Avvio della transazione
@@ -173,22 +135,14 @@ class GruppiController extends BaseController
         // Aggiornamento del gruppo
         try {
             $gruppo->removeRecordFromUtentiGruppiByGruppoId();
-
-            foreach ($utenti as $id_utente) {
-                $gruppo->addUtente($id_utente);
-            }
+            $this->addUtentiToGruppo($gruppo->getId(), $data['utenti']);
 
             $gruppo->removeGruppoFromPraticheByGruppoId();
-            foreach ($pratiche as $id_pratica) {
-                $pratica = new Pratica($id_pratica);
-                $pratica->setIdGruppo($id);
-                $pratica->update();
-            }
-
+            $this->addPraticheToGruppo($gruppo->getId(), $data['pratiche']);
 
             $gruppo->update();
         } catch (\Exception $e) {
-            echo $e->getMessage();
+            Helper::addError('Errore durante la modifica del gruppo ' . $e->getMessage());
             Database::rollBack();
         }
 
@@ -200,10 +154,7 @@ class GruppiController extends BaseController
 
         header('Location: /gruppi/');
     }
-
-
-    // deletegruppo
-    public function deleteGruppo($id)
+    public function deleteGruppo($id): void
     {
         try {
             $gruppo = new Gruppo($id);
@@ -227,62 +178,50 @@ class GruppiController extends BaseController
         }
     }
 
-
-    // viewGruppo
-    public function viewGruppo($id)
-    {
+    // Helpers
+    private function addUtentiToGruppo($id, $utenti) {
         $gruppo = new Gruppo($id);
-        $utenti = $gruppo->getUtenti();
-        $utenti = array_map(function ($utente) {
-            return new Utente($utente->id);
-        }, $utenti);
+        foreach ($utenti as $id_utente) {
+            $gruppo->addUtente($id_utente);
+        }
+        return $gruppo;
+    }
+    private function buildTableRows(array $gruppi = []): void
+    {
+        if(empty($gruppi)) {
+            $gruppi = Gruppo::getAllGruppi($this->args);
+        }
 
-        $pratiche = $gruppo->getPratiche();
-
-        echo $this->view->render('viewGruppo.html.twig',
-            [
-                'gruppo' => $gruppo,
-                'utenti' => $utenti,
-                'pratiche' => $pratiche
+        foreach ($gruppi as $gruppo) {
+            $this->table->addRow($this->createGruppoRow($gruppo));
+        }
+    }
+    private function createGruppoRow(mixed $gruppo): array
+    {
+        return [
+            'cells' => [
+                ['content' => $gruppo->getId()],
+                ['content' => $gruppo->getNome()],
+                ['content' => $gruppo->getCountUtenti()],
+                ['content' => count($gruppo->getPratiche())],
+                ['content' => $this->createActionsCell($gruppo)],
             ]
-        );
+        ];
     }
-
-    private function getAllSortedByPratiche(array $args)
+    private function addPraticheToGruppo(int $getId, mixed $pratiche)
     {
-        $args['sort'] = 'id';
-        $gruppi = Gruppo::getAll($args);
-        $gruppi = array_map(function ($gruppo) {
-            return new Gruppo($gruppo->id);
-        }, $gruppi);
-
-        $direction = $args['order'] ?? 'asc';
-        $compareFunction = $direction === 'asc'
-            ? function ($a, $b) { return count($b->getPratiche()) <=> count($a->getPratiche()); }
-            : function ($a, $b) { return count($a->getPratiche()) <=> count($b->getPratiche()); };
-
-        usort($gruppi, $compareFunction);
-
-        return $gruppi;
+        foreach ($pratiche as $id_pratica) {
+            $pratica = new Pratica($id_pratica);
+            $pratica->setIdGruppo($getId);
+            $pratica->update();
+        }
     }
-
-    private function getAllSortedByUtenti(array $args)
-    {
-        $args['sort'] = 'id';
-        $gruppi = Gruppo::getAll($args);
-        $gruppi = array_map(function ($gruppo) {
-            return new Gruppo($gruppo->id);
-        }, $gruppi);
-
-        $direction = $args['order'] ?? 'asc';
-        $compareFunction = $direction === 'asc'
-            ? function ($a, $b) { return count($b->getUtenti()) <=> count($a->getUtenti()); }
-            : function ($a, $b) { return count($a->getUtenti()) <=> count($b->getUtenti()); };
-
-        usort($gruppi, $compareFunction);
-
-        return $gruppi;
+    private function getUtenti() {
+        return Utente::getAll([
+            'where' => [
+                'id_ruolo' => [6],
+                'operator' => 'NOT IN'
+            ]
+        ]);
     }
-
-
 }

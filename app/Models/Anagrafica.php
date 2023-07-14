@@ -256,4 +256,10 @@ class Anagrafica extends BaseModel
         if(isset($data['tipo_utente'])) $this->setTipoUtente($data['tipo_utente']);
         if(isset($data['note'])) $this->setNote($data['note']);
     }
+
+    // getNomeCompleto
+    public function getNomeCompleto()
+    {
+        return $this->getNome() . ' ' . $this->getCognome() . ' ' . $this->getDenominazione();
+    }
 }

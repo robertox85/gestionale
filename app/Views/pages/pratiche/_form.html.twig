@@ -25,11 +25,13 @@
         </div>
 
 
-
         <!-- Multi Select: Assegna gruppo -->
         <div>
-            <label for="id_gruppo">
+            <label for="id_gruppo" class="flex justify-between">
                 {{ 'Assign group'|trans }}
+
+
+
             </label>
 
             <select id="id_gruppo" name="id_gruppo" required="" class="select2">
@@ -45,31 +47,6 @@
         </div>
 
 
-
-
-        <!--
-        <div>
-            <label for="avvocato">
-                {{ 'Lawyer'|trans }}
-            </label>
-            <input type="text"
-                   name="avvocato"
-                   id="avvocato"
-                   value="{{ pratica.getAvvocato() }}"
-                   placeholder="{{ 'Type lawyer name'|trans }}">
-        </div>
-
-        <div>
-            <label for="referente">
-                {{ 'Referent'|trans }}
-            </label>
-            <input type="text"
-                   name="referente"
-                   id="referente"
-                   value="{{ pratica.getReferente() }}"
-                   placeholder="{{ 'Type referent name'|trans }}">
-        </div>
-        -->
         <!-- Testo: Competenza -->
         <div>
             <label for="competenza">
@@ -133,68 +110,6 @@
                 </option>
             </select>
         </div>
-<!--
-        <div>
-
-            <label for="assistiti" class="flex items-center justify-between">
-                {{ 'Assisted'|trans }}
-
-                <a href="#"
-                   id="add-assistito"
-                   class="text-blue-500 flex items-center">
-                    <ion-icon name="add-outline"></ion-icon>
-                    {{ 'Add assisted'|trans }}
-                </a>
-            </label>
-
-            <select class="select2" name="assistiti[]" multiple="multiple">
-                {% for utente in assistiti %}
-                    <option
-                            {% if pratica is defined %}
-                                {% if utente.getId() in pratica.getAssistiti() | json_encode() %}
-                                    selected
-                                {% endif %}
-                            {% endif %}
-                            value="{{ utente.getId() }}">
-                        {{ utente.getAnagrafica().nome }} {{ utente.getAnagrafica().cognome }}
-                        - {{ utente.getAnagrafica().getTipoUtente() }}
-                    </option>
-                {% endfor %}
-            </select>
-
-        </div>
-
-
-        <div>
-
-            <label for="controparti" class="flex items-center justify-between">
-                {{ 'Counterparties'|trans }}
-
-                <a href="#"
-                   id="add-controparte"
-                   class="text-blue-500 flex items-center">
-                    <ion-icon name="add-outline"></ion-icon>
-                    {{ 'Add counterparty'|trans }}
-                </a>
-            </label>
-            <select class="select2" name="controparti[]" multiple="multiple">
-                {% for utente in controparti %}
-
-                    <option
-                            {% if pratica is defined %}
-                                {% if utente.getId() in pratica.getControparti() | json_encode() %}
-                                    selected
-                                {% endif %}
-                            {% endif %}
-                            value="{{ utente.getId() }}">
-                        {{ utente.getAnagrafica().nome }} {{ utente.getAnagrafica().cognome }}
-                        - {{ utente.getAnagrafica().getTipoUtente() }}
-                    </option>
-                {% endfor %}
-            </select>
-
-        </div>
--->
 
         <div
                 {% if pratica.getScadenze() is not empty %}
@@ -210,7 +125,7 @@
             <template x-for="(scadenza, index) in scadenze" :key="index">
                 <div class="flex mt-2 w-full gap-2">
                     <!-- select -->
-                    <input datepicker
+                    <input
                            x-model="scadenza.data"
                            type="date"
                            placeholder="Select date"
@@ -227,7 +142,7 @@
                 </div>
             </template>
 
-            <button x-on:click="scadenze.push({ data: '', motivo: '' }); initDatePicker()"
+            <button x-on:click="scadenze.push({ data: '', motivo: '' }); "
                     class="text-blue-500 flex items-center mt-4" type="button">
                 <ion-icon name="add-outline"></ion-icon>
                 {{ 'Add deadline'|trans }}
@@ -238,7 +153,7 @@
         <div
                 {% if pratica.getUdienze() is not empty %}
                     x-data="{ udienze: {{ pratica.getUdienze() | json_encode }} }"
-                    x-init="initDatePicker()"
+
                 {% else %}
                     x-data="{ udienze: [] }"
 
@@ -251,7 +166,7 @@
                 <div class="flex mt-2 w-full gap-2">
                     <!-- select -->
 
-                    <input datepicker
+                    <input
                            x-model="udienza.data"
                            type="date"
                            placeholder="Select date"
@@ -269,7 +184,7 @@
                     </button>
                 </div>
             </template>
-            <button x-on:click="udienze.push({ descrizione: '', data: '' }); initDatePicker()"
+            <button x-on:click="udienze.push({ descrizione: '', data: '' });"
                     class="text-blue-500 flex items-center mt-4" type="button">
                 <ion-icon name="add-outline"></ion-icon>
                 {{ 'Add hearing'|trans }}
@@ -412,7 +327,9 @@
     </div>
 </div>
 
-<div id="modalAddUtente" tabindex="-1" aria-hidden="true"
+
+
+<div id="modalAddGruppi" tabindex="-1" aria-hidden="true"
      class="fixed top-0 left-0 right-0 z-50 hidden w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full">
     <div class="relative w-full max-w-2xl max-h-full">
         <!-- Modal content -->
@@ -420,7 +337,7 @@
             <!-- Modal header -->
             <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600">
                 <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                    {{ 'Add new user'|trans }}
+                    {{ 'Add new group'|trans }}
                 </h3>
                 <button type="button"
                         class="close-modal text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white ">
@@ -435,67 +352,65 @@
             <!-- Modal body -->
 
             <div class="p-6 space-y-6" x-data="{
-            tipo_utente: 'Persona',
-            UtenteRuolo: 'Cliente',
-            UtenteNome: '',
-            UtenteCognome: '',
-            UtenteDenominazione: '',
+            nome_gruppo: '',
+            utenti: '',
+            pratiche: '',
             }">
-                    <!-- ruolo, tipo utente, nome, cognome, denominazione -->
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <input type="hidden"
-                               id="entity"
-                               name="entity"
-                               x-model="UtenteRuolo"
-                               value="Cliente">
-                        <div>
-                            <label for="tipo_utente"
-                                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                {{ 'User type'|trans }}
-                            </label>
-                            <select
-                                    name="tipo_utente"
-                                    id="tipo_utente"
-                                    class="w-full"
-                                    x-model="tipo_utente"
-                                    x-init="tipo_utente = 'Persona'"
-                                    @change="if(tipo_utente == 'Persona') { denominazione = ''; } else { nome = ''; cognome = ''; }"
-                            >
-                                <option value="Persona" selected>{{ 'Person'|trans }}</option>
-                                <option value="Azienda">{{ 'Company'|trans }}</option>
-                            </select>
-                        </div>
-                        <div x-show="tipo_utente == 'Persona'">
-                            <label for="UtenteNome" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                {{ 'Name'|trans }}
-                            </label>
-                            <input type="text"
-                                   name="UtenteNome"
-                                   id="UtenteNome"
-                                   x-model="UtenteNome"
-                                   class="w-full">
-                        </div>
-                        <div x-show="tipo_utente == 'Persona'">
-                            <label for="UtenteCognome" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                {{ 'Surname'|trans }}
-                            </label>
-                            <input
-                                    x-model="UtenteCognome"
-                                    type="text"
-                                    name="UtenteCognome"
-                                    id="UtenteCognome" class="w-full">
-                        </div>
-                        <div x-show="tipo_utente == 'Azienda'" class="">
-                            <label for="UtenteDenominazione"
-                                   class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
-                                {{ 'Company name'|trans }}
-                            </label>
-                            <input
-                                    x-model="UtenteDenominazione"
-                                    type="text" name="UtenteDenominazione" id="UtenteDenominazione" class="w-full">
-                        </div>
-                    </div>
+                <!-- Name, utenti, pratiche -->
+                <div class="flex flex-col space-y-2">
+
+                       <label for="nome_gruppo"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ 'Name'|trans }}
+                        </label>
+                       <input type="text"
+                               name="nome_gruppo"
+                               id="nome_gruppo"
+                               x-model="nome_gruppo"
+                               class="w-full">
+
+                        <label for="utenti"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ 'Users'|trans }}
+                        </label>
+                        <select class="select2 " id="utenti" name="utenti[]" multiple="multiple">
+                            {% for utente in utenti %}
+                                <option
+                                        {% if utente is defined %}
+                                            {% if utente.getId() in pratica.getUtenti() | json_encode() %}
+                                                selected
+                                            {% endif %}
+                                        {% endif %}
+                                        value="{{ utente.getId() }}">
+                                    {{ utente.getAnagrafica().getNomeCompleto() }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
+
+                        <label for="pratiche"
+                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                            {{ 'Pratiche'|trans }}
+                        </label>
+                        <select class="select2" id="pratiche" name="pratiche[]" multiple="multiple">
+                            {% for pratica in pratiche %}
+                                <option
+                                        {% if pratica is defined %}
+                                            {% if pratica.getId() in pratica.getGruppi() | json_encode() %}
+                                                selected
+                                            {% endif %}
+                                        {% endif %}
+                                        value="{{ pratica.getId() }}">
+                                    {{ pratica.getNome() }}
+                                </option>
+                            {% endfor %}
+                        </select>
+
                 </div>
+
+
+
+            </div>
 
             <!-- Modal footer -->
             <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
@@ -511,4 +426,3 @@
         </div>
     </div>
 </div>
-
