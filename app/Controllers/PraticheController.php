@@ -5,17 +5,17 @@ namespace App\Controllers;
 use App\Libraries\Database;
 use App\Libraries\Helper;
 use App\Libraries\Table;
-use App\Models\Anagrafica;
 use App\Models\Gruppo;
 use App\Models\Nota;
 use App\Models\Pratica;
-use App\Models\Ruolo;
 use App\Models\Scadenza;
 use App\Models\Udienza;
 use App\Models\Utente;
+use App\Services\PraticaService;
 
 class PraticheController extends BaseController
 {
+    protected $praticaService;
 
     public function __construct()
     {
@@ -53,15 +53,20 @@ class PraticheController extends BaseController
                 ],
             ]
         );
+        $this->praticaService = new PraticaService(new Pratica());
     }
 
     // Views
     public function praticheView()
     {
-
         $this->buildTableRows();
 
-        $totalItems = Pratica::getTotalCount();
+        // where pratiche is_deleted = 0
+        $totalItems = Pratica::getTotalCount([
+            'where' => [
+                'is_deleted' => ['value' => 0, 'operator' => '=']
+            ]
+        ]);
 
         echo $this->view->render(
             'pratiche.html.twig',
@@ -134,54 +139,55 @@ class PraticheController extends BaseController
     // Actions
     public function createPratica()
     {
-        $pratica = $this->createAndSavePratica();
-        $this->createAndSaveNrPratica($pratica);
-        $this->createAndSaveScadenze($pratica);
-        $this->createAndSaveUdienze($pratica);
-        $this->createAndSaveNote($pratica);
+        try {
+            $this->praticaService->createPratica();
+            $this->praticaService->createAndSaveNrPratica();
+            $this->praticaService->saveScadenze();
+            $this->praticaService->saveUdienze();
+            $this->praticaService->saveNote();
 
-        Helper::addSuccess('Pratica creata con successo');
-        header('Location: /pratiche');
-        exit();
+            Helper::addSuccess('Pratica creata con successo');
+            header('Location: /pratiche');
+            exit();
+        } catch (\Exception $e) {
+            Helper::addError($e->getMessage());
+            header('Location: /pratiche');
+            exit();
+        }
     }
 
     public function editPratica()
     {
-        $pratica = new Pratica($_POST['id_pratica']);
-        $this->updateAndSavePratica($pratica);
-        $pratica->clearScadenze();
-        $this->createAndSaveScadenze($pratica);
-        $pratica->clearUdienze();
-        $this->createAndSaveUdienze($pratica);
-        $pratica->clearNote();
-        $this->createAndSaveNote($pratica);
+        try {
+            $pratica = new Pratica($_POST['id_pratica']);
+            $oldGruppo = $pratica->getIdGruppo();
+            $this->praticaService = new PraticaService($pratica);
+            if($oldGruppo != $_POST['id_gruppo']) {
+                $newNrPratica = Pratica::generateNrPratica($_POST['id_gruppo']);
+                $this->praticaService->updateNrPratica($newNrPratica);
+            }
+            $this->praticaService->updatePratica();
+            $this->praticaService->updateScadenze();
+            $this->praticaService->updateUdienze();
+            $this->praticaService->updateNote();
 
-        Helper::addSuccess('Pratica aggiornata con successo');
-        header('Location: /pratiche');
-        exit();
-
+            Helper::addSuccess('Pratica aggiornata con successo');
+            header('Location: /pratiche');
+            exit();
+        } catch (\Exception $e) {
+            Helper::addError($e->getMessage());
+            header('Location: /pratiche');
+            exit();
+        }
     }
     public function deletePratica(int $id_pratica)
     {
-        // Ottenere i dati inviati dal form
         $pratica = new Pratica($id_pratica);
-
-        Database::beginTransaction();
         try {
-
-            $pratica->deleteNote();
-            $pratica->deleteUdienze();
-            $pratica->deleteScadenze();
-
             $pratica->delete();
-
-            Database::commit();
-
             Helper::addSuccess('Pratica eliminata con successo');
-
         } catch (\Exception $e) {
-            Database::rollBack();
-            echo $e->getMessage();
+            Helper::addError('Errore durante l\'eliminazione della pratica ' . $e->getMessage());
         }
 
 
@@ -191,47 +197,13 @@ class PraticheController extends BaseController
     }
 
     // Private methods
-    private function createAndSavePratica(): Pratica
-    {
-        $pratica = new Pratica();
-
-        $fields = ['nome', 'tipologia', 'competenza', 'ruolo_generale', 'giudice', 'stato', 'id_gruppo'];
-        foreach ($fields as $field) {
-            $pratica->setFieldIfExistInPost($pratica, $field);
-        }
-
-        $pratica->save();
-
-        return $pratica;
-    }
-    private function createAndSaveScadenze(Pratica $pratica): void
-    {
-        $data = $pratica->sanificaInput($_POST);
-        $scadenze = $data['scadenze'];
-
-        foreach ($scadenze as $scadenzaData) {
-            $scadenza = new Scadenza();
-            $scadenza->setData($scadenzaData['data']);
-            $scadenza->setMotivo($scadenzaData['motivo']);
-            $scadenza->setIdPratica($pratica->getId());
-            $scadenza->save();
-        }
-    }
-    private function createAndSaveUdienze(Pratica $pratica): void
-    {
-        $udienze = $_POST['udienze'];
-
-        foreach ($udienze as $udienzaData) {
-            $udienza = new Udienza();
-            $udienza->setData($udienzaData['data']);
-            $udienza->setDescrizione($udienzaData['descrizione']);
-            $udienza->setIdPratica($pratica->getId());
-            $udienza->save();
-        }
-    }
     private function buildTableRows(array $pratiche = []): void
     {
         if (empty($pratiche)) {
+            // override $this->args['sort'] if is equal to id with nr_pratica
+            if ($this->args['sort'] == 'id') {
+                $this->args['sort'] = 'nr_pratica';
+            }
             $pratiche = Pratica::getAllPratiche($this->args);
         }
         foreach ($pratiche as $pratica) {
@@ -251,38 +223,6 @@ class PraticheController extends BaseController
                 ['content' => $this->createActionsCell($pratica)],
             ]
         ];
-    }
-
-    private function createAndSaveNrPratica($pratica): void
-    {
-        $pratica->setNrPratica(Pratica::generateNrPratica($pratica->getIdGruppo()));
-        $pratica->update();
-    }
-
-    private function updateAndSavePratica(Pratica $pratica = null): void
-    {
-        if (!$pratica) {
-            $pratica = new Pratica($_POST['id_pratica']);
-        }
-
-        $fields = ['nome', 'tipologia', 'competenza', 'ruolo_generale', 'giudice', 'stato', 'id_gruppo'];
-        foreach ($fields as $field) {
-            $pratica->setFieldIfExistInPost($pratica, $field);
-        }
-        $pratica->update();
-    }
-
-
-    private function createAndSaveNote(Pratica $pratica): void
-    {
-        foreach ($_POST['note'] as $notaData) {
-            $nota = new Nota();
-            $nota->setTipologia($notaData['tipologia']);
-            $nota->setDescrizione($notaData['descrizione']);
-            $nota->setVisibilita($notaData['visibilita']);
-            $nota->setIdPratica($pratica->getId());
-            $nota->save();
-        }
     }
 
 

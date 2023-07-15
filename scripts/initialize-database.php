@@ -107,9 +107,10 @@ try {
           competenza VARCHAR(50),
           ruolo_generale VARCHAR(50),
           giudice VARCHAR(50),
+          is_deleted BOOLEAN DEFAULT FALSE,
           id_gruppo INT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
           FOREIGN KEY (id_gruppo) REFERENCES Gruppi(id)
         );
         

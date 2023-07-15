@@ -255,7 +255,7 @@ class BaseModel
     }
 
     // count
-    public static function getTotalCount($args = [])
+    /*public static function getTotalCount($args = [])
     {
         $db = Database::getInstance();
         $className = static::class;
@@ -275,7 +275,84 @@ class BaseModel
 
         $result = $db->query($options);
         return $result[0]->{'COUNT(*)'};
+    }*/
+
+    /**
+     * Metodo getTotalCount():
+     *
+     * Questo metodo accetta un array di argomenti per definire la query SQL per ottenere il conteggio totale delle righe dal database.
+     *
+     * Gli argomenti sono:
+     *
+     * 'where' => Questa è un'opzione per aggiungere una clausola WHERE alla query SQL. Deve essere un array associativo,
+     *            dove la chiave è il nome del campo nel database e il valore è un array associativo con 'value' e 'operator'.
+     *
+     * 'value' => Il valore da confrontare con il campo nel database. Può essere una stringa o un array.
+     *
+     * 'operator' => Questo è l'operatore da utilizzare nella clausola WHERE. Può essere uno dei seguenti:
+     *               '=', '!=', '<', '>', '<=', '>=', 'IN', 'NOT IN'.
+     *               Tieni presente che '!=' e 'NOT IN' sono per le disuguaglianze.
+     *               L'operatore di disuguaglianza '!=' accetta un singolo valore, mentre 'NOT IN' può accettare un array di valori.
+     *
+     * Esempi di uso:
+     *
+     * // Ottieni il conteggio totale delle pratiche non eliminate
+     * $conteggio = Pratica::getTotalCount([
+     *     'where' => [
+     *         'is_deleted' => ['value' => 0, 'operator' => '=']
+     *     ]
+     * ]);
+     *
+     * // Ottieni il conteggio totale delle pratiche che non sono state eliminate e il cui gruppo è 21 o 22
+     * $conteggio = Pratica::getTotalCount([
+     *     'where' => [
+     *         'is_deleted' => ['value' => 0, 'operator' => '='],
+     *         'id_gruppo' => ['value' => [21, 22], 'operator' => 'IN']
+     *     ]
+     * ]);
+     *
+     * Assicurati di utilizzare l'operatore corretto in base al tipo e al numero dei valori che stai passando.
+     */
+    public static function getTotalCount($args = [])
+    {
+        $db = Database::getInstance();
+        $className = static::class;
+        $shortClassName = (new \ReflectionClass($className))->getShortName();
+        $tableName = self::getPluralName($shortClassName);
+
+        $sql = "SELECT COUNT(*) FROM " . $tableName;
+
+        $options = [];
+
+        if (isset($args['where']) && is_array($args['where'])) {
+            $sql .= " WHERE ";
+            $whereClauses = [];
+
+            foreach($args['where'] as $column => $condition) {
+                $operator = $condition['operator'] ?? '=';
+                $value = $condition['value'];
+
+                if (is_array($value)) {
+                    $placeholders = implode(',', array_fill(0, count($value), '?'));
+                    $whereClauses[] = "$tableName.$column IN ($placeholders)";
+                    foreach ($value as $v) {
+                        $options['params'][] = $v;
+                    }
+                } else {
+                    $whereClauses[] = "$tableName.$column $operator ?";
+                    $options['params'][] = $value;
+                }
+            }
+
+            $sql .= implode(' AND ', $whereClauses);
+        }
+
+        $options['query'] = $sql;
+
+        $result = $db->query($options);
+        return $result[0]->{'COUNT(*)'};
     }
+
     // delete by id
     public static function deleteById($id)
     {
@@ -382,14 +459,13 @@ class BaseModel
     }
 
     // setProperties
-    public function setFieldIfExistInPost($class, $field)
+    public function setFieldIfExistInPost($field)
     {
-        //$class = self::class;
         $setField = str_replace('_', '', $field);
         $setter = 'set' . ucfirst($setField);
         $data = $this->sanificaInput($_POST);
         if (isset($_POST[$field])) {
-            $class->$setter($data[$field]);
+            $this->$setter($data[$field]);
         }
     }
 
