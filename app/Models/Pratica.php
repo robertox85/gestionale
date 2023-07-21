@@ -221,9 +221,19 @@ class Pratica extends BaseModel
         $className = static::class;
         $shortClassName = (new \ReflectionClass($className))->getShortName();
         $tableName = self::getPluralName($shortClassName);
-
+        $options = [];
         // Join with Gruppi but distinguish between 'id_gruppo' and Pratiche.'id' (Gruppi.id)
-        $sql = "SELECT 
+        $sql = "SELECT Pratiche.*, Gruppi.nome AS gruppo, Utenti.username AS utente,";
+        $sql .= " Anagrafiche.nome AS nome_anagrafica, Anagrafiche.cognome AS cognome_anagrafica,";
+        $sql .= " Anagrafiche.denominazione AS denominazione_anagrafica";
+        $sql .= " FROM Pratiche";
+        $sql .= " LEFT JOIN Gruppi ON Pratiche.id_gruppo = Gruppi.id";
+        $sql .= " LEFT JOIN Utenti_Gruppi ON Pratiche.id_gruppo = Utenti_Gruppi.id_gruppo";
+        $sql .= " LEFT JOIN Utenti ON Utenti_Gruppi.id_utente = Utenti.id";
+        $sql .= " LEFT JOIN Anagrafiche ON Anagrafiche.id_utente = Utenti.id";
+        $sql .= " WHERE Pratiche.is_deleted = false";
+
+        /*$sql = "SELECT
                     Pratiche.*,
                     Gruppi.nome AS gruppo
                 FROM 
@@ -232,22 +242,22 @@ class Pratica extends BaseModel
                     Gruppi ON Pratiche.id_gruppo = Gruppi.id";
 
         // EXCLUDE DELETED PRACTICES
-        $sql .= " WHERE Pratiche.is_deleted = false";
+        $sql .= " WHERE Pratiche.is_deleted = false";*/
 
-        $options = [];
 
         if (!empty($args)) {
             $options['limit'] = $args['limit'];
             $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
             $options['order_dir'] = $args['order'] ?? 'ASC';
-            if ($args['sort'] == 'id') {
+            if ($args['order_by'] == 'id') {
                 $options['order_by'] = "Pratiche.id";
-            } elseif ($args['sort'] == 'gruppo') {
+            } elseif ($args['order_by'] == 'gruppo') {
                 $options['order_by'] = "Gruppi.nome";
             } else {
-                $options['order_by'] = "Pratiche." . $args['sort'];
+                $options['order_by'] = "Pratiche." . $args['order_by'];
             }
         }
+
 
         if (!empty($args['limit'])) {
             $options['limit'] = $args['limit'];
@@ -271,6 +281,21 @@ class Pratica extends BaseModel
             }
         }
 
+        if(isset($args['search']) && !empty($args['search'])) {
+            $sql .= " AND(Pratiche.nr_pratica LIKE ?";
+            $sql .= " OR Pratiche.nome LIKE ?";
+            $sql .= " OR Pratiche.giudice LIKE ?";
+            $sql .= " OR Gruppi.nome LIKE ?";
+            $sql .= " OR Utenti.username LIKE ?";
+            $sql .= " OR Utenti.email LIKE ?";
+            $sql .= " OR Anagrafiche.nome LIKE ?";
+            $sql .= " OR Anagrafiche.cognome LIKE ?";
+            $sql .= " OR Anagrafiche.denominazione LIKE ?)";
+            $searchTerm = "%{$args['search']}%"; // la percentuale è usata per la ricerca parziale in SQL
+            $params = array_fill(0, 9, $searchTerm);
+            $options['params'] = $params;
+        }
+
         $options['query'] = $sql;
 
         // return instance of the class
@@ -286,10 +311,22 @@ class Pratica extends BaseModel
     public function delete()
     {
         $db = Database::getInstance();
-        $sql = "UPDATE Pratiche SET is_deleted = true WHERE id = :id";
+        $sql = "UPDATE Pratiche SET is_deleted = true, nr_pratica = 'DELETED' WHERE id = :id";
         $options = [];
         $options['query'] = $sql;
         $options['params'] = [':id' => $this->getId()];
+        $db->query($options);
+    }
+
+    public function restore()
+    {
+        $db = Database::getInstance();
+        // Set is_deleted to false and restore the original nr_pratica
+        $sql = "UPDATE Pratiche SET is_deleted = false, nr_pratica = :nr_pratica WHERE id = :id";
+        $options = [];
+        $options['query'] = $sql;
+        $options['params'] = [':id' => $this->getId()];
+        $options['params'][':nr_pratica'] = $this->getNrPratica();
         $db->query($options);
     }
 }

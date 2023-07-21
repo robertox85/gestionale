@@ -8,17 +8,24 @@ use App\Models\Utente;
 
 class AuthController extends BaseController
 {
+    // Views
     public function signInView(): void
     {
         echo $this->view->render('signin.html.twig');
     }
 
+    public function forgotPasswordView(): void
+    {
+        echo $this->view->render('forgot-password.html.twig');
+    }
+
+    // Actions
     public function signInUser(): void
     {
         try {
             $csrf_token = $_POST['csrf_token'] ?? '';
-            $email = $_POST['username-or-email'] ?? '';
-            $password = $_POST['password'] ?? '';
+            $login = trim($_POST['username-or-email']) ?? '';
+            $password = trim($_POST['password']) ?? '';
             $remember_me = isset($_POST['remember']);
 
             if (!Helper::validateToken('signin', $csrf_token)) {
@@ -28,10 +35,10 @@ class AuthController extends BaseController
 
             //$user = Utente::getUserByUsernameOrEmail($email);
 
-            $user = Utente::getByPropertyName('email', $email);
+            $user = Utente::getByPropertyName('email', $login);
 
             if (!$user) {
-                $user = Utente::getByPropertyName('username', $email);
+                $user = Utente::getByPropertyName('username', $login);
 
                 if (!$user) {
                     Helper::addError('Login failed');
@@ -40,11 +47,10 @@ class AuthController extends BaseController
             }
 
 
-            /*
             if (!password_verify($password, $user->getPassword())) {
                 Helper::addError('Login failed');
                 Helper::redirect('sign-in');
-            }*/
+            }
 
             if ($remember_me) {
                 $user->rememberMe();
@@ -53,9 +59,7 @@ class AuthController extends BaseController
             $_SESSION['utente'] = array_merge($user->toArray(),$user->getAnagrafica()->toArray());
             $_SESSION['utente']['id'] = $user->getId();
 
-            // if url contains returnUrl, redirect to that url
             if (isset($_POST['returnUrl']) && !empty($_POST['returnUrl'])) {
-                // if return url is empty after removing host name, redirect to home
                 if (parse_url($_POST['returnUrl'], PHP_URL_PATH) === '/') {
                     Helper::redirect('/');
                 }
@@ -68,7 +72,6 @@ class AuthController extends BaseController
             $errorHandler->handleException($e);
         }
     }
-
     public function signOutUser(): void
     {
         session_destroy();
@@ -79,6 +82,26 @@ class AuthController extends BaseController
         }
 
         Helper::redirect('/');
+    }
+
+    public function forgotPassword(): void
+    {
+        try {
+            $email = $_POST['email'] ?? '';
+
+            $user = Utente::getByPropertyName('email', $email);
+
+            if (!$user) {
+                Helper::addError('Email not found');
+                Helper::redirect('forgot-password');
+            }
+
+            $user->generateNewPasswordAndSendEmail();
+            Helper::addSuccess('Please check your email for password reset instructions');
+            Helper::redirect('sign-in');
+        } catch (\Exception $e) {
+            ErrorHandler::getInstance()->handleException($e);
+        }
     }
 
 

@@ -72,12 +72,15 @@ class UserController extends BaseController
         $ruoliFilter = (isset($_POST['ruoli'])) ? $_POST['ruoli'] : [];
 
         if (!empty($ruoliFilter)) {
-            $this->args['where']['id_ruolo'] = $ruoliFilter;
+            $this->args['where']['id_ruolo'] = [
+                'value' => $ruoliFilter,
+                'operator' => 'IN'
+            ];
         }
 
         $this->buildTableRows();
 
-        $totalItems = Utente::getTotalCount($this->args);
+        $totalItems = (isset($this->args['search'])) && ($this->args['search'] !== '') ? count($this->table->getRows()) : Utente::getTotalCount($this->args);
 
         echo $this->view->render('utenti.html.twig', [
             'entity' => 'utenti',
@@ -96,15 +99,20 @@ class UserController extends BaseController
     }
     public function contropartiView(): void
     {
-        $this->args['where']['id_ruolo'] = [6]; // imposta l'id_ruolo come 5 per le controparti
-        // empty filter
-        $this->filters = [];
+        $this->args['where']['id_ruolo'] = [
+            'value' => [6],
+            'operator' => 'IN'
+        ]; // imposta l'id_ruolo come 2, 3, 4 per le controparti
+
         $this->utentiView(); // chiama il metodo utentiView
     }
     public function assistitiView(): void
     {
-        $this->filters = [];
-        $this->args['where']['id_ruolo'] = [5]; // imposta l'id_ruolo come 4 per gli assistiti
+        $this->args['where']['id_ruolo'] =
+            [
+                'value' => [5],
+                'operator' => 'IN'
+            ]; // imposta l'id_ruolo come 2, 3, 4 per gli assistiti
         $this->utentiView(); // chiama il metodo utentiView
     }
     public function utenteView($id): void
@@ -156,7 +164,10 @@ class UserController extends BaseController
                     ],
                 ]
             );
-            $this->args['where']['id_utente'] = $id;
+            $this->args['where']['id_utente'] = [
+                'value' => [$id],
+                'operator' => 'IN'
+            ];
             foreach ($pratiche as $pratica) {
                 $pratica = new Pratica($pratica[0]);
                 $table->addRow(
@@ -194,30 +205,6 @@ class UserController extends BaseController
     }
 
     // Actions
-    public function editUtente(): void
-    {
-        $utente = new Utente($_POST['id_utente']);
-        $data = $utente->sanificaInput($_POST, ['password', 'password_confirm']);
-        $update = $utente->preparaAggiornamento($data);
-        if ($update === true) {
-            $utente->update();
-            Helper::addSuccess('Utente aggiornato con successo');
-            $this->redirectToReferer();
-            exit;
-        } else {
-            $errors = $utente->getErrors();
-            foreach ($errors as $item) {
-                Helper::addError($item);
-            }
-            header('Location: /utenti/edit/' . $utente->getId());
-            exit;
-        }
-    }
-    public function deleteUtente($id): void
-    {
-        $this->deleteUserAndRelatedRecords($id);
-        $this->redirectToReferer();
-    }
     public function createUtente(): void
     {
         $utente = $this->creaUtente($_POST);
@@ -241,6 +228,82 @@ class UserController extends BaseController
         $this->redirectToReferer();
         header('Location: /utenti');
         exit;
+    }
+    public function editUtente(): void
+    {
+        $utente = new Utente($_POST['id_utente']);
+        $data = $utente->sanificaInput($_POST, ['password', 'password_confirm']);
+
+
+
+        if ($utente->getUsername() !== $data['username']) {
+            if (!$utente->validazioneUsername($data)) {
+                $errors = $utente->getErrors();
+                foreach ($errors as $item) {
+                    Helper::addError($item);
+                }
+                header('Location: /utenti/edit/' . $utente->getId());
+                exit;
+            }
+            if (!$utente->usernameIsUnique($data['username'])) {
+                $errors = $utente->getErrors();
+                foreach ($errors as $item) {
+                    Helper::addError($item);
+                }
+                header('Location: /utenti/edit/' . $utente->getId());
+                exit;
+            }
+        }
+
+        if ($utente->getEmail() !== $data['email']) {
+            if (!$utente->validazioneEmail($data)) {
+                $errors = $utente->getErrors();
+                foreach ($errors as $item) {
+                    Helper::addError($item);
+                }
+                header('Location: /utenti/edit/' . $utente->getId());
+                exit;
+            }
+            if (!$utente->emailIsUnique($data['email'])) {
+                $errors = $utente->getErrors();
+                foreach ($errors as $item) {
+                    Helper::addError($item);
+                }
+                header('Location: /utenti/edit/' . $utente->getId());
+                exit;
+            }
+        }
+
+        if ($data['password'] !== '') {
+            if(!$utente->validazionePassword($data)) {
+                $errors = $utente->getErrors();
+                foreach ($errors as $item) {
+                    Helper::addError($item);
+                }
+                header('Location: /utenti/edit/' . $utente->getId());
+                exit;
+            }
+        }
+
+        $update = $utente->preparaAggiornamento($data);
+        if ($update === true) {
+            $utente->update();
+            Helper::addSuccess('Utente aggiornato con successo');
+            $this->redirectToReferer();
+            exit;
+        } else {
+            $errors = $utente->getErrors();
+            foreach ($errors as $item) {
+                Helper::addError($item);
+            }
+            header('Location: /utenti/edit/' . $utente->getId());
+            exit;
+        }
+    }
+    public function deleteUtente($id): void
+    {
+        $this->deleteUserAndRelatedRecords($id);
+        $this->redirectToReferer();
     }
 
     // Private methods
@@ -271,13 +334,35 @@ class UserController extends BaseController
     {
         $utente = new Utente();
         $data = $utente->sanificaInput($data, ['password', 'password_confirm']);
-        $utente->setEmail($data['email']);
-        $utente->setUsername($data['username']);
-        $utente->setIdRuolo($data['ruolo']);
 
-        if (!$utente->controllaEsettaPassword($data)) {
+        if (!$utente->validazioneEmail($data)) {
             return false;
         }
+
+        if (!$utente->validazioneUsername($data)) {
+            return false;
+        }
+
+        if (!$utente->usernameIsUnique($data['username'])) {
+            Helper::addError('Username già presente nel database');
+            return false;
+        }
+
+        if (!$utente->emailIsUnique($data['email'])) {
+            Helper::addError('Email già presente nel database');
+            return false;
+        }
+
+        if (!$utente->validazionePassword($data)) {
+            return false;
+        }
+
+
+        $utente->setEmail($data['email']);
+        $utente->setUsername($data['username']);
+        $utente->setPassword(password_hash(trim($data['password']), PASSWORD_DEFAULT));
+        $utente->setIdRuolo($data['ruolo']);
+
 
         $utente_id = $utente->save();
 
@@ -322,7 +407,6 @@ class UserController extends BaseController
     private function buildTableRows(): void
     {
         $utenti = Utente::getAllUtenti($this->args);
-
         foreach ($utenti as $utente) {
             $this->table->addRow($this->createUtenteRow($utente));
         }

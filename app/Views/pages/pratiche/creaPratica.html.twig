@@ -1,8 +1,8 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-    <section class="bg-white dark:bg-gray-900">
-        <div class="py-8 px-4 mx-auto w-full">
+
+    <div class="py-8 px-4 mx-auto w-full">
 
             <div class=" flex justify-between w-full items-center mb-6">
                 <h2 class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -10,18 +10,12 @@
                 </h2>
             </div>
 
-            <form action="{{ url('pratiche/crea') }} " method="post" class="w-full">
+            <form action="{{ url('pratiche/crea') }} " method="post" class="w-full" enctype="multipart/form-data">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token('crea-pratica') }}">
 
                 {% include 'pratiche/_form.html.twig' with {'button_label': 'Save'} %}
 
             </form>
         </div>
-    </section>
-{% endblock %}
 
-{% block javascripts %}
-    <script>
-
-    </script>
 {% endblock %}

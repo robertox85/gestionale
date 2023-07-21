@@ -29,13 +29,12 @@
 
     <script src="{{ assets('js/app.js') }}" defer></script>
 </head>
-<body class="{{ getPageClass() }}">
+<body class="{{ getPageClass() }} font-sans">
 
 
 {{ include('preloader.html.twig') }}
 
-<div class="antialiased bg-gray-50 dark:bg-gray-900">
-
+<div class="antialiase">
 
     <!-- Top Navigation -->
     {% include('navigation.html.twig') %}
@@ -44,17 +43,16 @@
     {% include('sidebar.html.twig') %}
 
 
-    <main class="md:ml-48 h-screen pt-20 px-4">
-
-        {% if session.utente %}
+    <main class="md:ml-48 pt-20 px-4">
+        <section class="">
             {% include('alerts.html.twig') %}
-        {% endif %}
 
-        {% block content %}
-            
-        {% endblock %}
+            {% include('breadcrumb.html.twig') %}
 
+            {% block content %}
 
+            {% endblock %}
+        </section>
 
     </main>
 </div>

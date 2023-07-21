@@ -26,6 +26,14 @@
     </tr>
     </thead>
     <tbody>
+    {% if rows is empty %}
+        <tr>
+            <td colspan="{{ headers|length }}" class="px-4 py-3 text-center">
+                {{ 'No results found.'|trans }}
+            </td>
+        </tr>
+    {% endif %}
+
     {% for row in rows %}
         <tr class="border-b dark:border-gray-700">
             {% for cell in row.cells %}

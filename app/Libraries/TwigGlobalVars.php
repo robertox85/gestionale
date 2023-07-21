@@ -32,6 +32,15 @@ class TwigGlobalVars
         // if is localhost, add the global variable 'isLocalhost' to the twig template
         $twig->addGlobal('isLocalhost', $_ENV['APP_ENV'] === 'local');
 
+        // if $_GET['s'] is set, add the global variable 'search' to the twig template
+        if (isset($_GET['s'])) {
+            $twig->addGlobal('search', $_GET['s']);
+        } else {
+            $twig->addGlobal('search', '');
+        }
+
+        // add the global variable 'path' to the twig template
+        $twig->addGlobal('path', $_SERVER['REQUEST_URI'] ?? '');
 
 
         self::addTwigFunctions($twig);
@@ -151,6 +160,18 @@ class TwigGlobalVars
                 $routeName = explode('?', $routeName)[0];
 
                 return $routeName;
+            },
+            'getLabelClass' => function() {
+                return 'block mb-2 text-sm font-medium text-gray-900 dark:text-white';
+            },
+            'getInputClass' => function() {
+                return 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500';
+            },
+            'getSubmitClass' => function (){
+                return 'inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-80';
+            },
+            'getCheckboxClass' => function() {
+                return 'w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800';
             },
         ];
 

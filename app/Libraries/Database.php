@@ -70,6 +70,7 @@ class Database
     }
 
 
+    /*
     public function query(array $options): array|bool|int|null|object
     {
         // opzioni predefinite
@@ -89,26 +90,15 @@ class Database
         // costruisce la query
         $sql = $options['query'];
 
-        /*if ($options['where'] !== null && is_array($options['where'])) {
-            // $options['where'] come array associativo
-            $whereConditions = [];
-            foreach ($options['where'] as $key => $value) {
-                $whereConditions[] = "{$key} = '{$value}'";
-            }
-            $whereClause = implode(' AND ', $whereConditions);
-            $sql .= " WHERE {$whereClause}";
-        }*/
+
 
         if ($options['where'] !== null && is_array($options['where'])) {
-            // $options['where'] as associative array
             $whereConditions = [];
             foreach ($options['where'] as $key => $value) {
                 if(is_array($value)) {
-                    // If the value is an array, we assume the first element is the operator
                     $operator = $value[0];
                     $actualValue = $value[1];
                 } else {
-                    // If it's not an array, we assume the operator is =
                     $operator = '=';
                     $actualValue = $value;
                 }
@@ -136,14 +126,12 @@ class Database
             if ($this->db === null) {
                 $errorHandler = ErrorHandler::getInstance();
                 $errorHandler->handleException(new Exception('Database not found'));
-                //throw new Exception('Database not found');
                 echo 'Database not found';
                 exit;
             } else {
                 $stmt = $this->db->prepare($sql);
                 $stmt->execute($options['params']);
 
-                // se la query è una SELECT restituisce un array di oggetti. Se seleziona un solo record restituisce un oggetto
                 if (explode(' ', $sql)[0] == 'SELECT') {
                     if ($options['limit'] == 1) {
                         return $stmt->fetch(PDO::FETCH_OBJ);
@@ -151,20 +139,16 @@ class Database
                     return $stmt->fetchAll(PDO::FETCH_OBJ);
                 }
 
-                // se la query è una INSERT restituisce l'id dell'ultimo record inserito
                 if (explode(' ', $sql)[0] == 'INSERT') {
                     return $this->db->lastInsertId();
                 }
 
-                // se la query è una UPDATE o DELETE restituisce il numero di righe modificate
                 if (explode(' ', $sql)[0] == 'UPDATE' || explode(' ', $sql)[0] == 'DELETE') {
                     return $stmt->rowCount();
                 }
 
                 return $stmt->fetchAll(PDO::FETCH_OBJ);
             }
-            // restituisce il risultato della query come un array di oggetti
-
         } catch (PDOException $e) {
             $errorHandler = ErrorHandler::getInstance();
             $errorHandler->handleException($e);
@@ -175,6 +159,107 @@ class Database
 
         return false;
 
+    }
+    */
+
+    public function query(array $options): array|bool|int|null|object
+    {
+        // opzioni predefinite
+        $default_options = [
+            'query' => '',
+            'params' => [],
+            'joins' => [], // Nuova opzione per le clausole JOIN
+            'limit' => null,
+            'offset' => null,
+            'order_by' => null,
+            'order_dir' => 'ASC',
+            'where' => '1',
+        ];
+
+        // unisce le opzioni predefinite con quelle passate dall'utente
+        $options = array_merge($default_options, $options);
+
+        // costruisce la query
+        $sql = $options['query'];
+
+        // Aggiunge le clausole JOIN se presenti
+        if (!empty($options['joins'])) {
+            foreach ($options['joins'] as $join) {
+                $sql .= " {$join['type']} JOIN {$join['table']} ON {$join['condition']}";
+            }
+        }
+
+        if ($options['where'] !== null && is_array($options['where'])) {
+            $whereConditions = [];
+            foreach ($options['where'] as $key => $value) {
+                if(is_array($value) && isset($value['operator']) && isset($value['value'])) {
+                    $operator = $value['operator'];
+                    $actualValue = $value['value'];
+                } else {
+                    $operator = '=';
+                    $actualValue = $value;
+                }
+                $whereConditions[] = "{$key} {$operator} '{$actualValue}'";
+            }
+            $whereClause = implode(' AND ', $whereConditions);
+            $sql .= " WHERE {$whereClause}";
+        }
+
+        if ($options['order_by'] !== null) {
+            $sql .= " ORDER BY {$options['order_by']} {$options['order_dir']}";
+        }
+
+        if ($options['limit'] !== null) {
+            $sql .= " LIMIT {$options['limit']}";
+        }
+
+        if ($options['offset'] !== null) {
+            $sql .= " OFFSET {$options['offset']}";
+        }
+
+        // Inizia la manipolazione del database e la gestione degli errori
+        try {
+            if ($this->db === null) {
+                $errorHandler = ErrorHandler::getInstance();
+                $errorHandler->handleException(new Exception('Database not found'));
+                //throw new Exception('Database not found');
+                echo 'Database not found';
+                exit;
+            } else {
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute($options['params']);
+
+                // se la query è una SELECT restituisce un array di oggetti. Se seleziona un solo record restituisce un oggetto
+                if (explode(' ', trim($sql))[0] === 'SELECT') {
+                    if ($options['limit'] == 1) {
+                        return $stmt->fetch(PDO::FETCH_OBJ);
+                    }
+                    return $stmt->fetchAll(PDO::FETCH_OBJ);
+                }
+
+                // se la query è una INSERT restituisce l'id dell'ultimo record inserito
+                if (explode(' ', trim($sql))[0] === 'INSERT') {
+                    return $this->db->lastInsertId();
+                }
+
+                // se la query è una UPDATE o DELETE restituisce il numero di righe modificate
+                if (explode(' ', trim($sql))[0] === 'UPDATE' || explode(' ', trim($sql))[0] === 'DELETE') {
+                    return $stmt->rowCount();
+                }
+
+                return $stmt->fetchAll(PDO::FETCH_OBJ);
+            }
+
+        } catch (PDOException $e) {
+            $errorHandler = ErrorHandler::getInstance();
+            $errorHandler->handleException($e);
+            return false;
+
+        } catch (\Exception $e) {
+            $errorHandler = ErrorHandler::getInstance();
+            $errorHandler->handleException($e);
+            return false;
+        }
     }
 
     public function getLastInsertId(): int

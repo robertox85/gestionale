@@ -23,30 +23,37 @@ class Gruppo extends BaseModel
     {
         return $this->id;
     }
+
     public function setId($id)
     {
         $this->id = $id;
     }
+
     public function getNome()
     {
         return $this->nome;
     }
+
     public function setNome($nome)
     {
         $this->nome = $nome;
     }
+
     public function getCreatedAt()
     {
         return $this->created_at;
     }
+
     public function getUpdatedAt()
     {
         return $this->updated_at;
     }
+
     public function setCreatedAt($created_at)
     {
         $this->created_at = $created_at;
     }
+
     public function setUpdatedAt($updated_at)
     {
         $this->updated_at = $updated_at;
@@ -58,6 +65,7 @@ class Gruppo extends BaseModel
     {
         $this->pratiche = $getPratiche;
     }
+
     public function getPratiche()
     {
         $db = Database::getInstance();
@@ -67,12 +75,13 @@ class Gruppo extends BaseModel
         $options['params'] = [':id_gruppo' => $this->getId()];
         $result = $db->query($options);
         // return only id
-        $result = array_map(function($result){
+        $result = array_map(function ($result) {
             return $result->id;
         }, $result);
 
         return $result;
     }
+
     public function getUtenti()
     {
         $db = Database::getInstance();
@@ -84,6 +93,7 @@ class Gruppo extends BaseModel
         $options['params'] = [':id_gruppo' => $this->getId()];
         return $db->query($options);
     }
+
     public function getCountUtenti()
     {
         $db = Database::getInstance();
@@ -96,6 +106,7 @@ class Gruppo extends BaseModel
         $this->setCountUtenti($result[0]->count);
         return $this->count_utenti;
     }
+
     public function addUtente(int $id_utente)
     {
         $db = Database::getInstance();
@@ -109,6 +120,7 @@ class Gruppo extends BaseModel
         $result = $db->query($options);
         return $result;
     }
+
     public function removeRecordFromUtentiGruppiByGruppoId()
     {
         $db = Database::getInstance();
@@ -121,6 +133,7 @@ class Gruppo extends BaseModel
         $result = $db->query($options);
         return $result;
     }
+
     public function removeGruppoFromPraticheByGruppoId(): bool
     {
         // Update Pratiche set id_gruppo = null where id_gruppo = :id_gruppo
@@ -134,6 +147,7 @@ class Gruppo extends BaseModel
         return $db->query($options);
 
     }
+
     public function setCountUtenti($getCountUtenti)
     {
         $this->count_utenti = $getCountUtenti;
@@ -152,6 +166,7 @@ class Gruppo extends BaseModel
         $result = $db->query($options);
         return $result;
     }
+
     public static function getGruppiByUtenteId(int $id_utente)
     {
         $db = Database::getInstance();
@@ -162,6 +177,7 @@ class Gruppo extends BaseModel
         $result = $db->query($options);
         return $result;
     }
+
     public static function addRecordToUtentiGruppi(mixed $id, mixed $gruppo)
     {
         $db = Database::getInstance();
@@ -172,42 +188,62 @@ class Gruppo extends BaseModel
         $result = $db->query($options);
         return $result;
     }
+
     public static function getAllGruppi(array $args)
     {
         $db = Database::getInstance();
-        // $sql = "SELECT * FROM Gruppi";
-
-        // COUNT UTENTI AND PRATICHE
-        $sql = "SELECT Gruppi.*, COUNT(Utenti_Gruppi.id_utente) AS count_utenti, COUNT(Pratiche.id) AS count_pratiche FROM Gruppi LEFT JOIN Utenti_Gruppi ON Gruppi.id = Utenti_Gruppi.id_gruppo LEFT JOIN Pratiche ON Gruppi.id = Pratiche.id_gruppo GROUP BY Gruppi.id";
-
-
+        $sql = "SELECT Gruppi.*, COUNT(Utenti_Gruppi.id_utente) AS count_utenti, ";
+        $sql .= "COUNT(Pratiche.id) AS count_pratiche FROM Gruppi ";
+        $sql .= "LEFT JOIN Utenti_Gruppi ON Gruppi.id = Utenti_Gruppi.id_gruppo ";
+        $sql .= "LEFT JOIN Pratiche ON Gruppi.id = Pratiche.id_gruppo ";
 
         $options = [];
+        $options['params'] = [];
 
         if (!empty($args)) {
+
+            if (isset($args['search']) && !empty($args['search'])) {
+                $sql .= "WHERE Gruppi.id IN (";
+                $sql .= "SELECT Gruppi.id FROM Gruppi ";
+                $sql .= "LEFT JOIN Utenti_Gruppi ON Gruppi.id = Utenti_Gruppi.id_gruppo ";
+                $sql .= "LEFT JOIN Utenti ON Utenti_Gruppi.id_utente = Utenti.id ";
+                $sql .= "LEFT JOIN Anagrafiche ON Utenti.id = Anagrafiche.id_utente ";
+                $sql .= "WHERE Gruppi.nome LIKE ? OR Anagrafiche.nome LIKE ? OR Anagrafiche.cognome LIKE ?  OR Anagrafiche.denominazione LIKE ?  OR Utenti.username LIKE ?  OR Utenti.email LIKE ? )";
+                $options['params'] = [
+                    '%' . $args['search'] . '%',
+                    '%' . $args['search'] . '%',
+                    '%' . $args['search'] . '%',
+                    '%' . $args['search'] . '%',
+                    '%' . $args['search'] . '%',
+                    '%' . $args['search'] . '%'
+                ];
+            }
+
             $options['limit'] = $args['limit'];
             $options['offset'] = ($args['currentPage'] - 1) * $args['limit'];
             $options['order_dir'] = $args['order'] ?? 'ASC';
-            if ($args['sort'] == 'id') {
+
+            if ($args['order_by'] == 'id') {
                 $options['order_by'] = "Gruppi.id";
-            } elseif($args['sort'] == 'utenti') {
+            } elseif ($args['order_by'] == 'utenti') {
                 $options['order_by'] = "count_utenti";
-            } elseif($args['sort'] == 'pratiche') {
+            } elseif ($args['order_by'] == 'pratiche') {
                 $options['order_by'] = "count_pratiche";
             } else {
-                $options['order_by'] = "Gruppi." . $args['sort'];
+                $options['order_by'] = "Gruppi." . $args['order_by'];
             }
         }
 
+        $sql .= " GROUP BY Gruppi.id";
+
         $options['query'] = $sql;
-        $options['params'] = [];
         $result = $db->query($options);
         $array = [];
-        // return instance of this class
         foreach ($result as $key => $value) {
             $array[] = new Gruppo($value->id);
         }
 
         return $array;
     }
+
 }

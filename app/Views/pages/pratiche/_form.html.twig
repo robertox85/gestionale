@@ -3,10 +3,13 @@
 
         <!-- Testo: Nome pratica -->
         <div>
-            <label for="nome">
+            <label for="nome"
+                   class="{{ getLabelClass() }}">
                 {{ 'Name'|trans }}
             </label>
-            <input type="text"
+            <input
+                    class="{{ getInputClass() }}"
+                    type="text"
                    name="nome"
                    id="nome"
                    value="{{ pratica.getNome() }}"
@@ -14,10 +17,14 @@
         </div>
         <!-- Testo: Tipologia -->
         <div>
-            <label for="tipologia">
+            <label
+                    for="tipologia"
+                    class="{{ getLabelClass() }}">
                 {{ 'Typology'|trans }}
             </label>
-            <input type="text"
+            <input
+                    class="{{ getInputClass() }}"
+                    type="text"
                    name="tipologia"
                    id="tipologia"
                    value="{{ pratica.getTipologia() }}"
@@ -27,14 +34,14 @@
 
         <!-- Multi Select: Assegna gruppo -->
         <div>
-            <label for="id_gruppo" class="flex justify-between">
+            <label for="id_gruppo" class="flex justify-between {{ getLabelClass() }}">
                 {{ 'Assign group'|trans }}
 
 
 
             </label>
 
-            <select id="id_gruppo" name="id_gruppo" required="" class="select2">
+            <select id="id_gruppo" name="id_gruppo" required="" class="select2 {{ getInputClass() }}">
                 <option selected="" value="" disabled>{{ 'Select a group'|trans }}</option>
                 {% for gruppo in gruppi %}
                     <option
@@ -49,10 +56,11 @@
 
         <!-- Testo: Competenza -->
         <div>
-            <label for="competenza">
+            <label for="competenza" class="{{ getLabelClass() }}">
                 {{ 'Competence'|trans }}
             </label>
             <input
+                    class="{{ getInputClass() }}"
                     type="text"
                     name="competenza"
                     id="competenza"
@@ -61,10 +69,14 @@
         </div>
         <!-- Testo: Ruolo generale -->
         <div>
-            <label for="ruolo_generale">
+            <label
+                    class="{{ getLabelClass() }}"
+                    for="ruolo_generale">
                 {{ 'General role'|trans }}
             </label>
-            <input type="text"
+            <input
+                    class="{{ getInputClass() }}"
+                    type="text"
                    name="ruolo_generale"
                    id="ruolo_generale"
                    value="{{ pratica.getRuoloGenerale() }}"
@@ -73,19 +85,25 @@
         </div>
         <!-- Testo: Giudice -->
         <div>
-            <label for="giudice">
+            <label
+                    class="{{ getLabelClass() }}"
+                    for="giudice">
                 {{ 'Judge'|trans }}
             </label>
-            <input type="text" name="giudice" id="giudice" value="{{ pratica.getGiudice() }}"
+            <input
+                    class="{{ getInputClass() }}"
+                    type="text" name="giudice" id="giudice" value="{{ pratica.getGiudice() }}"
                    placeholder="{{ 'Type judge name'|trans }}">
         </div>
 
         <!-- Select: Stato -->
         <div>
-            <label for="stato">
+            <label
+                    class="{{ getLabelClass() }}"
+                    for="stato">
                 {{ 'Status'|trans }}
             </label>
-            <select id="stato" name="stato">
+            <select id="stato" name="stato" class="{{ getInputClass() }}">
                 <option selected="" disabled>{{ 'Select a status'|trans }}</option>
                 <option
                         {% if pratica.getStato() == 'aperta' %}
@@ -111,6 +129,17 @@
             </select>
         </div>
 
+
+
+        <!-- upload file -->
+        <div class="">
+
+            <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Upload file</label>
+            <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400" aria-describedby="file_input_help" id="file_input" type="file" multiple>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-300" id="file_input_help">SVG, PNG, JPG or GIF (MAX. 800x400px).</p>
+
+        </div>
+
         <div
                 {% if pratica.getScadenze() is not empty %}
                     x-data="{ scadenze: {{ pratica.getScadenze() | json_encode }} }"
@@ -118,8 +147,8 @@
                     x-data="{ scadenze: [] }"
                 {% endif %}
 
-                class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
-            <label>
+                class=" ">
+            <label class="{{ getLabelClass() }}">
                 {{ 'Deadlines'|trans }}
             </label>
             <template x-for="(scadenza, index) in scadenze" :key="index">
@@ -128,16 +157,18 @@
                     <input
                            x-model="scadenza.data"
                            type="date"
+                           class="{{ getInputClass() }}"
                            placeholder="Select date"
                            :name="'scadenze['+index+'][data]'"
                            :id="'scadenza_data_'+index">
                     <input x-model="scadenza.motivo"
+                           class="{{ getInputClass() }}"
                            type="text"
                            :name="'scadenze['+index+'][motivo]'" :id="'scadenza_motivo_'+index"
                            placeholder="{{ 'Type deadline reason'|trans }}">
                     <button type="button" x-on:click="scadenze.splice(index, 1)"
-                            class="text-white bg-red-500 px-2 py-1 rounded flex items-center">
-                        <ion-icon name="trash"></ion-icon>
+                            class="">
+                        <ion-icon name="trash" class="text-red-500"></ion-icon>
                     </button>
                 </div>
             </template>
@@ -149,6 +180,7 @@
             </button>
         </div>
 
+        <div></div>
 
         <div
                 {% if pratica.getUdienze() is not empty %}
@@ -158,8 +190,8 @@
                     x-data="{ udienze: [] }"
 
                 {% endif %}
-                class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
-            <label>
+                class="">
+            <label class="{{ getLabelClass() }}">
                 {{ 'Hearings'|trans }}
             </label>
             <template x-for="(udienza, index) in udienze" :key="index">
@@ -167,20 +199,23 @@
                     <!-- select -->
 
                     <input
+                            class="{{ getInputClass() }}"
                            x-model="udienza.data"
                            type="date"
                            placeholder="Select date"
                            :name="'udienze['+index+'][data]'"
                            :id="'udienza_data_'+index">
 
-                    <input x-model="udienza.descrizione"
+                    <input
+                            class="{{ getInputClass() }}"
+                            x-model="udienza.descrizione"
                            :name="'udienze['+index+'][descrizione]'" :id="'udienza_descrizione_'+index"
                            type="text" placeholder="{{ 'Type hearing reason'|trans }}">
 
 
                     <button type="button" x-on:click="udienze.splice(index, 1)"
-                            class="text-white bg-red-500 px-2 py-1 rounded flex items-center">
-                        <ion-icon name="trash"></ion-icon>
+                            class="">
+                        <ion-icon name="trash" class="text-red-500"></ion-icon>
                     </button>
                 </div>
             </template>
@@ -189,8 +224,11 @@
                 <ion-icon name="add-outline"></ion-icon>
                 {{ 'Add hearing'|trans }}
             </button>
+
         </div>
 
+
+        <div></div>
 
         <div
                 x-data="{
@@ -203,8 +241,8 @@
         this.notes.splice(index, 0, draggedNote);
     }
 }"
-                class="bg-gray-50 dark:bg-gray-800 p-8 w-full sm:col-span-2  rounded">
-            <label>
+                class="">
+            <label class="{{ getLabelClass() }}">
                 {{ 'Notes'|trans }}
             </label>
             <template x-for="(note, index) in notes" :key="index">
@@ -229,21 +267,9 @@
                                     <path x-show="isOpen[index]" fill-rule="evenodd" clip-rule="evenodd"
                                           d="M14 11.414L10 15.414L6 11.414L4.586 13L10 18.414L15.414 13L14 11.414Z"/>
                                 </svg>
-                                <ion-icon name="globe-outline" class="text-gray-500 dark:text-gray-400"
-                                          x-show="note.visibilita == 'pubblica'"></ion-icon>
-                                <ion-icon name="lock-closed-outline" class="text-gray-500 dark:text-gray-400"
-                                          x-show="note.visibilita == 'privata'"></ion-icon>
                                 <span class="font-medium text-gray-900 dark:text-white ml-2"
-                                      x-text="(note.tipologia == 'registro_contabile') ? 'Registro Contabile' : 'Annotazioni'"></span>
-                                <span
-                                        class="text-gray-500 dark:text-gray-400">-
-                                    <span x-text="(note.visibilita == 'pubblica') ? 'Pubblica ' : 'Privata '"></span>
-                                    <!-- if pubblica show icon for pubblica , else icon for privata -->
-                                    </span>
-
-                                <span class="text-gray-500 dark:text-gray-400">- {{ 'Created'|trans }} {{ note.created_at|date('d/m/Y') }}
-
-                                </span>
+                                      x-text="(note.visibilita == 'pubblica') ? '{{ 'Public'|trans }}' : '{{ 'Private'|trans }}'"></span>
+                                <span class="text-gray-500 dark:text-gray-400">- {{ 'Created'|trans }} {{ note.created_at|date('d/m/Y') }}</span>
                             </button>
                             <button type="button" @click="notes.splice(index, 1)"
                                     class="text-red-500 ml-2">
@@ -251,7 +277,7 @@
                             </button>
                         </div>
                         <div x-show="isOpen[index]" class="mt-4">
-                            <div>
+                            <div class="flex flex-col">
                                 <label :for="'tipologia_nota_' + index"
                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                     {{ 'Note Type'|trans }}
@@ -259,7 +285,8 @@
                                 <select x-model="note.tipologia"
                                         :id="'tipologia_' + index"
                                         :name="'note['+index+'][tipologia]'"
-                                        class="w-full">
+
+                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                                     <option value="registro_contabile">
                                         {{ 'Accounting Register'|trans }}
                                     </option>
@@ -268,7 +295,7 @@
                                     </option>
                                 </select>
                             </div>
-                            <div class="mt-2">
+                            <div class="flex flex-col mt-2">
                                 <label :for="'nota_' + index"
                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                     {{ 'Note'|trans }}
@@ -276,23 +303,23 @@
                                 <textarea x-model="note.descrizione"
                                           :id="'nota_' + index" rows="4"
                                           :name="'note['+index+'][descrizione]'"
-                                          class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                                          class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500"
                                           placeholder="{{ 'Note'|trans }}"
                                           x-text="note.descrizione"
                                 >
 
                                 </textarea>
                             </div>
-                            <div class="mt-2">
+                            <div class="flex flex-col mt-2">
                                 <label :for="'visibilita_' + index"
-                                       class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                                        class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
                                     {{ 'Visibility'|trans }}
                                 </label>
 
                                 <select x-model="note.visibilita"
                                         :name="'note['+index+'][visibilita]'"
                                         :id="'visibilita_' + index"
-                                        class="w-full">
+                                        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500">
                                     <option value="pubblica" :selected="note.visibilita === 'pubblica'">
                                         {{ 'Public'|trans }}
                                     </option>
@@ -314,10 +341,13 @@
                 {{ 'Add Note'|trans }}</button>
         </div>
 
+
+
+
         <div class="sm:col-span-2 text-right">
 
             <div class="fixed right-6 bottom-6 group">
-                <button type="submit" class="submit">
+                <button type="submit" class="{{ getSubmitClass() }} submit">
                     <!-- Save icon -->
                     {{ button_label | default('Save') | trans }}
                 </button>
@@ -360,17 +390,19 @@
                 <div class="flex flex-col space-y-2">
 
                        <label for="nome_gruppo"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="{{ getInputClass() }}"
                             {{ 'Name'|trans }}
                         </label>
-                       <input type="text"
+                       <input
+
+                               type="text"
                                name="nome_gruppo"
                                id="nome_gruppo"
                                x-model="nome_gruppo"
-                               class="w-full">
+                               class="{{ getInputClass() }}">
 
                         <label for="utenti"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="{{ getInputClass() }}">
                             {{ 'Users'|trans }}
                         </label>
                         <select class="select2 " id="utenti" name="utenti[]" multiple="multiple">
@@ -389,7 +421,7 @@
 
 
                         <label for="pratiche"
-                               class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
+                               class="{{ getInputClass() }}">
                             {{ 'Pratiche'|trans }}
                         </label>
                         <select class="select2" id="pratiche" name="pratiche[]" multiple="multiple">
@@ -415,7 +447,7 @@
             <!-- Modal footer -->
             <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600">
                 <button id="save-modal" type="button"
-                        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                        class="{{ getSubmitClass() }} submit">
                     {{ 'Save'|trans }}
                 </button>
                 <button type="button"

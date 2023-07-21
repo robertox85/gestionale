@@ -6,10 +6,7 @@ use App\Libraries\Database;
 use App\Libraries\Helper;
 use App\Libraries\Table;
 use App\Models\Gruppo;
-use App\Models\Nota;
 use App\Models\Pratica;
-use App\Models\Scadenza;
-use App\Models\Udienza;
 use App\Models\Utente;
 use App\Services\PraticaService;
 
@@ -59,12 +56,53 @@ class PraticheController extends BaseController
     // Views
     public function praticheView()
     {
+        if (isset($_GET['test'])) {
+            $groupid = 1;
+            // create 1000 pratiche
+            for ($i = 0; $i < 1000; $i++) {
+                $pratica = new Pratica();
+                $pratica->setNome('pratica' . $i);
+                $pratica->setIdGruppo($groupid);
+                $pratica->setNrPratica(Pratica::generateNrPratica($groupid));
+                $pratica->save();
+            }
+        }
+
         $this->buildTableRows();
+
+        // where pratiche is_deleted = 0
+        $totalItems = (isset($this->args['search'])) && !empty($this->args['search']) ? count($this->table->getRows()) : Pratica::getTotalCount(['where' => ['is_deleted' => ['value' => 0, 'operator' => '=']]]);
+
+        echo $this->view->render(
+            'pratiche.html.twig',
+            [
+                'entity' => 'pratiche',
+                'headers' => $this->table->getHeaders(),
+                'rows' => $this->table->getRows(),
+                'pagination' => [
+                    'totalPages' => ceil($totalItems / $this->args['limit']), // Necessario calcolarlo in base alla tua logica di paginazione
+                    'totalItems' => $totalItems,
+                    'itemsPerPage' => $this->args['limit'],
+                    'currentPage' => $this->args['currentPage'],
+                ],
+            ]
+        );
+    }
+
+    public function praticheArchiveView()
+    {
+        $pratiche = Pratica::getAll([
+            'where' => [
+                'is_deleted' => ['operator' => 'NOT IN', 'value' => [0]]
+            ]
+        ]);
+
+        $this->buildTableRows($pratiche, true);
 
         // where pratiche is_deleted = 0
         $totalItems = Pratica::getTotalCount([
             'where' => [
-                'is_deleted' => ['value' => 0, 'operator' => '=']
+                'is_deleted' => ['value' => 1, 'operator' => '=']
             ]
         ]);
 
@@ -83,6 +121,7 @@ class PraticheController extends BaseController
             ]
         );
     }
+
     public function praticaCreaView()
     {
 
@@ -93,6 +132,7 @@ class PraticheController extends BaseController
             ]
         );
     }
+
     public function miePraticheView()
     {
         $utente = Utente::getCurrentUser();
@@ -117,8 +157,10 @@ class PraticheController extends BaseController
             ]
         );
     }
+
     public function editPraticaView(int $id_pratica)
     {
+
         echo $this->view->render(
             'editPratica.html.twig',
             [
@@ -127,8 +169,10 @@ class PraticheController extends BaseController
                 'gruppi' => Gruppo::getAll(),
                 'utenti' => Utente::getAll([
                     'where' => [
-                        'id_ruolo' => [6],
-                        'operator' => 'NOT IN'
+                        'id_ruolo' => [
+                            'value' => [6],
+                            'operator' => 'NOT IN'
+                        ]
                     ]
                 ]),
                 'pratiche' => Pratica::getAll(),
@@ -162,7 +206,7 @@ class PraticheController extends BaseController
             $pratica = new Pratica($_POST['id_pratica']);
             $oldGruppo = $pratica->getIdGruppo();
             $this->praticaService = new PraticaService($pratica);
-            if($oldGruppo != $_POST['id_gruppo']) {
+            if ($oldGruppo != $_POST['id_gruppo']) {
                 $newNrPratica = Pratica::generateNrPratica($_POST['id_gruppo']);
                 $this->praticaService->updateNrPratica($newNrPratica);
             }
@@ -180,6 +224,7 @@ class PraticheController extends BaseController
             exit();
         }
     }
+
     public function deletePratica(int $id_pratica)
     {
         $pratica = new Pratica($id_pratica);
@@ -191,27 +236,50 @@ class PraticheController extends BaseController
         }
 
 
-        // Reindirizzare l'utente alla pagina di visualizzazione della pratica appena creata
-        header("Location: /pratiche");
+        // Reindirizzare l'utente to current page
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit();
     }
 
-    // Private methods
-    private function buildTableRows(array $pratiche = []): void
+    public function restorePratica(int $id_pratica)
     {
-        if (empty($pratiche)) {
-            // override $this->args['sort'] if is equal to id with nr_pratica
-            if ($this->args['sort'] == 'id') {
-                $this->args['sort'] = 'nr_pratica';
-            }
-            $pratiche = Pratica::getAllPratiche($this->args);
+        $pratica = new Pratica($id_pratica);
+        try {
+            $newNrPratica = Pratica::generateNrPratica($pratica->getIdGruppo());
+            $pratica->setNrPratica($newNrPratica);
+            $pratica->restore();
+
+            Helper::addSuccess('Pratica ripristinata con successo');
+        } catch (\Exception $e) {
+            Helper::addError('Errore durante il ripristino della pratica ' . $e->getMessage());
         }
+
+        // Reindirizzare l'utente to current page
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
+    }
+
+    // Private methods
+    private function buildTableRows(array $pratiche = [], $is_archive = false): void
+    {
+        if (empty($pratiche) && !$is_archive) {
+
+            // override $this->args['sort'] if is equal to id with nr_pratica
+            if ($this->args['order_by'] == 'id') {
+                $this->args['order_by'] = 'nr_pratica';
+            }
+
+            if ($this->args['order_by'] == 'gruppo') {
+                $this->args['order_by'] = 'Gruppi.nome';
+            }
+        }
+        $pratiche = Pratica::getAllPratiche($this->args);
         foreach ($pratiche as $pratica) {
-            $this->table->addRow($this->createPraticaRow($pratica));
+            $this->table->addRow($this->createPraticaRow($pratica, $is_archive));
         }
 
     }
-    private function createPraticaRow(mixed $pratica): array
+
+    private function createPraticaRow(mixed $pratica, $is_archive = false): array
     {
 
         return [
@@ -220,7 +288,7 @@ class PraticheController extends BaseController
                 ['content' => $pratica->getGruppoObj()->getNome()],
                 ['content' => $pratica->getNome()],
                 ['content' => $pratica->getStato()],
-                ['content' => $this->createActionsCell($pratica)],
+                ['content' => $this->createActionsCell($pratica, $is_archive)],
             ]
         ];
     }

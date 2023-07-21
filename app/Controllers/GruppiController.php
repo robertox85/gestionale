@@ -55,7 +55,7 @@ class GruppiController extends BaseController
 
         $this->buildTableRows();
 
-        $totalItems = Gruppo::getTotalCount();
+        $totalItems = (isset( $this->args['search'] )  && !empty($this->args['search']) ? count($this->table->getRows()) : Gruppo::getTotalCount());
 
         echo $this->view->render('gruppi.html.twig',
             [
@@ -73,10 +73,18 @@ class GruppiController extends BaseController
     }
     public function creaGruppoView(): void
     {
+        $practice = Pratica::getAll(
+            [
+                'where' => [
+                    'is_deleted' => ['value' => 0, 'operator' => '=']
+                ]
+            ]
+        );
         echo $this->view->render(
             'creaGruppo.html.twig',
             [
                 'utenti' => $this->getUtenti(),
+                'pratiche' => $practice
             ]
         );
     }
@@ -225,8 +233,10 @@ class GruppiController extends BaseController
     private function getUtenti() {
         return Utente::getAll([
             'where' => [
-                'id_ruolo' => [6],
-                'operator' => 'NOT IN'
+                'id_ruolo' => [
+                    'value' => [6],
+                    'operator' => 'NOT IN'
+                ]
             ]
         ]);
     }

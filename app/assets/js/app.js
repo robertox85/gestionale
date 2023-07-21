@@ -713,4 +713,34 @@ window.initDatePicker = function () {
 }
 
 
+window.validatePassword = function (password) {
 
+    if(password.length < 8) {
+        return 'Password must be at least 8 characters';
+    }
+    if(!(/[A-Z]/.test(password))) {
+        return 'Password must contain at least one uppercase letter';
+    }
+    if(!(/[a-z]/.test(password))) {
+        return 'Password must contain at least one lowercase letter';
+    }
+    if(!(/[0-9]/.test(password))) {
+        return 'Password must contain at least one number';
+    }
+    return '';
+}
+
+window.generatePassword = function (length = 8) {
+    let retVal = "";
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    for (var i = 0, n = characters.length; i < length - 3; ++i) {
+        retVal += characters.charAt(Math.floor(Math.random() * n));
+    }
+
+    // Ensure there's at least one number, one uppercase letter, and one lowercase letter.
+    retVal += Math.floor(Math.random() * 10); // add a number
+    retVal += String.fromCharCode(65 + Math.floor(Math.random() * 26)); // add an uppercase letter
+    retVal += String.fromCharCode(97 + Math.floor(Math.random() * 26)); // add a lowercase letter
+
+    return retVal;
+}

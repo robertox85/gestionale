@@ -26,6 +26,11 @@ $routes = function (RouteCollector $r) {
     // Logout
     $r->addRoute('GET', '/sign-out', ['App\Controllers\AuthController', 'signOutUser']);
 
+
+    // Forgot password
+    $r->addRoute('GET', '/forgot-password', ['App\Controllers\AuthController', 'forgotPasswordView']);
+    $r->addRoute('POST', '/forgot-password', ['App\Controllers\AuthController', 'forgotPassword']);
+
     // Registrazione
     //$r->addRoute('GET', '/sign-up', ['App\Controllers\AuthController', 'signUpView']);
     //$r->addRoute('POST', '/sign-up', ['App\Controllers\AuthController', 'signUpUser']);
@@ -48,6 +53,17 @@ $routes = function (RouteCollector $r) {
     $r->addRoute('GET', '/pratiche', [
         'middleware' => [$middlewareStack],
         'handler' => ['App\Controllers\PraticheController', 'praticheView']
+    ]);
+
+    $r->addRoute('GET', '/pratiche/archive', [
+        'middleware' => [$middlewareStack],
+        'handler' => ['App\Controllers\PraticheController', 'praticheArchiveView']
+    ]);
+
+    //restore
+    $r->addRoute('GET', '/pratiche/restore/{id:\d+}', [
+        'middleware' => [$middlewareStack],
+        'handler' => ['App\Controllers\PraticheController', 'restorePratica']
     ]);
 
     $middlewareStack = new MiddlewareStack();
