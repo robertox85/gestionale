@@ -3,4 +3,5 @@ node_modules/
 vendor/
 .idea/
 logs/error.log
-``
+public/css
+public/js
