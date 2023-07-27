@@ -20,7 +20,8 @@
 
         <select id="items-per-page" name="items-per-page"
                 class="form-select inline-block mt-1 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500  p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500">
-            <option value="10" {% if pagination.itemsPerPage > 0 and pagination.itemsPerPage <= 10 %}selected{% endif %}>10</option>
+
+            <option value="10" {% if pagination.itemsPerPage <= 10 %}selected{% endif %}>10</option>
             <option value="20" {% if pagination.itemsPerPage > 10 and pagination.itemsPerPage <= 20 %}selected{% endif %}>20</option>
             <option value="50" {% if pagination.itemsPerPage > 20 and pagination.itemsPerPage <= 50 %}selected{% endif %}>50</option>
             <option value="100" {% if pagination.itemsPerPage > 50 %}selected{% endif %}>100</option>
@@ -31,7 +32,7 @@
     {% if pagination.totalPages > 1 %}
         <ul class="inline-flex items-stretch -space-x-px">
             <li>
-                <a href="{% if pagination.currentPage > 1 %}{{ url(entity, {page: pagination.currentPage - 1}) }}{% else %}#{% endif %}"
+                <a href="{% if pagination.currentPage > 1 %}{{ url('', {page: pagination.currentPage - 1}) }}{% else %}#{% endif %}"
                    class="flex items-center justify-center h-full py-1.5 px-3 ml-0 text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                     <span class="sr-only">Previous</span>
                     <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20"
@@ -46,7 +47,7 @@
                 {% if page == pagination.currentPage or pagination.currentPage == 1 %}
                     <span class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-primary-600 bg-primary-50 border border-primary-300 hover:bg-primary-100 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">1</span>
                 {% else %}
-                    <a href="{{ url(entity, {page: 1}) }}"
+                    <a href="{{ url('', {page: 1}) }}"
                        class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">1</a>
                 {% endif %}
 
@@ -62,7 +63,7 @@
                     {% if page == pagination.currentPage %}
                         <span class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-primary-600 bg-primary-50 border border-primary-300 hover:bg-primary-100 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{ page }}</span>
                     {% else %}
-                        <a href="{{ url(entity, {page: page}) }}"
+                        <a href="{{ url('', {page: page}) }}"
                            class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">{{ page }}</a>
                     {% endif %}
                 {% endif %}
@@ -77,14 +78,14 @@
                 {% if page == pagination.currentPage or pagination.currentPage == pagination.totalPages %}
                     <span class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-primary-600 bg-primary-50 border border-primary-300 hover:bg-primary-100 hover:text-primary-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">{{ pagination.totalPages }}</span>
                 {% else %}
-                    <a href="{{ url(entity, {page: pagination.totalPages}) }}"
+                    <a href="{{ url('', {page: pagination.totalPages}) }}"
                        class="flex items-center justify-center text-sm py-2 px-3 leading-tight text-gray-500 bg-white border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">{{ pagination.totalPages }}</a>
                 {% endif %}
 
             </li>
 
             <li>
-                <a href="{{ url(entity, {page: pagination.currentPage + 1}) }}"
+                <a href="{{ url('', {page: pagination.currentPage + 1}) }}"
                    class="flex items-center justify-center h-full py-1.5 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 dark:bg-gray-800 dark:border-gray-700 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
                     <span class="sr-only">Next</span>
                     <svg class="w-5 h-5" aria-hidden="true" fill="currentColor" viewbox="0 0 20 20"

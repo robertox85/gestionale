@@ -381,4 +381,9 @@ class Database
     {
         return $this->db->lastInsertId();
     }
+
+    public function prepare(string $sql)
+    {
+        return $this->db->prepare($sql);
+    }
 }

@@ -13,6 +13,8 @@ class TwigGlobalVars
             $twig->addGlobal('session', $_SESSION);
         }
 
+
+
         // add app variables
         $twig->addGlobal('app', [
             'name' => $_ENV['APP_NAME'],
@@ -39,8 +41,10 @@ class TwigGlobalVars
             $twig->addGlobal('search', '');
         }
 
-        // add the global variable 'path' to the twig template
-        $twig->addGlobal('path', $_SERVER['REQUEST_URI'] ?? '');
+        // add the global variable 'path' to the twig template, but remove the query string
+        $twig->addGlobal('path', explode('?', $_SERVER['REQUEST_URI'])[0]);
+        // add query global variable, Traversability
+        $twig->addGlobal('query', $_GET);
 
 
         self::addTwigFunctions($twig);
@@ -49,21 +53,8 @@ class TwigGlobalVars
 
     private static function addTwigFunctions(Environment $twig): void
     {
-        $twigFunctions = [
-            'isLoginPage' => function () {
-                return str_contains($_SERVER['REQUEST_URI'], 'sign-in');
-            },
-            'assets' => function (string $filename) {
-                // return full server path to the public folder
-                return $_ENV['BASE_URL'] . '/' . $filename;
-            },
-            'navigationUrl' => function (string $routeName) {
-                // remove duplcate // from the $routeName
-                $routeName = str_starts_with($routeName, '/') ? $routeName : "/$routeName";
-                return $_ENV['BASE_URL'] . $routeName;
-
-            },
-            'url' => function (string $routeName, array $params = []) {
+        /*
+         * 'url' => function (string $routeName, array $params = []) {
 
                 // get the current query string
                 $currentQueryString = $_SERVER['QUERY_STRING'] ?? '';
@@ -79,7 +70,10 @@ class TwigGlobalVars
 
                 $query = http_build_query($params);
                 $query = $query ? "$currentQueryString&$query" : $currentQueryString;
-                $url = $_ENV['BASE_URL'] . $routeName . ($query ? "?$query" : '');
+
+                $url = $_ENV['BASE_URL'] . ($_SERVER['PATH_INFO'] ?? '') . $routeName . ($query ? "?$query" : '');
+
+
 
 
                 // remove ?route={*} from the query string if exists, and if i'm not in login or register page
@@ -90,6 +84,59 @@ class TwigGlobalVars
 
                 return $url;
             },
+         */
+        $twigFunctions = [
+            'isLoginPage' => function () {
+                return str_contains($_SERVER['REQUEST_URI'], 'sign-in');
+            },
+            'assets' => function (string $filename) {
+                // return full server path to the public folder
+                return $_ENV['BASE_URL'] . '/' . $filename;
+            },
+            'navigationUrl' => function (string $routeName) {
+                // remove duplcate // from the $routeName
+                $routeName = str_starts_with($routeName, '/') ? $routeName : "/$routeName";
+                return $_ENV['BASE_URL'] . $routeName;
+
+            },
+            'url' => function (string $routeName = '', array $params = []) {
+
+                // if route name is empty, return the current url with the parameters
+                if (!$routeName) {
+                    $currentQueryString = $_SERVER['QUERY_STRING'] ?? '';
+                    $currentQueryString = http_build_query(array_diff_key($_GET, $params));
+                    $query = http_build_query($params);
+                    $query = $query ? "$currentQueryString&$query" : $currentQueryString;
+                    $url = $_ENV['BASE_URL'] . ($_SERVER['PATH_INFO'] ?? '') . ($query ? "?$query" : '');
+                    return $url;
+                }
+
+                // get the current query string
+                $currentQueryString = $_SERVER['QUERY_STRING'] ?? '';
+
+                $routeName = str_starts_with($routeName, '/') ? $routeName : "/$routeName";
+
+                // if the current query string is not empty, append it to the new query string
+                if ($currentQueryString) {
+                    // remove duplicate from $currentQueryString the parameters that are already in $params
+                    $currentQueryString = http_build_query(array_diff_key($_GET, $params));
+                }
+
+                $query = http_build_query($params);
+
+                $query = $query ? "$currentQueryString&$query" : $currentQueryString;
+
+                $url = $_ENV['BASE_URL'] . ($_SERVER['PATH_INFO'] ?? '') . $routeName . ($query ? "?$query" : '');
+
+                // remove ?route={*} from the query string if exists, and if i'm not in login or register page
+                if (str_contains($url, '?route=') && !str_contains($url, 'sign-in') && !str_contains($url, 'register')) {
+                    // unset the route parameter from the query string
+                    $url = preg_replace('/&?route=[^&]+/', '', $url);
+                }
+
+                return $url;
+            },
+
             'csrf_token' => function (string $tokenId = 'authenticate') {
                 return Helper::generateToken($tokenId) ?? '';
             },
@@ -147,7 +194,6 @@ class TwigGlobalVars
 
                 return $params;
             },
-            // add PageClass to the body tag
             'getPageClass' => function () {
                 $routeName = $_SERVER['REQUEST_URI'] ?? '';
                 // remove id from the route name (e.g. /pratiche/edit/12)

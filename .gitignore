@@ -5,3 +5,5 @@ vendor/
 logs/error.log
 public/css
 public/js
+trash
+trash/*

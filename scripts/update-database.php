@@ -24,18 +24,7 @@ try {
 try {
 
 
-    // Modifica colonna stato in pratiche, deve essere un enum con valori: 'aperta', 'chiusa', 'sospesa'
-    $pdo->exec("ALTER TABLE Pratiche MODIFY COLUMN stato ENUM('aperta', 'chiusa', 'sospesa') NOT NULL DEFAULT 'aperta'");
 
-    // Aggiungi colonna 'Denominazione' in Anagrafica, deve essere un varchar(255) nullable
-    $pdo->exec("ALTER TABLE Anagrafiche ADD COLUMN denominazione VARCHAR(255) NULL DEFAULT NULL AFTER cognome");
-
-    // Aggiungi colonna tipo_entita in Anagrafica, dopo id_utente, deve essere un enum con valori: 'Persona', 'Azienda'
-    $pdo->exec("ALTER TABLE Anagrafiche ADD COLUMN tipo_utente ENUM('Persona', 'Azienda') NOT NULL DEFAULT 'Persona' AFTER note");
-
-
-    // Aggiungi colonna tipo_utente in Anagrafiche, deve essere un enum con valori: 'Controparte', 'Cliente', 'Referente'. Default: 'Cliente'
-    $pdo->exec("ALTER TABLE Anagrafiche ADD COLUMN tipo_anagrafica ENUM('Controparte', 'Cliente', 'Referente') NOT NULL DEFAULT 'Cliente' AFTER tipo_utente");
 
 
 

@@ -3,27 +3,78 @@
 namespace App\Controllers;
 
 use App\Libraries\Auth;
+use App\Libraries\Database;
 use App\Libraries\Table;
 use App\Libraries\TwigConfigurator;
 use App\Libraries\TwigGlobalVars;
+use Symfony\Component\HttpFoundation\Request;
 use Twig\Environment;
 
 abstract class BaseController
 {
     protected Environment $view;
-
     protected Table $table;
     protected array $args;
     protected array $filters;
-
     protected Auth $auth;
+    protected Database $db;
 
     public function __construct()
     {
         $this->view = TwigConfigurator::configure();
         $this->args = $this->getArgsArray();
         $this->auth = new Auth();
+        $this->db = Database::getInstance();
         TwigGlobalVars::addGlobals($this->view);
+    }
+
+    protected function getPagingParams()
+    {
+        $request = Request::createFromGlobals();
+        $limit = $request->query->get('limit', 10);
+        $page = $request->query->get('page', 1);
+        $order_by = $request->query->get('order_by', 'ID_utente');
+        $direction = $request->query->get('direction', 'ASC');
+        $search = $request->query->get('s', '');
+
+        // Validate limit
+        $limit = (int)$limit;
+        if ($limit < 1 || $limit > 100) {
+            throw new \InvalidArgumentException('Invalid limit value. It should be between 1 and 100.');
+        }
+
+        // Validate page
+        $page = (int)$page;
+        if ($page < 1) {
+            throw new \InvalidArgumentException('Invalid page number. It should be greater than 0.');
+        }
+
+        // Validate order by. This should be one of the columns of your table.
+        $allowed_order_by_values = ['ID_utente', 'nome', 'cognome', 'email'];
+        if (!in_array($order_by, $allowed_order_by_values)) {
+            //throw new \InvalidArgumentException('Invalid order by value. Allowed values are: ' . implode(', ', $allowed_order_by_values));
+        }
+
+        // Validate direction
+        $allowed_direction_values = ['ASC', 'DESC'];
+        if (!in_array(strtoupper($direction), $allowed_direction_values)) {
+            throw new \InvalidArgumentException('Invalid direction. Allowed values are: ASC, DESC');
+        }
+
+        // Validate search string
+        if (!preg_match('/^[a-zA-Z0-9 ]*$/', $search)) {
+            throw new \InvalidArgumentException('Invalid characters in search string. Only alphanumeric characters and space are allowed.');
+        }
+
+        return [
+            'limit' => $limit,
+            'page' => $page,
+            'currentPage' => $page,
+            'order_by' => $order_by,
+            'direction' => $direction,
+            'search' => $search,
+            'query' => $request->query->all(),
+        ];
     }
 
 

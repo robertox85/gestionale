@@ -1,0 +1,6 @@
+{% extends 'base.html.twig' %}
+{% block content %}
+    <div class="overflow-x-auto">
+        {% include 'table.html.twig' with {'headers': headers, 'rows': rows} %}
+    </div>
+{% endblock %}

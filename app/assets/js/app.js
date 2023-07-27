@@ -129,6 +129,62 @@ document.addEventListener('alpine:init', () => {
     }));
 });
 
+function checkAll(e) {
+    const bulkDeleteIds = document.getElementById('bulk-delete-ids');
+    const deleteButton = document.getElementById('bulk-delete-button');
+    if (bulkDeleteIds === null) {
+        return;
+    }
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    checkboxes.forEach(function (checkbox) {
+        checkbox.checked = e.checked;
+        if (deleteButton !== null) {
+            deleteButton.disabled = !e.checked;
+        }
+        if (bulkDeleteIds !== null) {
+            if (e.checked) {
+                // remove 'on' from the string
+                bulkDeleteIds.value = bulkDeleteIds.value.replace('on,', '');
+                // add the id to the string
+                bulkDeleteIds.value += checkbox.value + ',';
+
+            } else {
+                bulkDeleteIds.value = '';
+            }
+        }
+    });
+}
+
+
+function checkSelected() {
+
+    const bulkDeleteIds = document.getElementById('bulk-delete-ids');
+    const deleteButton = document.getElementById('bulk-delete-button');
+    if (bulkDeleteIds === null) {
+        return;
+    }
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    let checked = false;
+    checkboxes.forEach(function (checkbox) {
+        if (checkbox.checked) {
+            checked = true;
+        }
+    });
+    if (deleteButton !== null)  deleteButton.disabled = !checked;
+
+
+    bulkDeleteIds.value = '';
+    checkboxes.forEach(function (checkbox) {
+        if (checkbox.checked) {
+            // remove 'on' from the string
+            bulkDeleteIds.value = bulkDeleteIds.value.replace('on,', '');
+            // add the id to the string
+            bulkDeleteIds.value += checkbox.value + ',';
+        }
+    });
+}
+window.checkSelected = checkSelected;
+window.checkAll = checkAll;
 
 // MODAL
 // set the modal menu element
@@ -525,124 +581,6 @@ togglePassword.forEach(function (button) {
 
 });
 
-// on #checkbox-all-search click check all checkboxes
-var checkboxAllSearch = document.getElementById('checkbox-all-search');
-var checkboxes = document.querySelectorAll('input[type="checkbox"]');
-
-var bulkDeleteUsers = document.getElementById('bulk-delete-utenti');
-var bulkActivateUsers = document.getElementById('bulk-activate-utenti');
-var bulkDeleteUsersButton = document.getElementById('bulk-delete-utenti-button');
-var bulkActivateUsersButton = document.getElementById('bulk-activate-utenti-button');
-if (checkboxAllSearch) {
-    checkboxAllSearch.addEventListener('click', function () {
-        // if checked
-        if (this.checked) {
-            // check all checkboxes
-            checkboxes.forEach(function (checkbox) {
-                checkbox.checked = true;
-                // get data-id and add to bulkDeleteUsers input value as array
-                if (checkbox.dataset.id) {
-                    bulkDeleteUsers.value += checkbox.dataset.id + ',';
-                    bulkActivateUsers.value += checkbox.dataset.id + ',';
-                }
-            });
-            // remove disabled class from #bulk-delete-utenti-button
-            bulkDeleteUsersButton.classList.remove('disabled');
-            bulkDeleteUsersButton.classList.remove('opacity-20');
-            bulkDeleteUsersButton.classList.remove('cursor-not-allowed');
-
-            bulkActivateUsersButton.classList.remove('disabled');
-            bulkActivateUsersButton.classList.remove('opacity-20');
-            bulkActivateUsersButton.classList.remove('cursor-not-allowed');
-        }
-
-        // if unchecked
-        if (!this.checked) {
-            // uncheck all checkboxes
-            checkboxes.forEach(function (checkbox) {
-                checkbox.checked = false;
-                // get data-id and remove from bulkDeleteUsers
-                if (checkbox.dataset.id) {
-                    bulkDeleteUsers.value = bulkDeleteUsers.value.replace(checkbox.dataset.id + ',', '');
-                    bulkActivateUsers.value = bulkActivateUsers.value.replace(checkbox.dataset.id + ',', '');
-                }
-            });
-            // add disabled class to #bulk-delete-utenti-button
-            bulkDeleteUsersButton.classList.add('disabled');
-            bulkDeleteUsersButton.classList.add('opacity-20');
-            bulkDeleteUsersButton.classList.add('cursor-not-allowed');
-
-            bulkActivateUsersButton.classList.add('disabled');
-            bulkActivateUsersButton.classList.add('opacity-20');
-            bulkActivateUsersButton.classList.add('cursor-not-allowed');
-        }
-    });
-}
-
-// on checkbox click
-checkboxes.forEach(function (checkbox) {
-    checkbox.addEventListener('click', function () {
-        // if checked
-        if (this.checked) {
-            // get data-id and add to bulkDeleteUsers input value as array
-            if (this.dataset.id) {
-                bulkDeleteUsers.value += this.dataset.id + ',';
-                bulkActivateUsers.value += this.dataset.id + ',';
-            }
-        }
-
-        // if unchecked
-        if (!this.checked) {
-            // get data-id and remove from bulkDeleteUsers
-            if (this.dataset.id) {
-                bulkDeleteUsers.value = bulkDeleteUsers.value.replace(this.dataset.id + ',', '');
-                bulkActivateUsers.value = bulkActivateUsers.value.replace(this.dataset.id + ',', '');
-            }
-        }
-
-        // if there are no checkboxes checked
-        if (bulkDeleteUsers.value === '') {
-            // add disabled class to #bulk-delete-utenti-button
-            bulkDeleteUsersButton.classList.add('disabled');
-            bulkDeleteUsersButton.classList.add('opacity-20');
-            bulkDeleteUsersButton.classList.add('cursor-not-allowed');
-
-            bulkActivateUsersButton.classList.add('disabled');
-            bulkActivateUsersButton.classList.add('opacity-20');
-            bulkActivateUsersButton.classList.add('cursor-not-allowed');
-        } else {
-            // remove disabled class from #bulk-delete-utenti-button
-            bulkDeleteUsersButton.classList.remove('disabled');
-            bulkDeleteUsersButton.classList.remove('opacity-20');
-            bulkDeleteUsersButton.classList.remove('cursor-not-allowed');
-
-            bulkActivateUsersButton.classList.remove('disabled');
-            bulkActivateUsersButton.classList.remove('opacity-20');
-            bulkActivateUsersButton.classList.remove('cursor-not-allowed');
-        }
-    });
-});
-
-// #bulk-delete-utenti-button
-if (bulkDeleteUsersButton) {
-    // if clicked and has class disabled, return false
-    bulkDeleteUsersButton.addEventListener('click', function (e) {
-        if (this.classList.contains('disabled')) {
-            e.preventDefault();
-            return false;
-        }
-    });
-}
-
-if (bulkActivateUsersButton) {
-    // if clicked and has class disabled, return false
-    bulkActivateUsersButton.addEventListener('click', function (e) {
-        if (this.classList.contains('disabled')) {
-            e.preventDefault();
-            return false;
-        }
-    });
-}
 
 // add actions buttons to #utenti table
 /*document.addEventListener('DOMContentLoaded', function () {
