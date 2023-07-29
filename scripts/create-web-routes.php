@@ -11,12 +11,9 @@ $stmt = $pdo->query($sql);
 $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
 
 // Genera la lista delle rotte
-$routeList = "<?php\n\n// start session\nsession_start();\n\nuse FastRoute\RouteCollector;\n";
-$routeList .= "use App\Middleware\AuthenticationMiddleware;\n";
-$routeList .= "use App\Middleware\AuthorizationMiddleware;\n";
-$routeList .= "use App\Middleware\MiddlewareStack;\n\n";
+$routeList = "<?php\n\nuse FastRoute\RouteCollector;\n";
 $routeList .= "// Configurazione delle rotte e dei middleware con MiddlewareStack\n\n";
-$routeList .= "\$routes = function (RouteCollector \$r) {\n\n";
+$routeList .= "return function (RouteCollector \$r) {\n\n";
 
 // Aggiungi le rotte pubbliche
 $routeList .= "\t// Rotte pubbliche\n";
@@ -55,13 +52,13 @@ foreach ($tables as $tableName) {
 }
 
 $routeList .= "};\n\n";
-$routeList .= "return \$routes;\n";
+
 
 // Salva il codice generato nel file routes.php
-file_put_contents('routes.php', $routeList);
+file_put_contents('web.php', $routeList);
 
 // Sposta il file routes.php nella cartella app/Routes
-rename('routes.php', 'app/Routes/routes.php');
+rename('web.php', 'app/Routes/web.php');
 
 echo "Controlla il file routes.php per verificare le modifiche.\n";
 

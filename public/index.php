@@ -12,6 +12,7 @@ use App\Libraries\Helper;
 use App\Libraries\ErrorHandler;
 
 
+
 // Caricamento delle variabili d'ambiente
 $dotenv = Dotenv::createImmutable(dirname(__DIR__, 1));
 $dotenv->load();

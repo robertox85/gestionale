@@ -24,6 +24,11 @@ class BaseModel
         }
     }
 
+    private function getId()
+    {
+        $getter = 'getId' . ucfirst(Helper::getTablePrimaryKeyName($this->getShortClassName()));
+        return $this->$getter();
+    }
 
     // Load by id
     public function load($params = [])
@@ -99,7 +104,6 @@ class BaseModel
 
     }
 
-    // setProperties
     public static function find($id)
     {
         $qb = new QueryBuilder(Database::getInstance());
@@ -123,13 +127,6 @@ class BaseModel
         $className = static::class;
         return (new \ReflectionClass($className))->getShortName();
     }
-
-    private function getId()
-    {
-        $getter = 'getId' . ucfirst(Helper::getTablePrimaryKeyName($this->getShortClassName()));
-        return $this->$getter();
-    }
-
     private function setProperties(mixed $int)
     {
         foreach ($int as $key => $value) {
@@ -140,8 +137,32 @@ class BaseModel
         }
     }
 
+    public function getAll()
+    {
+        $qb = new QueryBuilder(Database::getInstance());
+        $tableName = (new \ReflectionClass(static::class))->getShortName();
+        $qb = $qb->setTable($tableName);
+        $qb = $qb->select('*');
+        return $qb->get();
+    }
     public function getPrimaryKeyName()
     {
         return $this->primaryKey;
+    }
+    public function getDisplayFieldName(): string {
+        // Puoi definire qui la logica per ottenere il nome del campo appropriato.
+        // Ad esempio, se vuoi il primo campo dopo l'id (primary key), puoi ottenere l'elenco dei nomi delle colonne della tabella
+        // e selezionare il secondo elemento dell'array (il primo dopo l'id).
+        $columnNames = $this->getColumnNames();
+        return $columnNames[1]; // Restituisce il nome del campo appropriato
+    }
+    public function getColumnNames()
+    {
+        $qb = new QueryBuilder(Database::getInstance());
+        $tableName = (new \ReflectionClass(static::class))->getShortName();
+        $qb = $qb->setTable($tableName);
+        $qb = $qb->select('*');
+        $result = $qb->get();
+        return array_keys($result[0]);
     }
 }

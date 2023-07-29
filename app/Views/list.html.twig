@@ -3,10 +3,31 @@
     <div class="overflow-x-auto">
 
         <!-- bulk delete form -->
-        <div class="flex justify-between items-center mb-4">
-            <form action="{{ get_current_url('bulk-delete') }}" method="post"
-                  class="mb-4"
-                  id="bulk-delete-form">
+        <div class="flex justify-end items-center mb-4 space-x-2">
+            <!-- create button -->
+            <a href="{{ get_current_url('create') }}"
+               class="
+        inline-flex
+        items-center
+        px-4
+        py-2
+        border border-transparent
+        text-sm
+        font-medium
+        rounded-md
+        shadow-sm
+        text-white
+        bg-indigo-600
+        hover:bg-indigo-700
+        dark:bg-indigo-500
+        dark:hover:bg-indigo-600
+        dark:text-gray-200
+        ">
+                <ion-icon name="add-outline"></ion-icon>
+                <span class="ml-2">Create</span>
+            </a>
+
+            <form action="{{ get_current_url('bulk-delete') }}" method="post" id="bulk-delete-form">
                 <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                 <input type="hidden" name="ids" id="bulk-delete-ids">
 
@@ -37,33 +58,10 @@
         dark:disabled:text-gray-400
         ">
                     <ion-icon name="trash-outline"></ion-icon>
-                    <span class="ml-2">Delete selected</span>
+                    <span class="ml-2">{{ 'Delete'|trans }}</span>
                 </button>
 
             </form>
-
-            <!-- create button -->
-            <a href="{{ get_current_url('create') }}"
-               class="
-        inline-flex
-        items-center
-        px-4
-        py-2
-        border border-transparent
-        text-sm
-        font-medium
-        rounded-md
-        shadow-sm
-        text-white
-        bg-indigo-600
-        hover:bg-indigo-700
-        dark:bg-indigo-500
-        dark:hover:bg-indigo-600
-        dark:text-gray-200
-        ">
-                <ion-icon name="add-outline"></ion-icon>
-                <span class="ml-2">Create</span>
-            </a>
         </div>
 
         <table class=" min-w-full divide-y divide-gray-200 dark:divide-gray-700">
@@ -83,7 +81,7 @@
 
                         <a
                                 class="flex items-center space-x-1"
-                                href="{{ url(get_current_url(),{sort: column|lower, order: pagination.query.order == 'asc' ? 'desc' : 'asc'}) }}">
+                                href="{{ url(get_current_url(),{sort: column|lower, order: pagination.query.order == 'desc' ? 'asc' : 'desc'}) }}">
                             {{ column }}
                             {% if pagination.query.sort == column|lower %}
                                 {% if pagination.query.order == 'asc' %}
@@ -93,7 +91,7 @@
                                 {% endif %}
 
                             {% else %}
-                                <ion-icon name="filter-outline"></ion-icon>
+                                <ion-icon name="arrow-up-outline"></ion-icon>
                             {% endif %}
                         </a>
                     </th>

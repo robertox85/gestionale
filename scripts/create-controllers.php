@@ -26,6 +26,7 @@ foreach ($tables as $tableName) {
     $idAlias = 'id_' . strtolower($singularTableName);
     if (preg_match('/[A-Z]/', $singularTableName)) {
         $words = preg_split('/(?=[A-Z])/', $singularTableName, -1, PREG_SPLIT_NO_EMPTY);
+        $action = strtolower(implode('-', $words));
         $string = strtolower(implode('_', $words));
         $array = explode('_', $string);
         $id = getSingularName($array[0]);
@@ -61,7 +62,7 @@ foreach ($tables as $tableName) {
     $controllerCode .= "\t\t\$formComponent = new DynamicFormComponent(\$entity);\n";
     $controllerCode .= "\n";
     $controllerCode .= "\t\t\$formData = [];\n";
-    $controllerCode .= "\t\t\$formData['action'] = \$this->url('" . strtolower($tableName) . "/store');\n";
+    $controllerCode .= "\t\t\$formData['action'] = \$this->url('" . strtolower($action) . "/store');\n";
     $controllerCode .= "\t\t\$formData['csrf_token'] = Helper::generateToken('" . ucfirst($tableName) . "');\n";
     $controllerCode .= "\t\t\$formData['button_label'] = 'Crea';\n";
     $controllerCode .= "\n";
@@ -77,18 +78,18 @@ foreach ($tables as $tableName) {
     $controllerCode .= "\t\t\$" . strtolower($tableName) . " = " . ucfirst($tableName) . "::find(\$id);\n";
     $controllerCode .= "\t\tif (!\$" . strtolower($tableName) . ") {\n";
     $controllerCode .= "\t\t\tHelper::addError('Record non trovato.');\n";
-    $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($tableName) . "');\n";
+    $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($action) . "');\n";
     $controllerCode .= "\t\t\texit();\n";
     $controllerCode .= "\t\t}\n";
     $controllerCode .= "\t\t\$formComponent = new DynamicFormComponent(\$" . strtolower($tableName) . ");\n";
     $controllerCode .= "\n";
     $controllerCode .= "\t\t\$formData = [];\n";
-    $controllerCode .= "\t\t\$formData['action'] = \$this->url('" . strtolower($tableName) . "/update');\n";
+    $controllerCode .= "\t\t\$formData['action'] = \$this->url('" . strtolower($action) . "/update');\n";
     $controllerCode .= "\t\t\$formData['csrf_token'] = Helper::generateToken('" . ucfirst($tableName) . "');\n";
     $controllerCode .= "\t\t\$formData['" . $idAlias . "'] = \$id;\n";
     $controllerCode .= "\t\t\$formData['button_label'] = 'Edit';\n";
     $controllerCode .= "\n";
-    $controllerCode .= "\t\t\$formHtml = \$formComponent->renderEditForm(\$formData);\n";
+    $controllerCode .= "\t\t\$formHtml = \$formComponent->renderForm(\$formData);\n";
     $controllerCode .= "\n";
     $controllerCode .= "\t\techo \$this->view->render('newform.html.twig', compact('formHtml'));\n";
     $controllerCode .= "\t}\n";
@@ -102,7 +103,7 @@ foreach ($tables as $tableName) {
     $controllerCode .= "\t\t\t// Verifica il token CSRF\n";
     $controllerCode .= "\t\t\tif (!Helper::validateToken('" . ucfirst($tableName) . "', \$post['csrf_token'])) {\n";
     $controllerCode .= "\t\t\t\tHelper::addError('Token CSRF non valido.');\n";
-    $controllerCode .= "\t\t\t\tHelper::redirect('/" . strtolower($tableName) . "');\n";
+    $controllerCode .= "\t\t\t\tHelper::redirect('/" . strtolower($action) . "');\n";
     $controllerCode .= "\t\t\t\texit();\n";
     $controllerCode .= "\t\t\t}\n";
     $controllerCode .= "\n";
@@ -118,11 +119,11 @@ foreach ($tables as $tableName) {
     $controllerCode .= "\t\t\t\tHelper::addError('Errore durante la creazione o l\'aggiornamento del record.');\n";
     $controllerCode .= "\t\t\t}\n";
     $controllerCode .= "\n";
-    $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($tableName) . "');\n";
+    $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($action) . "');\n";
     $controllerCode .= "\t\t\texit();\n";
     $controllerCode .= "\t\t} catch (\Exception \$e) {\n";
     $controllerCode .= "\t\t\tHelper::addError(\$e->getMessage());\n";
-    $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($tableName) . "');\n";
+    $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($action) . "');\n";
     $controllerCode .= "\t\t\texit();\n";
     $controllerCode .= "\t\t}\n";
     $controllerCode .= "\t}\n";
@@ -136,7 +137,7 @@ foreach ($tables as $tableName) {
     $controllerCode .= "\t\t\t// Verifica il token CSRF\n";
     $controllerCode .= "\t\t\tif (!Helper::validateToken('" . ucfirst($tableName) . "', \$post['csrf_token'])) {\n";
     $controllerCode .= "\t\t\t\tHelper::addError('Token CSRF non valido.');\n";
-    $controllerCode .= "\t\t\t\tHelper::redirect('/" . strtolower($tableName) . "');\n";
+    $controllerCode .= "\t\t\t\tHelper::redirect('/" . strtolower($action) . "');\n";
     $controllerCode .= "\t\t\t\texit();\n";
     $controllerCode .= "\t\t\t}\n";
     $controllerCode .= "\n";
@@ -152,11 +153,11 @@ foreach ($tables as $tableName) {
     $controllerCode .= "\t\t\t\tHelper::addError('Errore durante la creazione o l\'aggiornamento del record.');\n";
     $controllerCode .= "\t\t\t}\n";
     $controllerCode .= "\n";
-    $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($tableName) . "');\n";
+    $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($action) . "');\n";
     $controllerCode .= "\t\t\texit();\n";
     $controllerCode .= "\t\t} catch (\Exception \$e) {\n";
     $controllerCode .= "\t\t\tHelper::addError(\$e->getMessage());\n";
-    $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($tableName) . "');\n";
+    $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($action) . "');\n";
     $controllerCode .= "\t\t\texit();\n";
     $controllerCode .= "\t\t}\n";
     $controllerCode .= "\t}\n";
@@ -173,7 +174,7 @@ foreach ($tables as $tableName) {
     $controllerCode .= "\t\t\texit();\n";
     $controllerCode .= "\t\t} catch (\\Exception \$e) {\n";
     $controllerCode .= "\t\t\tHelper::addError(\$e->getMessage());\n";
-    $controllerCode .= "\t\t\tHelper::redirect('/{$tableName}');\n";
+    $controllerCode .= "\t\t\tHelper::redirect('/{$action}');\n";
     $controllerCode .= "\t\t\texit();\n";
     $controllerCode .= "\t\t}\n";
     $controllerCode .= "\t}\n";
