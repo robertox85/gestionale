@@ -1,0 +1,77 @@
+.env
+.gitignore
+.htaccess
+[app]
+  [Controllers]
+    AuthController.php
+    BaseController.php
+    DisponibilitaSaleController.php
+    EccezioniSaleController.php
+    ErrorController.php
+    HomeController.php
+    LogOperazioniUtenteController.php
+    NotificheController.php
+    PreferenzeUtenteSaleController.php
+    PrenotazioniController.php
+    RecensioniController.php
+    RelazioniSaleRisorseController.php
+    RisorseController.php
+    SaleController.php
+    UtentiController.php
+  [Libraries]
+    Auth.php
+    Database.php
+    DynamicFormComponent.php
+    ErrorHandler.php
+    Helper.php
+    QueryBuilder.php
+    TwigConfigurator.php
+    TwigGlobalVars.php
+  [Middleware]
+    AuthenticationMiddleware.php
+    AuthorizationMiddleware.php
+    MiddlewareStack.php
+  [Models]
+    BaseModel.php
+    DisponibilitaSale.php
+    EccezioniSale.php
+    LogOperazioniUtente.php
+    Notifiche.php
+    PreferenzeUtenteSale.php
+    Prenotazioni.php
+    Recensioni.php
+    RelazioniSaleRisorse.php
+    Risorse.php
+    Sale.php
+    Utenti.php
+  [Routes]
+    routes.php
+  [Services]
+    UtenteService.php
+  [Views]
+    alerts.html.twig
+    base.html.twig
+    breadcrumb.html.twig
+    [error-pages]
+      403.html.twig
+      404.html.twig
+      405.html.twig
+      500.html.twig
+    list.html.twig
+    navigation.html.twig
+    newform.html.twig
+    pagination.html.twig
+    preloader.html.twig
+    search.html.twig
+    sidebar.html.twig
+composer.json
+composer.lock
+directory_structure.txt
+env-example
+index.php
+package-lock.json
+package.json
+postcss.config.js
+tailwind.config.js
+translator.php
+webpack.config.js
