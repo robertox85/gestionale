@@ -126,4 +126,32 @@ abstract class BaseController
         return '<a href="/' . strtolower($tableName) . '/restore/' . $entity->getId() . '"  onclick="return confirm(\'Sei sicuro di voler ripristinare questo elemento?\')"  class="text-xl"><ion-icon name="refresh-circle-outline" role="img" class="md hydrated text-green-500 hover:text-green-700 dark:text-green-400 dark:hover:text-green-500"></ion-icon></a>';
 
     }
+
+    /**
+     * Genera l'URL completo per una determinata rotta.
+     *
+     * @param string $route Nome della rotta (es. 'utenti.index')
+     * @param array $params Parametri aggiuntivi per la rotta (opzionale)
+     * @return string URL completo per la rotta specificata
+     */
+    function url(string $route, array $params = []): string
+    {
+        $baseUrl = $_ENV['BASE_URL'] ?? '';
+        $routeParts = explode('.', $route);
+        $controllerName = $routeParts[0];
+        $actionName = $routeParts[1] ?? 'index';
+
+        $url = $baseUrl . '/' . strtolower($controllerName);
+
+        if ($actionName !== 'index') {
+            $url .= '/' . $actionName;
+        }
+
+        if (!empty($params)) {
+            $url .= '?' . http_build_query($params);
+        }
+
+        return $url;
+    }
+
 }

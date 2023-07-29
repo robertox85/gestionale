@@ -37,7 +37,11 @@ class QueryBuilder
     }
 
     public function paginate() {
-        $orderByColumn = $_GET['sort'] ?? 'id';
+
+        // if GET is empty, return
+        if (empty($_GET)) return $this;
+
+        $orderByColumn = $_GET['sort'] ?? 'created_at';
         $orderByDirection = $_GET['order'] ?? 'ASC';
         $limit = $_GET['limit'] ?? 10;
         $page = $_GET['page'] ?? 1;
@@ -70,15 +74,31 @@ class QueryBuilder
     }
 
     /**
+     * Set an alias for a column in the query result
+     * @param string $column Column name to set the alias for
+     * @param string $alias Alias name
+     * @return $this
+     */
+    public function setAlias(string $column, string $alias): static
+    {
+        $this->selectColumns[] = "$column AS $alias";
+        return $this;
+    }
+    /**
      * Select columns
      * @param string $columns Columns to select
      * @return $this
      */
     public function select($columns = '*')
     {
-        $this->selectColumns = explode(', ', $columns);
+        if (is_array($columns)) {
+            $this->selectColumns = $columns;
+        } else {
+            $this->selectColumns = explode(', ', $columns);
+        }
         return $this;
     }
+
 
     /**
      * Add a join clause
@@ -119,8 +139,8 @@ class QueryBuilder
 
     /**
      * Add a where clause
-     * @param $column Column name
-     * @param $value Column value
+     * @param string $column name
+     * @param string $value value
      * @param string $operator Comparison operator
      * @param string $logicalOperator Logical operator
      * @return $this
@@ -140,7 +160,7 @@ class QueryBuilder
 
     /**
      * Add a where clause with IN operator
-     * @param $column Column name
+     * @param $string $column Column name
      * @param array $values Column values
      * @param string $logicalOperator Logical operator
      * @return $this
@@ -319,7 +339,7 @@ class QueryBuilder
     protected function buildOrderBy(): string
     {
         if (empty($this->orders)) {
-            return 'ORDER BY id ASC';
+            return ' ORDER BY created_at ASC';
         }
         return ' ORDER BY ' . implode(', ', $this->orders);
     }
@@ -369,7 +389,9 @@ class QueryBuilder
     public function insert(array $values): array|\PDOStatement
     {
         $columns = implode(", ", array_keys($values));
+        $values = array_intersect_key($values, array_flip($this->getColumns()));
         $placeholders = implode(", ", array_fill(0, count($values), "?"));
+        $columns = implode(", ", array_keys($values));
         $sql = "INSERT INTO $this->table ($columns) VALUES ($placeholders)";
         $this->parameters = array_values($values);
         return $this->execute($sql);
@@ -377,13 +399,14 @@ class QueryBuilder
 
     /**
      * Update rows
-     * @param $values Values to update
+     * @param array $values to update
      * @param array $conditions Conditions
-     * @return \PDOStatement
+     * @return int
      */
-    public function update($values, $conditions = []): array|\PDOStatement
+    public function update($values, $conditions = []): int
     {
         $setClauses = [];
+        $this->parameters = [];
         foreach ($values as $column => $value) {
             $setClauses[] = "$column = ?";
             $this->parameters[] = $value;
@@ -409,7 +432,7 @@ class QueryBuilder
             }
         }
 
-        return $this->execute($sql);
+        return $this->execute($sql)->rowCount();
     }
 
 
@@ -589,5 +612,6 @@ class QueryBuilder
             'query' => $_GET,
         ];
     }
+
 
 }

@@ -10,18 +10,10 @@ use RobThree\Auth\TwoFactorAuth;
 use RobThree\Auth\TwoFactorAuthException;
 use Symfony\Component\Security\Csrf\CsrfTokenManager;
 use Symfony\Component\Security\Csrf\CsrfToken;
+use function PHPUnit\Framework\exactly;
 
 class Helper
 {
-
-    // start session if not started
-    public static function startSession(): void
-    {
-        if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
-    }
-
     public static function generateToken($tokenId): string
     {
         $tokenManager = new CsrfTokenManager();
@@ -29,48 +21,11 @@ class Helper
         return $token->getValue();
     }
 
-    // validateToken
     public static function validateToken(string $action, string $token): bool
     {
         $csrfTokenManager = new CsrfTokenManager();
         $csrfToken = new CsrfToken($action, $token);
         return $csrfTokenManager->isTokenValid($csrfToken);
-    }
-
-    public static function breadcrumb($url)
-    {
-        $crumbs = explode('/', trim(parse_url($url, PHP_URL_PATH), '/'));
-        $breadcrumb = array();
-        $link = '';
-        // add home if not empty
-        if (!empty($crumbs)) {
-            $item = array(
-                'name' => 'Home',
-                'link' => $_ENV['BASE_URL']
-            );
-            array_push($breadcrumb, $item);
-        }
-        foreach ($crumbs as $crumb) {
-            $link .= '/' . $crumb;
-            $name = ucwords(str_replace(array('.php', '_'), array('', ' '), $crumb));
-            $name = str_replace('-', ' ', $name);
-            $item = array(
-                'name' => $name,
-                'link' => $link
-            );
-            array_push($breadcrumb, $item);
-        }
-
-        // if last item is empty or numeric, remove it
-        if (empty(end($breadcrumb)['name']) || is_numeric(end($breadcrumb)['name'])) {
-            array_pop($breadcrumb);
-        }
-        // if last item is random string (token), remove it
-        if (preg_match('/^[a-zA-Z0-9]+$/', end($breadcrumb)['name'])) {
-            array_pop($breadcrumb);
-        }
-
-        return $breadcrumb;
     }
 
     public static function addSuccess(string $message): void
@@ -91,39 +46,6 @@ class Helper
     public static function addInfo(string $message): void
     {
         $_SESSION['alerts']['info'][] = $message;
-    }
-
-    /**
-     * @throws TwoFactorAuthException
-     */
-    public static function generateSecret(): string
-    {
-        $tfa = new TwoFactorAuth();
-        return $tfa->createSecret();
-    }
-
-    public static function extractString(): void
-    {
-        $dir = dirname(__DIR__, 2);
-        $directory = new RecursiveDirectoryIterator($dir . '/views');
-        $iterator = new RecursiveIteratorIterator($directory);
-        $regex = new RegexIterator($iterator, '/^.+\.twig$/i', RecursiveRegexIterator::GET_MATCH);
-
-        $translationKeys = [];
-
-        foreach ($regex as $file) {
-            $fileContent = file_get_contents($file[0]);
-
-            preg_match_all('/{% trans %}(.*?){% endtrans %}/s', $fileContent, $matches);
-
-            foreach ($matches[1] as $match) {
-                $translationKeys[] = $match;
-            }
-        }
-
-        $translationKeys = array_unique($translationKeys);
-
-        print_r($translationKeys);
     }
 
     public static function getCurrentPage(): string
@@ -153,18 +75,22 @@ class Helper
         exit;
     }
 
-
-
-    static function generateBreadcrumb() {
+    static function generateBreadcrumb()
+    {
         $path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
         $segments = explode('/', trim($path, '/'));
         $breadcrumbs = [];
         $breadcrumbPath = '';
 
         foreach ($segments as $segment) {
+            $label = ucfirst($segment);
+            // remove - and _ from label
+            $label = str_replace(['-', '_'], ' ', $label);
+            // Uppercase first letter of each word
+            $label = ucwords($label);
             $breadcrumbPath .= '/' . $segment;
             $breadcrumbs[] = [
-                'label' => ucfirst($segment), // Puoi personalizzare il modo in cui viene visualizzato il segmento
+                'label' => $label, // Puoi personalizzare il modo in cui viene visualizzato il segmento
                 'url' => $breadcrumbPath, // Puoi personalizzare la generazione dell'URL
             ];
 
@@ -205,10 +131,99 @@ class Helper
         return $pageTitle;
     }
 
-    public static function isAjaxRequest()
+    public static function getSingularName(string $pluralClassName)
     {
-        return !empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest';
+        // Espressioni regolari per individuare le terminazioni comuni dei nomi plurali
+        $pluralEndings = [
+            '/i$/' => 'e',         // es. "Utenti" diventa "Utente"
+            '/che$/' => 'ca',      // es. "DisponibilitaSale" diventa "DisponibilitaSala"
+            '/zi$/' => 'zio',         // es. "Servizi" diventa "Servizio"
+            '/le$/' => 'la',         // es. "DisponibilitaSale" diventa "DisponibilitaSala"
+            '/e$/' => 'a',         // es. "DisponibilitaSale" diventa "DisponibilitaSala"
+            // Aggiungi altre regole se necessario
+        ];
+
+        // Verifica se il nome plurale corrisponde a una delle regole
+        foreach ($pluralEndings as $pattern => $singularEnding) {
+            if (preg_match($pattern, $pluralClassName)) {
+                return preg_replace($pattern, $singularEnding, $pluralClassName);
+            }
+        }
+
+        // Se nessuna corrispondenza con le regole, rimuovi una "s" finale (implementazione fallback)
+        if (substr($pluralClassName, -1) === 's') {
+            return substr($pluralClassName, 0, -1);
+        }
+
+        // Se non è possibile trovare il nome singolare, ritorna semplicemente il nome plurale
+        return $pluralClassName;
     }
 
+    public static function getPluralName(string $shortClassName)
+    {
+        // in Italiano
+        if (substr($shortClassName, -2) === 'ca') {
+            return substr($shortClassName, 0, -2) . 'che';
+        } elseif (substr($shortClassName, -1) === 'o') {
+            return substr($shortClassName, 0, -1) . 'i';
+        } elseif (substr($shortClassName, -1) === 'e') {
+            return substr($shortClassName, 0, -1) . 'i';
+        } elseif (substr($shortClassName, -1) === 'a') {
+            return substr($shortClassName, 0, -1) . 'e';
+        } elseif (substr($shortClassName, -1) === 'i') {
+            return substr($shortClassName, 0, -1) . 'i';
+        } elseif (substr($shortClassName, -1) === 'u') {
+            return substr($shortClassName, 0, -1) . 'i';
+        } elseif (substr($shortClassName, -1) === 's') {
+            return $shortClassName;
+        } else {
+            return $shortClassName . 's';
+        }
+    }
 
+    public static function getFullTableName(string $shortClassName)
+    {
+        // $shortClassName can be Utenti, or LogOperazioni. When is CamelCase, split into words
+        return preg_replace('/(?<!^)([A-Z])/', ' $1', $shortClassName);
+    }
+
+    public static function getTablePrimaryKeyName($fullTableName): string
+    {
+
+        // if $fullTableName is a ReflectionClass, get the short name
+        if (is_object($fullTableName)) {
+            $fullTableName = $fullTableName->getShortName();
+        }
+
+        $fullTableName = self::getFullTableName($fullTableName);
+
+
+        $fullTableName = explode(' ', $fullTableName);
+
+        // if the table name is a single word, return the singular name
+        if (count($fullTableName) === 1) {
+            return self::getSingularName($fullTableName[0]);
+        }
+
+        // if the table name is multiple words, return the singular name of the start word
+        return self::getSingularName($fullTableName[0]);
+    }
+
+    public static function sanificaInput(array|null $dati = null, array $ignore_keys = [])
+    {
+        if (is_null($dati)) {
+            return [];
+        }
+        $sanitized = [];
+        foreach ($dati as $key => $value) {
+            if (in_array($key, $ignore_keys)) {
+                $sanitized[$key] = $value;
+            } else if (is_array($value)) {
+                $sanitized[$key] = self::sanificaInput($value);
+            } else {
+                $sanitized[$key] = trim(htmlspecialchars($value, ENT_QUOTES, 'UTF-8'));
+            }
+        }
+        return $sanitized;
+    }
 }

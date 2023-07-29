@@ -14,7 +14,6 @@ class TwigGlobalVars
         }
 
 
-
         // add app variables
         $twig->addGlobal('app', [
             'name' => $_ENV['APP_NAME'],
@@ -24,8 +23,6 @@ class TwigGlobalVars
             'debug' => $_ENV['APP_DEBUG'],
             'page_title' => Helper::getPageTitle()
         ]);
-
-
 
 
         // add breadcrumbs
@@ -99,44 +96,23 @@ class TwigGlobalVars
                 return $_ENV['BASE_URL'] . $routeName;
 
             },
-            'url' => function (string $routeName = '', array $params = []) {
-
-                // if route name is empty, return the current url with the parameters
-                if (!$routeName) {
-                    $currentQueryString = $_SERVER['QUERY_STRING'] ?? '';
-                    $currentQueryString = http_build_query(array_diff_key($_GET, $params));
-                    $query = http_build_query($params);
-                    $query = $query ? "$currentQueryString&$query" : $currentQueryString;
-                    $url = $_ENV['BASE_URL'] . ($_SERVER['PATH_INFO'] ?? '') . ($query ? "?$query" : '');
-                    return $url;
+            'get_current_url' => function ($parms = '') {
+                // current url without query string , and attach the query string if $parms is not empty
+                //return explode('?', $_SERVER['REQUEST_URI'])[0];
+                $url = explode('?', $_SERVER['REQUEST_URI'])[0];
+                if ($parms) {
+                    $url .= '/' . $parms;
                 }
-
-                // get the current query string
-                $currentQueryString = $_SERVER['QUERY_STRING'] ?? '';
-
-                $routeName = str_starts_with($routeName, '/') ? $routeName : "/$routeName";
-
-                // if the current query string is not empty, append it to the new query string
-                if ($currentQueryString) {
-                    // remove duplicate from $currentQueryString the parameters that are already in $params
-                    $currentQueryString = http_build_query(array_diff_key($_GET, $params));
-                }
-
-                $query = http_build_query($params);
-
-                $query = $query ? "$currentQueryString&$query" : $currentQueryString;
-
-                $url = $_ENV['BASE_URL'] . ($_SERVER['PATH_INFO'] ?? '') . $routeName . ($query ? "?$query" : '');
-
-                // remove ?route={*} from the query string if exists, and if i'm not in login or register page
-                if (str_contains($url, '?route=') && !str_contains($url, 'sign-in') && !str_contains($url, 'register')) {
-                    // unset the route parameter from the query string
-                    $url = preg_replace('/&?route=[^&]+/', '', $url);
-                }
-
                 return $url;
-            },
 
+            },
+            'url' => function (string $routeName = '', array $params = []) {
+                // return public url + params
+                $routeName = str_starts_with($routeName, '/') ? $routeName : "/$routeName";
+                $query = http_build_query($params);
+                $query = $query ? "?$query" : '';
+                return $_ENV['BASE_URL'] . $routeName . $query;
+            },
             'csrf_token' => function (string $tokenId = 'authenticate') {
                 return Helper::generateToken($tokenId) ?? '';
             },
@@ -161,7 +137,7 @@ class TwigGlobalVars
             },
             'getAuthQRCode' => function (string $username, string $secret = '') {
                 $tfa = new \RobThree\Auth\TwoFactorAuth();
-                return $tfa->getQRCodeImageAsDataUri('Demo site: '.$username, $secret);
+                return $tfa->getQRCodeImageAsDataUri('Demo site: ' . $username, $secret);
             },
             'svg' => function (string $filename) {
 
@@ -207,16 +183,16 @@ class TwigGlobalVars
 
                 return $routeName;
             },
-            'getLabelClass' => function() {
+            'getLabelClass' => function () {
                 return 'block mb-2 text-sm font-medium text-gray-900 dark:text-white';
             },
-            'getInputClass' => function() {
+            'getInputClass' => function () {
                 return 'bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-primary-500 dark:focus:border-primary-500';
             },
-            'getSubmitClass' => function (){
+            'getSubmitClass' => function () {
                 return 'inline-flex items-center px-5 py-2.5 mt-4 sm:mt-6 text-sm font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-80';
             },
-            'getCheckboxClass' => function() {
+            'getCheckboxClass' => function () {
                 return 'w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800';
             },
         ];

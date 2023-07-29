@@ -24,17 +24,7 @@ try {
 try {
 
     // DROP TABLES
-    $pdo->exec("DROP TABLE IF EXISTS DisponibilitaSale;");
-    $pdo->exec("DROP TABLE IF EXISTS Prenotazioni;");
-    $pdo->exec("DROP TABLE IF EXISTS EccezioniSale;");
-    $pdo->exec("DROP TABLE IF EXISTS SaleRisorse;");
-    $pdo->exec("DROP TABLE IF EXISTS Recensioni;");
-    $pdo->exec("DROP TABLE IF EXISTS SalePreferite;");
-    $pdo->exec("DROP TABLE IF EXISTS Sale;");
-    $pdo->exec("DROP TABLE IF EXISTS Notifiche;");
-    $pdo->exec("DROP TABLE IF EXISTS LogOperazioni;");
-    $pdo->exec("DROP TABLE IF EXISTS Utenti;");
-    $pdo->exec("DROP TABLE IF EXISTS Risorse;");
+
     // CREATE TABLES
 
 
@@ -59,8 +49,8 @@ CREATE TABLE Sale (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE DisponibilitàSale (
-    id_disponibilità INT AUTO_INCREMENT PRIMARY KEY,
+CREATE TABLE DisponibilitaSale (
+    id_disponibilita INT AUTO_INCREMENT PRIMARY KEY,
     id_sala INT,
     giorno_settimana ENUM('lun', 'mar', 'mer', 'gio', 'ven', 'sab', 'dom'),
     orario_apertura TIME,
@@ -107,7 +97,7 @@ CREATE TABLE Notifiche (
     FOREIGN KEY (id_utente) REFERENCES Utenti(id_utente)
 );
 
-CREATE TABLE LogOperazioni (
+CREATE TABLE LogOperazioniUtente (
     id_log INT AUTO_INCREMENT PRIMARY KEY,
     id_utente INT,
     azione VARCHAR(255),
@@ -125,13 +115,14 @@ CREATE TABLE Risorse (
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
-CREATE TABLE SaleRisorse (
+CREATE TABLE RelazioniSaleRisorse (
+    id_relazione INT AUTO_INCREMENT PRIMARY KEY,
     id_sala INT,
     id_risorsa INT,
     quantità INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id_sala, id_risorsa),
+    
     FOREIGN KEY (id_sala) REFERENCES Sale(id_sala),
     FOREIGN KEY (id_risorsa) REFERENCES Risorse(id_risorsa)
 );
@@ -148,15 +139,15 @@ CREATE TABLE Recensioni (
     FOREIGN KEY (id_sala) REFERENCES Sale(id_sala)
 );
 
-CREATE TABLE SalePreferite (
+CREATE TABLE PreferenzeUtenteSale (
+    id_preferenza INT AUTO_INCREMENT PRIMARY KEY,
     id_utente INT,
     id_sala INT,
-    data_aggiunta DATE,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    PRIMARY KEY (id_utente, id_sala),
     FOREIGN KEY (id_utente) REFERENCES Utenti(id_utente),
     FOREIGN KEY (id_sala) REFERENCES Sale(id_sala)
+
 );
 ");
 

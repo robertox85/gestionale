@@ -8,21 +8,27 @@ namespace App\Libraries;
 
 use PDO;
 use ReflectionClass;
+use ReflectionException;
 use ReflectionMethod;
-use ReflectionProperty;
-use App\Libraries\Database;
+
 
 class DynamicFormComponent
 {
-    private $entityFields;
+    private array $entityFields;
+    private $model;
 
+
+    /**
+     * @throws ReflectionException
+     */
     public function __construct($model)
     {
+        $this->model = $model;
         $this->entityFields = $this->getEntityFields($model);
     }
 
     // Resto del codice invariato
-    private function getColumnsType($tableName)
+    private function getColumnsType($tableName): array
     {
 
         $columnTypes = [];
@@ -49,28 +55,55 @@ class DynamicFormComponent
         return $columnTypes;
     }
 
-    private function getEntityFields($model)
+    function get_singular_form($word)
+    {
+
+        $plural_to_singular = array(
+            '/(che)$/' => 'ca',     // esempi: bacheche -> bacheca
+            '/(e)$/' => 'a',        // esempi: sale -> sala
+            // Aggiungi altre regole specifiche per casi particolari
+        );
+
+        foreach ($plural_to_singular as $rule => $replacement) {
+            if (preg_match($rule, $word)) {
+                $word = preg_replace($rule, $replacement, $word);
+                break; // Esci dal loop dopo la prima sostituzione
+            }
+        }
+
+        return $word;
+    }
+
+
+    /**
+     * @throws ReflectionException
+     */
+    private function getEntityFields($model): array
     {
         $reflectionClass = new ReflectionClass($model);
-        $columnTypes = $this->getColumnsType($model->getTableName());
+        $shortClassName = (new ReflectionClass($model))->getShortName();
+        $columnTypes = $this->getColumnsType($shortClassName);
 
-        $shortClassName = (new \ReflectionClass($model))->getShortName();
-        $tableName = $model::getPluralName($shortClassName);
-        $singularLower = strtolower($shortClassName);
 
         $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
-        $exclude = ['getId', 'setId', 'getCreatedAt', 'getUpdatedAt', 'setCreatedAt', 'setUpdatedAt'];
-        $fields = [];
 
+        $primaryKeyName = Helper::getTablePrimaryKeyName($reflectionClass);
+
+        // Escludi i metodi che non devono essere considerati come campi, getIdEntity ad esempio
+        $getPrimaryKeyMethod = 'getId' . $primaryKeyName;
+
+        $exclude = [$getPrimaryKeyMethod, 'getCreatedAt', 'getUpdatedAt', 'getPrimaryKeyName'];
+        $fields = [];
+        $values = [];
         foreach ($methods as $method) {
             $methodName = $method->getName();
 
-            if (in_array($methodName, $exclude) || strpos($methodName, 'getId' . $shortClassName) === 0) {
+            if (in_array($methodName, $exclude)) {
                 continue;
             }
 
             // Verifica che il metodo sia un getter e non richieda parametri
-            if (strpos($methodName, 'get') === 0 && $method->getNumberOfParameters() === 0) {
+            if (str_starts_with($methodName, 'get') && $method->getNumberOfParameters() === 0) {
                 $propertyName = lcfirst(substr($methodName, 3));
                 // add _ to property name if property name is composed by dataOraInizio
                 $propertyName = preg_replace('/(?<!^)[A-Z]/', '_$0', $propertyName);
@@ -83,23 +116,23 @@ class DynamicFormComponent
                     $columnType = $columnTypes[$propertyName];
 
                     // Esempio: se hai una colonna ENUM, crei un campo select con le opzioni possibili
-                    if (strpos($columnType, 'enum') === 0) {
+                    if (str_starts_with($columnType, 'enum')) {
                         $options = explode(',', substr($columnType, 5, -1));
                         $fields[$propertyName] = ['type' => 'select', 'options' => $options];
                     } // Esempio: se hai una colonna di tipo datetime, crei un campo di tipo data
-                    elseif (strpos($columnType, 'datetime') === 0) {
+                    elseif (str_starts_with($columnType, 'datetime')) {
                         $fields[$propertyName] = 'datetime';
                     } // Esempio: se hai una colonna di tipo date, crei un campo di tipo data
-                    elseif (strpos($columnType, 'date') === 0) {
+                    elseif (str_starts_with($columnType, 'date')) {
                         $fields[$propertyName] = 'date';
                     } // Esempio: se hai una colonna di tipo time, crei un campo di tipo data
-                    elseif (strpos($columnType, 'time') === 0) {
+                    elseif (str_starts_with($columnType, 'time')) {
                         $fields[$propertyName] = 'time';
                     } // Esempio: se hai una colonna di tipo boolean, crei un campo di tipo checkbox
-                    elseif (strpos($columnType, 'tinyint(1)') === 0) {
+                    elseif (str_starts_with($columnType, 'tinyint(1)')) {
                         $fields[$propertyName] = 'boolean';
                     } // Esempio: se hai una colonna di tipo int, crei un campo di tipo number
-                    elseif (strpos($columnType, 'int') === 0) {
+                    elseif (str_starts_with($columnType, 'int')) {
                         $fields[$propertyName] = 'number';
                     } else {
                         // Altrimenti, imposta il tipo di campo a "text" (puoi personalizzare come desideri)
@@ -116,11 +149,11 @@ class DynamicFormComponent
     }
 
     // Resto del codice invariato
-    public function renderForm(array $formData = [])
+    public function renderForm(array $formData = []): string
     {
         $form = '<form action="' . $formData['action'] . '" method="post" class="mb-4">';
         $form .= '<input type="hidden" name="csrf_token" value="' . $formData['csrf_token'] . '">';
-        $form .= '<input type="hidden" name="id" value="' . ($formData['id'] ?? '') . '">';
+
         $form .= '<div class="mb-4 grid grid-cols-2 gap-4">';
         foreach ($this->entityFields as $fieldName => $fieldType) {
             // replace _ with ' ' in $fieldName
@@ -128,7 +161,7 @@ class DynamicFormComponent
             // separate $fieldName written DataOraInizio to Data Ora Inizio
             $fieldName = preg_replace('/(?<!^)[A-Z]/', ' $0', $fieldName);
 
-            $form .= $this->renderField($fieldName, $fieldType, $formData);
+            $form .= $this->renderField($fieldName, $fieldType);
         }
         $form .= '</div>';
 
@@ -140,11 +173,8 @@ class DynamicFormComponent
         return $form;
     }
 
-    private function renderField($fieldName, $fieldType, $formData)
+    private function renderField($fieldName, $fieldType, $fieldValue = ''): string
     {
-        $fieldValue = $formData[$fieldName] ?? '';
-
-
         switch ($fieldType) {
             case 'text':
                 return $this->renderTextField($fieldName, $fieldValue);
@@ -172,42 +202,38 @@ class DynamicFormComponent
         }
     }
 
-    private function renderTextField($fieldName, $fieldValue)
+    private function renderTextField($fieldLabel, $fieldValue): string
     {
-        $name = str_replace(" ", "_", $fieldName);
-        $name = strtolower($name);
-
+        $name = $this->getInputName($fieldLabel);
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldName) . ':</label>
+                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                     type="text" name="' . $name . '" id="' . $name . '" value="' . $fieldValue . '">
                 </div>';
     }
 
-    private function renderTextAreaField($fieldName, $fieldValue)
+    private function renderTextAreaField($fieldLabel, $fieldValue): string
     {
-        $name = str_replace(" ", "_", $fieldName);
-        $name = strtolower($name);
+        $name = $this->getInputName($fieldLabel);
         return '<div class="mb-4 col-span-2">
                     <label 
                     class="block text-gray-700 text-sm font-bold mb-2"
-                    for="' . $name . '">' . ucfirst($fieldName) . ':</label>
+                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
                     <textarea
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                     name="' . $name . '" id="' . $name . '">' . $fieldValue . '</textarea>
                 </div>';
     }
 
-    private function renderSelectField($fieldName, mixed $fieldValue)
+    private function renderSelectField($fieldLabel, mixed $fieldValue): string
     {
-        $name = str_replace(" ", "_", $fieldName);
-        $name = strtolower($name);
+        $name = $this->getInputName($fieldLabel);
         $options = '';
 
-        foreach ($fieldValue as $key => $value) {
+        foreach ($fieldValue as $value) {
             // replace ' with \' in $value
             $value = str_replace("'", "", $value);
             $options .= '<option value="' . $value . '">' . $value . '</option>';
@@ -216,63 +242,61 @@ class DynamicFormComponent
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldName) . ':</label>
+                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
                     <select
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                     name="' . $name . '" id="' . $name . '">' . $options . '</select>
                 </div>';
     }
 
-    private function renderDateField($fieldName, mixed $fieldValue)
+    private function renderDateField($fieldLabel, mixed $fieldValue): string
     {
-        $name = str_replace(" ", "_", $fieldName);
-        $name = strtolower($name);
+        $name = $this->getInputName($fieldLabel);
+        // turn $fieldValue from 2021-09-01 00:00:00 to 2021-09-01, if $fieldValue is empty, set it to today
+        $fieldValue = $fieldValue ? substr($fieldValue, 0, 10) : date("Y-m-d");
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldName) . ':</label>
+                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                     type="date" name="' . $name . '" id="' . $name . '" value="' . $fieldValue . '">
                 </div>';
     }
 
-    private function renderBooleanField($fieldName, mixed $fieldValue)
+    private function renderBooleanField($fieldLabel, mixed $fieldValue): string
     {
-        $name = str_replace(" ", "_", $fieldName);
-        $name = strtolower($name);
+        $name = $this->getInputName($fieldLabel);
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldName) . ':</label>
+                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    type="checkbox" name="' . $name . '" id="' . $fieldName . '" value="' . $fieldValue . '">
+                    type="checkbox" name="' . $name . '" id="' . $name . '" value="' . $fieldValue . '">
                 </div>';
     }
 
-    private function renderTimeField($fieldName, mixed $fieldValue)
+    private function renderTimeField($fieldLabel, mixed $fieldValue): string
     {
-        $name = str_replace(" ", "_", $fieldName);
-        $name = strtolower($name);
+        $name = $this->getInputName($fieldLabel);
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldName) . ':</label>
+                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                     type="time" name="' . $name . '" id="' . $name . '" value="' . $fieldValue . '">
                 </div>';
     }
 
-    private function renderNumberField($fieldName, mixed $fieldValue)
+    private function renderNumberField($fieldLabel, mixed $fieldValue): string
     {
-        $name = str_replace(" ", "_", $fieldName);
-        $name = strtolower($name);
+        $name = $this->getInputName($fieldLabel);
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldName) . ':</label>
+                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                     type="number"
@@ -280,5 +304,77 @@ class DynamicFormComponent
                     name="' . $name . '" id="' . $name . '" value="' . $fieldValue . '">
                 </div>';
     }
+
+    public function renderEditForm(array $formData): string
+    {
+        $primaryKeyName = $this->getPrimaryKeyName();
+        $form = $this->openFormTag($formData['action'], 'post', 'edit-form', 'mb-4 grid grid-cols-2 gap-4');
+
+        $form .= '<input type="hidden" name="csrf_token" value="' . $formData['csrf_token'] . '">';
+        if (isset($formData[$primaryKeyName])) {
+            $form .= '<input type="hidden" name="' . $primaryKeyName . '" value="' . $formData[$primaryKeyName] . '">';
+        }
+
+
+        foreach ($this->entityFields as $fieldName => $fieldType) {
+            $fieldValue = $this->model->{$this->getGetterName($fieldName)}();
+            $fieldName = $this->splitCamelCase($fieldName);
+            $form .= $this->renderField($fieldName, $fieldType, $fieldValue);
+        }
+
+        $form .= $this->getSubmitButton($formData['button_label'] ?? 'Submit');
+        $form .= $this->closeFormTag();
+
+        return $form;
+    }
+
+    private function getGetterName($fieldName)
+    {
+        $fieldName = str_replace("_", " ", $fieldName);
+        $getter = ucwords($fieldName);
+        $getter = str_replace(" ", "", $getter);
+        $getter = 'get' . $getter;
+        return $getter;
+    }
+
+    private function splitCamelCase($fieldName)
+    {
+        $fieldName = str_replace("_", " ", $fieldName);
+        $fieldName = preg_replace('/(?<!^)[A-Z]/', ' $0', $fieldName);
+        return $fieldName;
+    }
+
+    private function getInputName($fieldName)
+    {
+        $fieldName = str_replace(" ", "_", $fieldName);
+        $fieldName = strtolower($fieldName);
+        return $fieldName;
+    }
+
+    private function openFormTag($action, $method, $id, $class = 'mb-4 grid grid-cols-2 gap-4')
+    {
+        $form = '<form action="' . $action . '" method="' . $method . '" id="' . $id . '" class="' . $class . '">';
+        return $form;
+    }
+
+    private function closeFormTag()
+    {
+        $form = '</form>';
+        return $form;
+    }
+
+    private function getSubmitButton($label = 'Submit')
+    {
+        $button = '<button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">';
+        $button .= $label;
+        $button .= '</button>';
+        return $button;
+    }
+
+    private function getPrimaryKeyName()
+    {
+        return $this->model->getPrimaryKeyName();
+    }
+
 }
 

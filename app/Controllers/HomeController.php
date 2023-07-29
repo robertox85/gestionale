@@ -2,27 +2,23 @@
 
 namespace App\Controllers;
 
-use App\Libraries\Database;
 use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
-use App\Libraries\Pagination;
 use App\Libraries\QueryBuilder;
 use App\Models;
-use App\Models\DisponibilitaSala;
-use Exception;
-use Symfony\Component\HttpFoundation\Request;
 
 class HomeController extends BaseController
 {
-    public function homeView(): void
+    public function home(): void
 
     {
         $qb = new QueryBuilder($this->db);
-        $qb = $qb->setTable('Utenti');
-        $qb = $qb->select('id_utente as id, nome, cognome, email');
+        $qb = $qb->setTable('Risorse');
+        $qb = $qb->select('*');
+        $qb = $qb->setAlias('id_risorsa', 'id'); // Alias per la colonna id_sala come id
 
         echo $this->view->render('list.html.twig', [
-            'columns' => ['ID', 'Nome', 'Cognome', 'Email'],
+            'columns' => $qb->getColumns(),
             'rows' => $qb->get(),
             'pagination' => $qb->getPagination()
         ]);
@@ -45,7 +41,7 @@ class HomeController extends BaseController
     public function newItem()
     {
 
-        $entity = new DisponibilitaSala();
+        $entity = new Models\Recensioni();
         $formComponent = new DynamicFormComponent($entity);
 
         $formHtml = $formComponent->renderForm([
