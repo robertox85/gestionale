@@ -3,6 +3,14 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const BrowserSyncPlugin = require('browser-sync-webpack-plugin');
 
 module.exports = {
+    devServer: {
+        proxy: {
+            '/api': {
+                target: 'http://localhost:8000',
+                changeOrigin: true,
+            },
+        },
+    },
     entry: './app/assets/js/app.js',
     output: {
         filename: 'app.js',
@@ -30,7 +38,7 @@ module.exports = {
         new BrowserSyncPlugin({
             host: 'localhost',
             port: 3000,
-            proxy: 'http://localhost:8000/',
+            proxy: 'http://localhost:5000/',
             open: false,
             files: [
                 {
@@ -49,7 +57,7 @@ module.exports = {
                     }
                 }
             ]
-        })
+        }),
     ],
     resolve: {
         fallback: {

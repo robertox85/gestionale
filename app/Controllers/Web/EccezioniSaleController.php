@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Web;
 
-use App\Models\Utenti;
+use App\Models\EccezioniSale;
 use App\Libraries\QueryBuilder;
 use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
 
-class UtentiController extends BaseController {
+class EccezioniSaleController extends BaseController {
 
 	public function index() {
 		$qb = new QueryBuilder($this->db);
-		$qb = $qb->setTable('Utenti');
+		$qb = $qb->setTable('EccezioniSale');
 		// Seleziona tutte le colonne dalla tabella con alias per l'ID
 		$qb = $qb->select('*');
-		$qb = $qb->setAlias('id_utente', 'id');
+		$qb = $qb->setAlias('id_eccezione', 'id');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,12 +25,12 @@ class UtentiController extends BaseController {
 
 	public function create(): void
 	{
-		$entity = new Utenti();
+		$entity = new EccezioniSale();
 		$formComponent = new DynamicFormComponent($entity);
 
 		$formData = [];
-		$formData['action'] = $this->url('utenti/store');
-		$formData['csrf_token'] = Helper::generateToken('Utenti');
+		$formData['action'] = $this->url('eccezioni-sale/store');
+		$formData['csrf_token'] = Helper::generateToken('EccezioniSale');
 		$formData['button_label'] = 'Crea';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -41,18 +41,18 @@ class UtentiController extends BaseController {
 
 	public function edit($id)
 	{
-		$utenti = Utenti::find($id);
-		if (!$utenti) {
+		$eccezionisale = EccezioniSale::find($id);
+		if (!$eccezionisale) {
 			Helper::addError('Record non trovato.');
-			Helper::redirect('/utenti');
+			Helper::redirect('/eccezioni-sale');
 			exit();
 		}
-		$formComponent = new DynamicFormComponent($utenti);
+		$formComponent = new DynamicFormComponent($eccezionisale);
 
 		$formData = [];
-		$formData['action'] = $this->url('utenti/update');
-		$formData['csrf_token'] = Helper::generateToken('Utenti');
-		$formData['id_utente'] = $id;
+		$formData['action'] = $this->url('eccezioni-sale/update');
+		$formData['csrf_token'] = Helper::generateToken('EccezioniSale');
+		$formData['id_eccezione'] = $id;
 		$formData['button_label'] = 'Edit';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -66,9 +66,9 @@ class UtentiController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('Utenti', $post['csrf_token'])) {
+			if (!Helper::validateToken('EccezioniSale', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/utenti');
+				Helper::redirect('/eccezioni-sale');
 				exit();
 			}
 
@@ -76,7 +76,7 @@ class UtentiController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = Utenti::create($post);
+			$newId = EccezioniSale::create($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Nuovo record creato con successo.');
@@ -84,11 +84,11 @@ class UtentiController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/utenti');
+			Helper::redirect('/eccezioni-sale');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/utenti');
+			Helper::redirect('/eccezioni-sale');
 			exit();
 		}
 	}
@@ -99,9 +99,9 @@ class UtentiController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('Utenti', $post['csrf_token'])) {
+			if (!Helper::validateToken('EccezioniSale', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/utenti');
+				Helper::redirect('/eccezioni-sale');
 				exit();
 			}
 
@@ -109,7 +109,7 @@ class UtentiController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = Utenti::update($post);
+			$newId = EccezioniSale::update($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Record aggiornato con successo.');
@@ -117,25 +117,25 @@ class UtentiController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/utenti');
+			Helper::redirect('/eccezioni-sale');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/utenti');
+			Helper::redirect('/eccezioni-sale');
 			exit();
 		}
 	}
 
 	public function delete($id) {
 		try {
-			(new Utenti)->delete($id);
+			(new EccezioniSale)->delete($id);
 			Helper::addSuccess('Record eliminato con successo!');
 			$current_page = Helper::getCurrentPage();
 			Helper::redirect('/' . $current_page);
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/utenti');
+			Helper::redirect('/eccezioni-sale');
 			exit();
 		}
 	}
@@ -143,7 +143,7 @@ class UtentiController extends BaseController {
 	public function bulkDelete() {
 		try {
 			$qb = new QueryBuilder($this->db);
-			$qb = $qb->setTable('Utenti');
+			$qb = $qb->setTable('EccezioniSale');
 			$ids = $_POST['ids'];
 			// Turn into array if not already
 			if (!is_array($ids)) {
@@ -151,7 +151,7 @@ class UtentiController extends BaseController {
 				$ids = array_filter($ids);
 				$ids = array_map('intval', $ids);
 			}
-			$qb = $qb->whereIn('id_utente', $ids);
+			$qb = $qb->whereIn('id_eccezione', $ids);
 			$qb = $qb->delete();
 			$qb->execute();
 			Helper::addSuccess('Record eliminati con successo!');

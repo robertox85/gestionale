@@ -15,6 +15,9 @@ $apiRoutes = require_once __DIR__ . '/api.php';
 $routes = function (RouteCollector $r) use ($webRoutes, $apiRoutes) {
     $webRoutes($r);
     $apiRoutes($r);
+
+    // set_language must have '?_locale=en' in the URL to set the language to 'en
+    $r->addRoute('GET', '/set_language', ['App\Controllers\Web\LanguageController', 'setLanguage']);
 };
 
 

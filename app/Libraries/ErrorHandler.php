@@ -2,7 +2,7 @@
 
 namespace App\Libraries;
 
-use App\Controllers\BaseController;
+use App\Controllers\Web\BaseController;
 use Exception;
 use PDOException;
 use Twig\Error\LoaderError;

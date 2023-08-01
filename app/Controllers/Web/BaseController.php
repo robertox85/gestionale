@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Web;
 
 use App\Libraries\Auth;
 use App\Libraries\Database;
 use App\Libraries\TwigConfigurator;
 use App\Libraries\TwigGlobalVars;
-use Symfony\Component\HttpFoundation\Request;
 use Twig\Environment;
 
 abstract class BaseController

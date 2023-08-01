@@ -17,11 +17,11 @@ $routeList .= "return function (RouteCollector \$r) {\n\n";
 
 // Aggiungi le rotte pubbliche
 $routeList .= "\t// Rotte pubbliche\n";
-$routeList .= "\t\$r->addRoute('GET', '/403', ['App\Controllers\ErrorController', 'forbiddenView']);\n";
-$routeList .= "\t\$r->addRoute('GET', '/404', ['App\Controllers\ErrorController', 'notFoundView']);\n";
-$routeList .= "\t\$r->addRoute('GET', '/405', ['App\Controllers\ErrorController', 'notAllowedView']);\n";
-$routeList .= "\t\$r->addRoute('GET', '/500', ['App\Controllers\ErrorController', 'internalErrorView']);\n\n";
-$routeList .= "\t\$r->addRoute('GET', '/', ['App\Controllers\HomeController', 'home']);\n";
+$routeList .= "\t\$r->addRoute('GET', '/403', ['App\Controllers\Web\ErrorController', 'forbiddenView']);\n";
+$routeList .= "\t\$r->addRoute('GET', '/404', ['App\Controllers\Web\ErrorController', 'notFoundView']);\n";
+$routeList .= "\t\$r->addRoute('GET', '/405', ['App\Controllers\Web\ErrorController', 'notAllowedView']);\n";
+$routeList .= "\t\$r->addRoute('GET', '/500', ['App\Controllers\Web\ErrorController', 'internalErrorView']);\n\n";
+$routeList .= "\t\$r->addRoute('GET', '/', ['App\Controllers\Web\HomeController', 'home']);\n";
 // Genera le rotte per le tabelle nel database
 foreach ($tables as $tableName) {
     // Genera il nome del controller e delle azioni
@@ -40,15 +40,15 @@ foreach ($tables as $tableName) {
     // add separator for tables with camel case name
     $route = strtolower(preg_replace('/(?<!^)[A-Z]/', '-$0', $tableName));
 
-    $routeList .= "\t\$r->addRoute('GET', '/" . $route . "', ['App\Controllers\\$controllerName', '$indexAction']);\n";
-    $routeList .= "\t\$r->addRoute('GET', '/" . $route . "/create', ['App\Controllers\\$controllerName', '$createAction']);\n";
-    $routeList .= "\t\$r->addRoute('POST', '/" . $route . "/store', ['App\Controllers\\$controllerName', '$storeAction']);\n\n";
+    $routeList .= "\t\$r->addRoute('GET', '/" . $route . "', ['App\Controllers\Web\\$controllerName', '$indexAction']);\n";
+    $routeList .= "\t\$r->addRoute('GET', '/" . $route . "/create', ['App\Controllers\Web\\$controllerName', '$createAction']);\n";
+    $routeList .= "\t\$r->addRoute('POST', '/" . $route . "/store', ['App\Controllers\Web\\$controllerName', '$storeAction']);\n\n";
 
-    $routeList .= "\t\$r->addRoute('GET', '/" . $route . "/edit/{id:\d+}', ['App\Controllers\\$controllerName', '$editAction']);\n";
-    $routeList .= "\t\$r->addRoute('POST', '/" . $route . "/update', ['App\Controllers\\$controllerName', '$updateAction']);\n";
+    $routeList .= "\t\$r->addRoute('GET', '/" . $route . "/edit/{id:\d+}', ['App\Controllers\Web\\$controllerName', '$editAction']);\n";
+    $routeList .= "\t\$r->addRoute('POST', '/" . $route . "/update', ['App\Controllers\Web\\$controllerName', '$updateAction']);\n";
 
-    $routeList .= "\t\$r->addRoute('GET', '/" . $route . "/delete/{id:\d+}', ['App\Controllers\\$controllerName', '$deleteAction']);\n";
-    $routeList .= "\t\$r->addRoute('POST', '/" . $route . "/bulk-delete', ['App\Controllers\\$controllerName', '$bulkDeleteAction']);\n\n";
+    $routeList .= "\t\$r->addRoute('GET', '/" . $route . "/delete/{id:\d+}', ['App\Controllers\Web\\$controllerName', '$deleteAction']);\n";
+    $routeList .= "\t\$r->addRoute('POST', '/" . $route . "/bulk-delete', ['App\Controllers\Web\\$controllerName', '$bulkDeleteAction']);\n\n";
 }
 
 $routeList .= "};\n\n";

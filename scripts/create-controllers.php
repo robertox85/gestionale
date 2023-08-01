@@ -36,7 +36,7 @@ foreach ($tables as $tableName) {
 
 
     // Genera il codice del Controller
-    $controllerCode = "<?php\n\nnamespace App\Controllers;\n\nuse App\Models\\" . ucfirst($tableName) . ";\nuse App\Libraries\QueryBuilder;\nuse App\Libraries\DynamicFormComponent;\nuse App\Libraries\Helper;\n\nclass " . $controllerName . " extends BaseController {\n";
+    $controllerCode = "<?php\n\nnamespace App\Controllers\Web;\n\nuse App\Models\\" . ucfirst($tableName) . ";\nuse App\Libraries\QueryBuilder;\nuse App\Libraries\DynamicFormComponent;\nuse App\Libraries\Helper;\n\nclass " . $controllerName . " extends BaseController {\n";
 
     // Azione per la vista generale
     $controllerCode .= "\n\tpublic function index() {\n";
@@ -213,7 +213,7 @@ foreach ($tables as $tableName) {
     $controllerCode .= "}\n";
 
     // Salva il codice generato in un file
-    file_put_contents('app/Controllers/' . $controllerName . '.php', $controllerCode);
+    file_put_contents('app/Controllers/Web/' . $controllerName . '.php', $controllerCode);
 
     echo "Controller generato con successo: " . $controllerName . ".php\n";
 }

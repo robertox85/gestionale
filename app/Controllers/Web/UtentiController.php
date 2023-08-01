@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Web;
 
-use App\Models\PreferenzeUtenteSale;
+use App\Models\Utenti;
 use App\Libraries\QueryBuilder;
 use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
 
-class PreferenzeUtenteSaleController extends BaseController {
+class UtentiController extends BaseController {
 
 	public function index() {
 		$qb = new QueryBuilder($this->db);
-		$qb = $qb->setTable('PreferenzeUtenteSale');
+		$qb = $qb->setTable('Utenti');
 		// Seleziona tutte le colonne dalla tabella con alias per l'ID
 		$qb = $qb->select('*');
-		$qb = $qb->setAlias('id_preferenza', 'id');
+		$qb = $qb->setAlias('id_utente', 'id');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,12 +25,12 @@ class PreferenzeUtenteSaleController extends BaseController {
 
 	public function create(): void
 	{
-		$entity = new PreferenzeUtenteSale();
+		$entity = new Utenti();
 		$formComponent = new DynamicFormComponent($entity);
 
 		$formData = [];
-		$formData['action'] = $this->url('preferenze-utente-sale/store');
-		$formData['csrf_token'] = Helper::generateToken('PreferenzeUtenteSale');
+		$formData['action'] = $this->url('utenti/store');
+		$formData['csrf_token'] = Helper::generateToken('Utenti');
 		$formData['button_label'] = 'Crea';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -41,18 +41,18 @@ class PreferenzeUtenteSaleController extends BaseController {
 
 	public function edit($id)
 	{
-		$preferenzeutentesale = PreferenzeUtenteSale::find($id);
-		if (!$preferenzeutentesale) {
+		$utenti = Utenti::find($id);
+		if (!$utenti) {
 			Helper::addError('Record non trovato.');
-			Helper::redirect('/preferenze-utente-sale');
+			Helper::redirect('/utenti');
 			exit();
 		}
-		$formComponent = new DynamicFormComponent($preferenzeutentesale);
+		$formComponent = new DynamicFormComponent($utenti);
 
 		$formData = [];
-		$formData['action'] = $this->url('preferenze-utente-sale/update');
-		$formData['csrf_token'] = Helper::generateToken('PreferenzeUtenteSale');
-		$formData['id_preferenza'] = $id;
+		$formData['action'] = $this->url('utenti/update');
+		$formData['csrf_token'] = Helper::generateToken('Utenti');
+		$formData['id_utente'] = $id;
 		$formData['button_label'] = 'Edit';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -66,9 +66,9 @@ class PreferenzeUtenteSaleController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('PreferenzeUtenteSale', $post['csrf_token'])) {
+			if (!Helper::validateToken('Utenti', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/preferenze-utente-sale');
+				Helper::redirect('/utenti');
 				exit();
 			}
 
@@ -76,7 +76,7 @@ class PreferenzeUtenteSaleController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = PreferenzeUtenteSale::create($post);
+			$newId = Utenti::create($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Nuovo record creato con successo.');
@@ -84,11 +84,11 @@ class PreferenzeUtenteSaleController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/preferenze-utente-sale');
+			Helper::redirect('/utenti');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/preferenze-utente-sale');
+			Helper::redirect('/utenti');
 			exit();
 		}
 	}
@@ -99,9 +99,9 @@ class PreferenzeUtenteSaleController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('PreferenzeUtenteSale', $post['csrf_token'])) {
+			if (!Helper::validateToken('Utenti', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/preferenze-utente-sale');
+				Helper::redirect('/utenti');
 				exit();
 			}
 
@@ -109,7 +109,7 @@ class PreferenzeUtenteSaleController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = PreferenzeUtenteSale::update($post);
+			$newId = Utenti::update($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Record aggiornato con successo.');
@@ -117,25 +117,25 @@ class PreferenzeUtenteSaleController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/preferenze-utente-sale');
+			Helper::redirect('/utenti');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/preferenze-utente-sale');
+			Helper::redirect('/utenti');
 			exit();
 		}
 	}
 
 	public function delete($id) {
 		try {
-			(new PreferenzeUtenteSale)->delete($id);
+			(new Utenti)->delete($id);
 			Helper::addSuccess('Record eliminato con successo!');
 			$current_page = Helper::getCurrentPage();
 			Helper::redirect('/' . $current_page);
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/preferenze-utente-sale');
+			Helper::redirect('/utenti');
 			exit();
 		}
 	}
@@ -143,7 +143,7 @@ class PreferenzeUtenteSaleController extends BaseController {
 	public function bulkDelete() {
 		try {
 			$qb = new QueryBuilder($this->db);
-			$qb = $qb->setTable('PreferenzeUtenteSale');
+			$qb = $qb->setTable('Utenti');
 			$ids = $_POST['ids'];
 			// Turn into array if not already
 			if (!is_array($ids)) {
@@ -151,7 +151,7 @@ class PreferenzeUtenteSaleController extends BaseController {
 				$ids = array_filter($ids);
 				$ids = array_map('intval', $ids);
 			}
-			$qb = $qb->whereIn('id_preferenza', $ids);
+			$qb = $qb->whereIn('id_utente', $ids);
 			$qb = $qb->delete();
 			$qb->execute();
 			Helper::addSuccess('Record eliminati con successo!');

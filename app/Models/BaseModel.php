@@ -154,15 +154,21 @@ class BaseModel
         // Ad esempio, se vuoi il primo campo dopo l'id (primary key), puoi ottenere l'elenco dei nomi delle colonne della tabella
         // e selezionare il secondo elemento dell'array (il primo dopo l'id).
         $columnNames = $this->getColumnNames();
+        if (empty($columnNames)) {
+            return '';
+        }
         return $columnNames[1]; // Restituisce il nome del campo appropriato
     }
-    public function getColumnNames()
+    public function getColumnNames(): array
     {
         $qb = new QueryBuilder(Database::getInstance());
         $tableName = (new \ReflectionClass(static::class))->getShortName();
         $qb = $qb->setTable($tableName);
         $qb = $qb->select('*');
         $result = $qb->get();
+        if (empty($result)) {
+            return [];
+        }
         return array_keys($result[0]);
     }
 }

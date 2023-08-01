@@ -100,9 +100,19 @@ class TwigGlobalVars
                 // current url without query string , and attach the query string if $parms is not empty
                 //return explode('?', $_SERVER['REQUEST_URI'])[0];
                 $url = explode('?', $_SERVER['REQUEST_URI'])[0];
+
+                // if params is 'create' or 'delete', and url is / return BASE_URL
+                if (in_array($parms, ['create', 'delete']) && $url === '/') {
+                    return $_ENV['BASE_URL'] . '/' . $parms;
+                }
+
                 if ($parms) {
                     $url .= '/' . $parms;
                 }
+
+
+
+
                 return $url;
 
             },

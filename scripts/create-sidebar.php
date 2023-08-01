@@ -1,10 +1,10 @@
 <?php
 
 // Leggi il contenuto del file delle rotte (routes.php)
-$routesFileContent = file_get_contents('app/Routes/routes.php');
+$routesFileContent = file_get_contents('app/Routes/web.php');
 
 // Cerca le rotte che corrispondono all'azione index() di ogni tabella nel database. Le rotte sono definite come: ->addRoute('GET', '/{nome-tabella}', ['App\Controllers\{NomeTabella}Controller', 'index'])
-preg_match_all('/->addRoute\(\'GET\', \'\/([a-z-]+)\', \[\'App\\\\Controllers\\\\([a-zA-Z]+)Controller\', \'index\'\]\)/', $routesFileContent, $matches);
+preg_match_all('/->addRoute\(\'GET\', \'\/([a-z-]+)\', \[\'App\\\\Controllers\\\\Web\\\\([a-zA-Z]+)Controller\', \'index\'\]\)/', $routesFileContent, $matches);
 
 // Ottieni l'elenco delle tabelle e dei rispettivi controller
 $tables = $matches[1];

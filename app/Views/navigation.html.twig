@@ -1,5 +1,5 @@
 <nav class="bg-white border-b border-gray-200 px-4 py-2.5 dark:bg-gray-800 dark:border-gray-700 fixed left-0 right-0 top-0 z-50">
-    <div class="flex flex-wrap justify-between items-center">
+    <div class="flex flex-wrap justify-end items-center">
         <div class="flex justify-start items-center">
 
             <button
@@ -80,6 +80,60 @@
 
             {% endif %}
 
+        </div>
+
+        <div class="p-4 w-auto lg:flex bg-white dark:bg-gray-800 z-20">
+            <button
+                    type="button"
+                    data-dropdown-toggle="language-dropdown"
+                    class="inline-flex justify-center p-2 text-gray-500 rounded cursor-pointer dark:hover:text-white dark:text-gray-400 hover:text-gray-900 hover:bg-gray-100 dark:hover:bg-gray-600"
+            >
+            <span class="sr-only">
+                {{ 'Change language'|trans }}
+            </span>
+
+                <!-- add html code for italy flag -->
+
+                <div class="w-5 h-5 mr-1">
+                    <!-- session.language or 'it' -->
+                    {% if (session.language) %}
+                        {{ svg(session.language) | raw }}
+                    {% else %}
+                        {{ svg('it') | raw }}
+                    {% endif %}
+                </div>
+
+
+                <ion-icon name="chevron-down-outline" class="w-5 h-5 ml-1"></ion-icon>
+
+            </button>
+            <!-- Dropdown -->
+
+            <div class="hidden z-50 my-4 text-base list-none bg-white rounded divide-y divide-gray-100 shadow dark:bg-gray-700"
+                 id="language-dropdown">
+                <ul class="py-1" role="none">
+                    {% for lang in availableLanguages %}
+                        <li>
+                            <a
+                                    href="{{ url('set_language', {'_locale': lang}) }}"
+                                    class="block py-2 px-4 text-sm text-gray-700 hover:bg-gray-100 dark:hover:text-white dark:text-gray-300 dark:hover:bg-gray-600"
+                                    role="menuitem"
+                            >
+                                <div class="inline-flex items-center">
+                                    <div class="w-5 h-5 mr-2">
+                                        {{ svg(lang) | raw }}
+                                    </div>
+
+
+                                    {{ lang|trans }}
+
+
+                                </div>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
         </div>
 
     </div>

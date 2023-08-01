@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Web;
 
-use App\Models\Prenotazioni;
+use App\Models\Risorse;
 use App\Libraries\QueryBuilder;
 use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
 
-class PrenotazioniController extends BaseController {
+class RisorseController extends BaseController {
 
 	public function index() {
 		$qb = new QueryBuilder($this->db);
-		$qb = $qb->setTable('Prenotazioni');
+		$qb = $qb->setTable('Risorse');
 		// Seleziona tutte le colonne dalla tabella con alias per l'ID
 		$qb = $qb->select('*');
-		$qb = $qb->setAlias('id_prenotazione', 'id');
+		$qb = $qb->setAlias('id_risorsa', 'id');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,12 +25,12 @@ class PrenotazioniController extends BaseController {
 
 	public function create(): void
 	{
-		$entity = new Prenotazioni();
+		$entity = new Risorse();
 		$formComponent = new DynamicFormComponent($entity);
 
 		$formData = [];
-		$formData['action'] = $this->url('prenotazioni/store');
-		$formData['csrf_token'] = Helper::generateToken('Prenotazioni');
+		$formData['action'] = $this->url('risorse/store');
+		$formData['csrf_token'] = Helper::generateToken('Risorse');
 		$formData['button_label'] = 'Crea';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -41,18 +41,18 @@ class PrenotazioniController extends BaseController {
 
 	public function edit($id)
 	{
-		$prenotazioni = Prenotazioni::find($id);
-		if (!$prenotazioni) {
+		$risorse = Risorse::find($id);
+		if (!$risorse) {
 			Helper::addError('Record non trovato.');
-			Helper::redirect('/prenotazioni');
+			Helper::redirect('/risorse');
 			exit();
 		}
-		$formComponent = new DynamicFormComponent($prenotazioni);
+		$formComponent = new DynamicFormComponent($risorse);
 
 		$formData = [];
-		$formData['action'] = $this->url('prenotazioni/update');
-		$formData['csrf_token'] = Helper::generateToken('Prenotazioni');
-		$formData['id_prenotazione'] = $id;
+		$formData['action'] = $this->url('risorse/update');
+		$formData['csrf_token'] = Helper::generateToken('Risorse');
+		$formData['id_risorsa'] = $id;
 		$formData['button_label'] = 'Edit';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -66,9 +66,9 @@ class PrenotazioniController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('Prenotazioni', $post['csrf_token'])) {
+			if (!Helper::validateToken('Risorse', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/prenotazioni');
+				Helper::redirect('/risorse');
 				exit();
 			}
 
@@ -76,7 +76,7 @@ class PrenotazioniController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = Prenotazioni::create($post);
+			$newId = Risorse::create($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Nuovo record creato con successo.');
@@ -84,11 +84,11 @@ class PrenotazioniController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/prenotazioni');
+			Helper::redirect('/risorse');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/prenotazioni');
+			Helper::redirect('/risorse');
 			exit();
 		}
 	}
@@ -99,9 +99,9 @@ class PrenotazioniController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('Prenotazioni', $post['csrf_token'])) {
+			if (!Helper::validateToken('Risorse', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/prenotazioni');
+				Helper::redirect('/risorse');
 				exit();
 			}
 
@@ -109,7 +109,7 @@ class PrenotazioniController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = Prenotazioni::update($post);
+			$newId = Risorse::update($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Record aggiornato con successo.');
@@ -117,25 +117,25 @@ class PrenotazioniController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/prenotazioni');
+			Helper::redirect('/risorse');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/prenotazioni');
+			Helper::redirect('/risorse');
 			exit();
 		}
 	}
 
 	public function delete($id) {
 		try {
-			(new Prenotazioni)->delete($id);
+			(new Risorse)->delete($id);
 			Helper::addSuccess('Record eliminato con successo!');
 			$current_page = Helper::getCurrentPage();
 			Helper::redirect('/' . $current_page);
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/prenotazioni');
+			Helper::redirect('/risorse');
 			exit();
 		}
 	}
@@ -143,7 +143,7 @@ class PrenotazioniController extends BaseController {
 	public function bulkDelete() {
 		try {
 			$qb = new QueryBuilder($this->db);
-			$qb = $qb->setTable('Prenotazioni');
+			$qb = $qb->setTable('Risorse');
 			$ids = $_POST['ids'];
 			// Turn into array if not already
 			if (!is_array($ids)) {
@@ -151,7 +151,7 @@ class PrenotazioniController extends BaseController {
 				$ids = array_filter($ids);
 				$ids = array_map('intval', $ids);
 			}
-			$qb = $qb->whereIn('id_prenotazione', $ids);
+			$qb = $qb->whereIn('id_risorsa', $ids);
 			$qb = $qb->delete();
 			$qb->execute();
 			Helper::addSuccess('Record eliminati con successo!');

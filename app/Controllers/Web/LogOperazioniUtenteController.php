@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Web;
 
-use App\Models\Sale;
+use App\Models\LogOperazioniUtente;
 use App\Libraries\QueryBuilder;
 use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
 
-class SaleController extends BaseController {
+class LogOperazioniUtenteController extends BaseController {
 
 	public function index() {
 		$qb = new QueryBuilder($this->db);
-		$qb = $qb->setTable('Sale');
+		$qb = $qb->setTable('LogOperazioniUtente');
 		// Seleziona tutte le colonne dalla tabella con alias per l'ID
 		$qb = $qb->select('*');
-		$qb = $qb->setAlias('id_sala', 'id');
+		$qb = $qb->setAlias('id_log', 'id');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,12 +25,12 @@ class SaleController extends BaseController {
 
 	public function create(): void
 	{
-		$entity = new Sale();
+		$entity = new LogOperazioniUtente();
 		$formComponent = new DynamicFormComponent($entity);
 
 		$formData = [];
-		$formData['action'] = $this->url('sale/store');
-		$formData['csrf_token'] = Helper::generateToken('Sale');
+		$formData['action'] = $this->url('log-operazioni-utente/store');
+		$formData['csrf_token'] = Helper::generateToken('LogOperazioniUtente');
 		$formData['button_label'] = 'Crea';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -41,18 +41,18 @@ class SaleController extends BaseController {
 
 	public function edit($id)
 	{
-		$sale = Sale::find($id);
-		if (!$sale) {
+		$logoperazioniutente = LogOperazioniUtente::find($id);
+		if (!$logoperazioniutente) {
 			Helper::addError('Record non trovato.');
-			Helper::redirect('/sale');
+			Helper::redirect('/log-operazioni-utente');
 			exit();
 		}
-		$formComponent = new DynamicFormComponent($sale);
+		$formComponent = new DynamicFormComponent($logoperazioniutente);
 
 		$formData = [];
-		$formData['action'] = $this->url('sale/update');
-		$formData['csrf_token'] = Helper::generateToken('Sale');
-		$formData['id_sala'] = $id;
+		$formData['action'] = $this->url('log-operazioni-utente/update');
+		$formData['csrf_token'] = Helper::generateToken('LogOperazioniUtente');
+		$formData['id_log'] = $id;
 		$formData['button_label'] = 'Edit';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -66,9 +66,9 @@ class SaleController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('Sale', $post['csrf_token'])) {
+			if (!Helper::validateToken('LogOperazioniUtente', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/sale');
+				Helper::redirect('/log-operazioni-utente');
 				exit();
 			}
 
@@ -76,7 +76,7 @@ class SaleController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = Sale::create($post);
+			$newId = LogOperazioniUtente::create($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Nuovo record creato con successo.');
@@ -84,11 +84,11 @@ class SaleController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/sale');
+			Helper::redirect('/log-operazioni-utente');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/sale');
+			Helper::redirect('/log-operazioni-utente');
 			exit();
 		}
 	}
@@ -99,9 +99,9 @@ class SaleController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('Sale', $post['csrf_token'])) {
+			if (!Helper::validateToken('LogOperazioniUtente', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/sale');
+				Helper::redirect('/log-operazioni-utente');
 				exit();
 			}
 
@@ -109,7 +109,7 @@ class SaleController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = Sale::update($post);
+			$newId = LogOperazioniUtente::update($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Record aggiornato con successo.');
@@ -117,25 +117,25 @@ class SaleController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/sale');
+			Helper::redirect('/log-operazioni-utente');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/sale');
+			Helper::redirect('/log-operazioni-utente');
 			exit();
 		}
 	}
 
 	public function delete($id) {
 		try {
-			(new Sale)->delete($id);
+			(new LogOperazioniUtente)->delete($id);
 			Helper::addSuccess('Record eliminato con successo!');
 			$current_page = Helper::getCurrentPage();
 			Helper::redirect('/' . $current_page);
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/sale');
+			Helper::redirect('/log-operazioni-utente');
 			exit();
 		}
 	}
@@ -143,7 +143,7 @@ class SaleController extends BaseController {
 	public function bulkDelete() {
 		try {
 			$qb = new QueryBuilder($this->db);
-			$qb = $qb->setTable('Sale');
+			$qb = $qb->setTable('LogOperazioniUtente');
 			$ids = $_POST['ids'];
 			// Turn into array if not already
 			if (!is_array($ids)) {
@@ -151,7 +151,7 @@ class SaleController extends BaseController {
 				$ids = array_filter($ids);
 				$ids = array_map('intval', $ids);
 			}
-			$qb = $qb->whereIn('id_sala', $ids);
+			$qb = $qb->whereIn('id_log', $ids);
 			$qb = $qb->delete();
 			$qb->execute();
 			Helper::addSuccess('Record eliminati con successo!');

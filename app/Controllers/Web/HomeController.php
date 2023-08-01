@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Web;
 
 use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;

@@ -24,29 +24,6 @@ try {
 try {
 
     // DROP TABLES
-    $pdo->exec("
-    drop table DisponibilitaSale;
-
-drop table EccezioniSale;
-
-drop table LogOperazioniUtente;
-
-drop table Notifiche;
-
-drop table PreferenzeUtenteSale;
-
-drop table Prenotazioni;
-
-drop table Recensioni;
-
-drop table RelazioniSaleRisorse;
-
-drop table Risorse;
-
-drop table Sale;
-
-drop table Utenti;
-");
 
     // CREATE TABLES
 

@@ -43,7 +43,4 @@ class Risorse extends BaseModel {
 	public function setUpdatedAt($updated_at) {
 		$this->updated_at = $updated_at;
 	}
-
-    // Definisci un metodo astratto per ottenere il nome del campo da utilizzare come valore per le opzioni del campo select
-
 }

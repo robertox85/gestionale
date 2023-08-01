@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Web;
 
-use App\Models\Notifiche;
+use App\Models\Recensioni;
 use App\Libraries\QueryBuilder;
 use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
 
-class NotificheController extends BaseController {
+class RecensioniController extends BaseController {
 
 	public function index() {
 		$qb = new QueryBuilder($this->db);
-		$qb = $qb->setTable('Notifiche');
+		$qb = $qb->setTable('Recensioni');
 		// Seleziona tutte le colonne dalla tabella con alias per l'ID
 		$qb = $qb->select('*');
-		$qb = $qb->setAlias('id_notifica', 'id');
+		$qb = $qb->setAlias('id_recensione', 'id');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,12 +25,12 @@ class NotificheController extends BaseController {
 
 	public function create(): void
 	{
-		$entity = new Notifiche();
+		$entity = new Recensioni();
 		$formComponent = new DynamicFormComponent($entity);
 
 		$formData = [];
-		$formData['action'] = $this->url('notifiche/store');
-		$formData['csrf_token'] = Helper::generateToken('Notifiche');
+		$formData['action'] = $this->url('recensioni/store');
+		$formData['csrf_token'] = Helper::generateToken('Recensioni');
 		$formData['button_label'] = 'Crea';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -41,18 +41,18 @@ class NotificheController extends BaseController {
 
 	public function edit($id)
 	{
-		$notifiche = Notifiche::find($id);
-		if (!$notifiche) {
+		$recensioni = Recensioni::find($id);
+		if (!$recensioni) {
 			Helper::addError('Record non trovato.');
-			Helper::redirect('/notifiche');
+			Helper::redirect('/recensioni');
 			exit();
 		}
-		$formComponent = new DynamicFormComponent($notifiche);
+		$formComponent = new DynamicFormComponent($recensioni);
 
 		$formData = [];
-		$formData['action'] = $this->url('notifiche/update');
-		$formData['csrf_token'] = Helper::generateToken('Notifiche');
-		$formData['id_notifica'] = $id;
+		$formData['action'] = $this->url('recensioni/update');
+		$formData['csrf_token'] = Helper::generateToken('Recensioni');
+		$formData['id_recensione'] = $id;
 		$formData['button_label'] = 'Edit';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -66,9 +66,9 @@ class NotificheController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('Notifiche', $post['csrf_token'])) {
+			if (!Helper::validateToken('Recensioni', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/notifiche');
+				Helper::redirect('/recensioni');
 				exit();
 			}
 
@@ -76,7 +76,7 @@ class NotificheController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = Notifiche::create($post);
+			$newId = Recensioni::create($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Nuovo record creato con successo.');
@@ -84,11 +84,11 @@ class NotificheController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/notifiche');
+			Helper::redirect('/recensioni');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/notifiche');
+			Helper::redirect('/recensioni');
 			exit();
 		}
 	}
@@ -99,9 +99,9 @@ class NotificheController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('Notifiche', $post['csrf_token'])) {
+			if (!Helper::validateToken('Recensioni', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/notifiche');
+				Helper::redirect('/recensioni');
 				exit();
 			}
 
@@ -109,7 +109,7 @@ class NotificheController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = Notifiche::update($post);
+			$newId = Recensioni::update($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Record aggiornato con successo.');
@@ -117,25 +117,25 @@ class NotificheController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/notifiche');
+			Helper::redirect('/recensioni');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/notifiche');
+			Helper::redirect('/recensioni');
 			exit();
 		}
 	}
 
 	public function delete($id) {
 		try {
-			(new Notifiche)->delete($id);
+			(new Recensioni)->delete($id);
 			Helper::addSuccess('Record eliminato con successo!');
 			$current_page = Helper::getCurrentPage();
 			Helper::redirect('/' . $current_page);
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/notifiche');
+			Helper::redirect('/recensioni');
 			exit();
 		}
 	}
@@ -143,7 +143,7 @@ class NotificheController extends BaseController {
 	public function bulkDelete() {
 		try {
 			$qb = new QueryBuilder($this->db);
-			$qb = $qb->setTable('Notifiche');
+			$qb = $qb->setTable('Recensioni');
 			$ids = $_POST['ids'];
 			// Turn into array if not already
 			if (!is_array($ids)) {
@@ -151,7 +151,7 @@ class NotificheController extends BaseController {
 				$ids = array_filter($ids);
 				$ids = array_map('intval', $ids);
 			}
-			$qb = $qb->whereIn('id_notifica', $ids);
+			$qb = $qb->whereIn('id_recensione', $ids);
 			$qb = $qb->delete();
 			$qb->execute();
 			Helper::addSuccess('Record eliminati con successo!');

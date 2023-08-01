@@ -1,20 +1,20 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Web;
 
-use App\Models\RelazioniSaleRisorse;
+use App\Models\Notifiche;
 use App\Libraries\QueryBuilder;
 use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
 
-class RelazioniSaleRisorseController extends BaseController {
+class NotificheController extends BaseController {
 
 	public function index() {
 		$qb = new QueryBuilder($this->db);
-		$qb = $qb->setTable('RelazioniSaleRisorse');
+		$qb = $qb->setTable('Notifiche');
 		// Seleziona tutte le colonne dalla tabella con alias per l'ID
 		$qb = $qb->select('*');
-		$qb = $qb->setAlias('id_relazione', 'id');
+		$qb = $qb->setAlias('id_notifica', 'id');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,12 +25,12 @@ class RelazioniSaleRisorseController extends BaseController {
 
 	public function create(): void
 	{
-		$entity = new RelazioniSaleRisorse();
+		$entity = new Notifiche();
 		$formComponent = new DynamicFormComponent($entity);
 
 		$formData = [];
-		$formData['action'] = $this->url('relazioni-sale-risorse/store');
-		$formData['csrf_token'] = Helper::generateToken('RelazioniSaleRisorse');
+		$formData['action'] = $this->url('notifiche/store');
+		$formData['csrf_token'] = Helper::generateToken('Notifiche');
 		$formData['button_label'] = 'Crea';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -41,18 +41,18 @@ class RelazioniSaleRisorseController extends BaseController {
 
 	public function edit($id)
 	{
-		$relazionisalerisorse = RelazioniSaleRisorse::find($id);
-		if (!$relazionisalerisorse) {
+		$notifiche = Notifiche::find($id);
+		if (!$notifiche) {
 			Helper::addError('Record non trovato.');
-			Helper::redirect('/relazioni-sale-risorse');
+			Helper::redirect('/notifiche');
 			exit();
 		}
-		$formComponent = new DynamicFormComponent($relazionisalerisorse);
+		$formComponent = new DynamicFormComponent($notifiche);
 
 		$formData = [];
-		$formData['action'] = $this->url('relazioni-sale-risorse/update');
-		$formData['csrf_token'] = Helper::generateToken('RelazioniSaleRisorse');
-		$formData['id_relazione'] = $id;
+		$formData['action'] = $this->url('notifiche/update');
+		$formData['csrf_token'] = Helper::generateToken('Notifiche');
+		$formData['id_notifica'] = $id;
 		$formData['button_label'] = 'Edit';
 
 		$formHtml = $formComponent->renderForm($formData);
@@ -66,9 +66,9 @@ class RelazioniSaleRisorseController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('RelazioniSaleRisorse', $post['csrf_token'])) {
+			if (!Helper::validateToken('Notifiche', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/relazioni-sale-risorse');
+				Helper::redirect('/notifiche');
 				exit();
 			}
 
@@ -76,7 +76,7 @@ class RelazioniSaleRisorseController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = RelazioniSaleRisorse::create($post);
+			$newId = Notifiche::create($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Nuovo record creato con successo.');
@@ -84,11 +84,11 @@ class RelazioniSaleRisorseController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/relazioni-sale-risorse');
+			Helper::redirect('/notifiche');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/relazioni-sale-risorse');
+			Helper::redirect('/notifiche');
 			exit();
 		}
 	}
@@ -99,9 +99,9 @@ class RelazioniSaleRisorseController extends BaseController {
 			$post = $_POST;
 
 			// Verifica il token CSRF
-			if (!Helper::validateToken('RelazioniSaleRisorse', $post['csrf_token'])) {
+			if (!Helper::validateToken('Notifiche', $post['csrf_token'])) {
 				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/relazioni-sale-risorse');
+				Helper::redirect('/notifiche');
 				exit();
 			}
 
@@ -109,7 +109,7 @@ class RelazioniSaleRisorseController extends BaseController {
 
 			$post = Helper::sanificaInput($post);
 
-			$newId = RelazioniSaleRisorse::update($post);
+			$newId = Notifiche::update($post);
 
 			if ($newId !== false) {
 				Helper::addSuccess('Record aggiornato con successo.');
@@ -117,25 +117,25 @@ class RelazioniSaleRisorseController extends BaseController {
 				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
 			}
 
-			Helper::redirect('/relazioni-sale-risorse');
+			Helper::redirect('/notifiche');
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/relazioni-sale-risorse');
+			Helper::redirect('/notifiche');
 			exit();
 		}
 	}
 
 	public function delete($id) {
 		try {
-			(new RelazioniSaleRisorse)->delete($id);
+			(new Notifiche)->delete($id);
 			Helper::addSuccess('Record eliminato con successo!');
 			$current_page = Helper::getCurrentPage();
 			Helper::redirect('/' . $current_page);
 			exit();
 		} catch (\Exception $e) {
 			Helper::addError($e->getMessage());
-			Helper::redirect('/relazioni-sale-risorse');
+			Helper::redirect('/notifiche');
 			exit();
 		}
 	}
@@ -143,7 +143,7 @@ class RelazioniSaleRisorseController extends BaseController {
 	public function bulkDelete() {
 		try {
 			$qb = new QueryBuilder($this->db);
-			$qb = $qb->setTable('RelazioniSaleRisorse');
+			$qb = $qb->setTable('Notifiche');
 			$ids = $_POST['ids'];
 			// Turn into array if not already
 			if (!is_array($ids)) {
@@ -151,7 +151,7 @@ class RelazioniSaleRisorseController extends BaseController {
 				$ids = array_filter($ids);
 				$ids = array_map('intval', $ids);
 			}
-			$qb = $qb->whereIn('id_relazione', $ids);
+			$qb = $qb->whereIn('id_notifica', $ids);
 			$qb = $qb->delete();
 			$qb->execute();
 			Helper::addSuccess('Record eliminati con successo!');
