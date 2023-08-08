@@ -17,6 +17,7 @@ $routeList .= "return function (RouteCollector \$r) {\n\n";
 
 // Aggiungi le rotte pubbliche
 $routeList .= "\t// Rotte pubbliche\n";
+$routeList .= "\t\$r->addRoute('GET', '/401', ['App\Controllers\Web\ErrorController', 'unauthorizedView']);\n";
 $routeList .= "\t\$r->addRoute('GET', '/403', ['App\Controllers\Web\ErrorController', 'forbiddenView']);\n";
 $routeList .= "\t\$r->addRoute('GET', '/404', ['App\Controllers\Web\ErrorController', 'notFoundView']);\n";
 $routeList .= "\t\$r->addRoute('GET', '/405', ['App\Controllers\Web\ErrorController', 'notAllowedView']);\n";

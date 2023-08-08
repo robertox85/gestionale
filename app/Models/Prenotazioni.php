@@ -4,7 +4,7 @@ namespace App\Models;
 
 class Prenotazioni extends BaseModel {
 
-	private int $id_prenotazione;
+	private int $id_prenotazione = 0;
 
 	public function getIdPrenotazione() {
 		return $this->id_prenotazione;
@@ -14,7 +14,7 @@ class Prenotazioni extends BaseModel {
 		$this->id_prenotazione = $id_prenotazione;
 	}
 
-	private int $id_utente;
+	private int $id_utente = 0;
 
 	public function getIdUtente() {
 		return $this->id_utente;
@@ -24,7 +24,7 @@ class Prenotazioni extends BaseModel {
 		$this->id_utente = $id_utente;
 	}
 
-	private int $id_sala;
+	private int $id_sala = 0;
 
 	public function getIdSala() {
 		return $this->id_sala;
@@ -34,7 +34,7 @@ class Prenotazioni extends BaseModel {
 		$this->id_sala = $id_sala;
 	}
 
-	private mixed $data_ora_inizio;
+	private mixed $data_ora_inizio = null;
 
 	public function getDataOraInizio() {
 		return $this->data_ora_inizio;
@@ -44,7 +44,7 @@ class Prenotazioni extends BaseModel {
 		$this->data_ora_inizio = $data_ora_inizio;
 	}
 
-	private mixed $data_ora_fine;
+	private mixed $data_ora_fine = null;
 
 	public function getDataOraFine() {
 		return $this->data_ora_fine;
@@ -54,7 +54,7 @@ class Prenotazioni extends BaseModel {
 		$this->data_ora_fine = $data_ora_fine;
 	}
 
-	private mixed $ricorrenza;
+	private mixed $ricorrenza = null;
 
 	public function getRicorrenza() {
 		return $this->ricorrenza;
@@ -64,7 +64,7 @@ class Prenotazioni extends BaseModel {
 		$this->ricorrenza = $ricorrenza;
 	}
 
-	private mixed $fine_ricorrenza;
+	private mixed $fine_ricorrenza = null;
 
 	public function getFineRicorrenza() {
 		return $this->fine_ricorrenza;
@@ -74,7 +74,7 @@ class Prenotazioni extends BaseModel {
 		$this->fine_ricorrenza = $fine_ricorrenza;
 	}
 
-	private mixed $created_at;
+	private mixed $created_at = null;
 
 	public function getCreatedAt() {
 		return $this->created_at;
@@ -84,7 +84,7 @@ class Prenotazioni extends BaseModel {
 		$this->created_at = $created_at;
 	}
 
-	private mixed $updated_at;
+	private mixed $updated_at = null;
 
 	public function getUpdatedAt() {
 		return $this->updated_at;

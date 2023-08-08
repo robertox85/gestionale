@@ -13,6 +13,7 @@ class RisorseApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('Risorse');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,7 +26,7 @@ class RisorseApiController extends BaseController {
 
 	public function edit($id)
 	{
-		$risorse = Risorse::find($id);
+		$risorse = Risorse::findById($id);
 		if (!$risorse) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -94,7 +95,7 @@ class RisorseApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$risorse = Risorse::find($id);
+		$risorse = Risorse::findById($id);
 		if (!$risorse) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

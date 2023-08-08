@@ -3,28 +3,46 @@
 .htaccess
 [app]
   [Controllers]
-    AuthController.php
-    BaseController.php
-    DisponibilitaSaleController.php
-    EccezioniSaleController.php
-    ErrorController.php
-    HomeController.php
-    LogOperazioniUtenteController.php
-    NotificheController.php
-    PreferenzeUtenteSaleController.php
-    PrenotazioniController.php
-    RecensioniController.php
-    RelazioniSaleRisorseController.php
-    RisorseController.php
-    SaleController.php
-    UtentiController.php
+    [Api]
+      DisponibilitaSaleApiController.php
+      EccezioniSaleApiController.php
+      ErrorApiController.php
+      LogOperazioniUtenteApiController.php
+      NotificheApiController.php
+      PreferenzeUtenteSaleApiController.php
+      PrenotazioniApiController.php
+      RecensioniApiController.php
+      RelazioniSaleRisorseApiController.php
+      RisorseApiController.php
+      SaleApiController.php
+      UtentiApiController.php
+    [Web]
+      AuthController.php
+      BaseController.php
+      DisponibilitaSaleController.php
+      EccezioniSaleController.php
+      ErrorController.php
+      HomeController.php
+      LanguageController.php
+      LogOperazioniUtenteController.php
+      NotificheController.php
+      PreferenzeUtenteSaleController.php
+      PrenotazioniController.php
+      RecensioniController.php
+      RelazioniSaleRisorseController.php
+      RisorseController.php
+      SaleController.php
+      UtentiController.php
   [Libraries]
     Auth.php
     Database.php
     DynamicFormComponent.php
     ErrorHandler.php
+    FormRenderer.php
     Helper.php
     QueryBuilder.php
+    ReflectionHelper.php
+    ResponseHelper.php
     TwigConfigurator.php
     TwigGlobalVars.php
   [Middleware]
@@ -45,9 +63,9 @@
     Sale.php
     Utenti.php
   [Routes]
+    api.php
     routes.php
-  [Services]
-    UtenteService.php
+    web.php
   [Views]
     alerts.html.twig
     base.html.twig

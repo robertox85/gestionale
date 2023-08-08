@@ -27,21 +27,25 @@ foreach ($tables as $tableName) {
 
         // Formatta il nome della colonna per utilizzarlo come nome della proprietà
         $propertyName = $columnName;
+        $propertyValue = $column['Default'];
 
         // Determina il tipo di dato corrispondente per la proprietà
         // Puoi definire una mappatura dei tipi di colonna a tipi di dato nel modello
         if (strpos($columnType, 'int') === 0) {
             $propertyType = 'int';
+            $propertyValue = 0;
         } elseif (strpos($columnType, 'varchar') === 0) {
             $propertyType = 'string';
+            $propertyValue = "''";
         } else {
             // Tipo di colonna sconosciuto, utilizza "mixed" come tipo di dato della proprietà
             $propertyType = 'mixed';
+            $propertyValue = "null";
         }
 
 
-        // Genera la proprietà e il metodo getter nel modello
-        $modelCode .= "\n\tprivate $propertyType \$$propertyName;\n";
+        // Genera la proprietà e il metodo getter nel modello, inizializzando la proprietà con il valore predefinito in base al tipo di dato
+        $modelCode .= "\n\tprivate $propertyType \$$propertyName = " . $propertyValue . ";\n";
 
         // CamelCase
         $getterName = str_replace('_', '', lcfirst(ucwords($columnName, '_')));

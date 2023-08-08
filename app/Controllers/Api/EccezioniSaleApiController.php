@@ -13,6 +13,7 @@ class EccezioniSaleApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('EccezioniSale');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,7 +26,7 @@ class EccezioniSaleApiController extends BaseController {
 
 	public function edit($id)
 	{
-		$eccezionisale = EccezioniSale::find($id);
+		$eccezionisale = EccezioniSale::findById($id);
 		if (!$eccezionisale) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -94,7 +95,7 @@ class EccezioniSaleApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$eccezionisale = EccezioniSale::find($id);
+		$eccezionisale = EccezioniSale::findById($id);
 		if (!$eccezionisale) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

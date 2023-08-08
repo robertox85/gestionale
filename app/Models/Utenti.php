@@ -4,7 +4,7 @@ namespace App\Models;
 
 class Utenti extends BaseModel {
 
-	private int $id_utente;
+	private int $id_utente = 0;
 
 	public function getIdUtente() {
 		return $this->id_utente;
@@ -14,7 +14,7 @@ class Utenti extends BaseModel {
 		$this->id_utente = $id_utente;
 	}
 
-	private string $nome;
+	private string $nome = '';
 
 	public function getNome() {
 		return $this->nome;
@@ -24,7 +24,7 @@ class Utenti extends BaseModel {
 		$this->nome = $nome;
 	}
 
-	private string $cognome;
+	private string $cognome = '';
 
 	public function getCognome() {
 		return $this->cognome;
@@ -34,7 +34,7 @@ class Utenti extends BaseModel {
 		$this->cognome = $cognome;
 	}
 
-	private string $email;
+	private string $email = '';
 
 	public function getEmail() {
 		return $this->email;
@@ -44,7 +44,7 @@ class Utenti extends BaseModel {
 		$this->email = $email;
 	}
 
-	private string $password;
+	private string $password = '';
 
 	public function getPassword() {
 		return $this->password;
@@ -54,7 +54,7 @@ class Utenti extends BaseModel {
 		$this->password = $password;
 	}
 
-	private mixed $ruolo;
+	private mixed $ruolo = null;
 
 	public function getRuolo() {
 		return $this->ruolo;
@@ -64,7 +64,7 @@ class Utenti extends BaseModel {
 		$this->ruolo = $ruolo;
 	}
 
-	private mixed $created_at;
+	private mixed $created_at = null;
 
 	public function getCreatedAt() {
 		return $this->created_at;
@@ -74,7 +74,7 @@ class Utenti extends BaseModel {
 		$this->created_at = $created_at;
 	}
 
-	private mixed $updated_at;
+	private mixed $updated_at = null;
 
 	public function getUpdatedAt() {
 		return $this->updated_at;

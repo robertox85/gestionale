@@ -13,6 +13,7 @@ class UtentiApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('Utenti');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,7 +26,7 @@ class UtentiApiController extends BaseController {
 
 	public function edit($id)
 	{
-		$utenti = Utenti::find($id);
+		$utenti = Utenti::findById($id);
 		if (!$utenti) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -94,7 +95,7 @@ class UtentiApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$utenti = Utenti::find($id);
+		$utenti = Utenti::findById($id);
 		if (!$utenti) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

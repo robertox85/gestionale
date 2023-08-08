@@ -4,7 +4,7 @@ namespace App\Models;
 
 class Sale extends BaseModel {
 
-	private int $id_sala;
+	private int $id_sala = 0;
 
 	public function getIdSala() {
 		return $this->id_sala;
@@ -14,7 +14,7 @@ class Sale extends BaseModel {
 		$this->id_sala = $id_sala;
 	}
 
-	private string $nome_sala;
+	private string $nome_sala = '';
 
 	public function getNomeSala() {
 		return $this->nome_sala;
@@ -24,7 +24,7 @@ class Sale extends BaseModel {
 		$this->nome_sala = $nome_sala;
 	}
 
-	private int $capacita;
+	private int $capacita = 0;
 
 	public function getCapacita() {
 		return $this->capacita;
@@ -34,7 +34,7 @@ class Sale extends BaseModel {
 		$this->capacita = $capacita;
 	}
 
-	private mixed $created_at;
+	private mixed $created_at = null;
 
 	public function getCreatedAt() {
 		return $this->created_at;
@@ -44,7 +44,7 @@ class Sale extends BaseModel {
 		$this->created_at = $created_at;
 	}
 
-	private mixed $updated_at;
+	private mixed $updated_at = null;
 
 	public function getUpdatedAt() {
 		return $this->updated_at;

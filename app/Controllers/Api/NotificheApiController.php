@@ -13,6 +13,7 @@ class NotificheApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('Notifiche');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,7 +26,7 @@ class NotificheApiController extends BaseController {
 
 	public function edit($id)
 	{
-		$notifiche = Notifiche::find($id);
+		$notifiche = Notifiche::findById($id);
 		if (!$notifiche) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -94,7 +95,7 @@ class NotificheApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$notifiche = Notifiche::find($id);
+		$notifiche = Notifiche::findById($id);
 		if (!$notifiche) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

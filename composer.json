@@ -26,12 +26,6 @@
     "phpunit/phpunit": "^10.1"
   },
   "scripts": {
-    "post-install-cmd": [
-      "php scripts/initialize-database.php",
-      "php scripts/create-models.php",
-      "php scripts/create-controllers.php",
-      "php scripts/create-web-routes.php",
-      "php scripts/create-sidebar.php"
-    ]
+
   }
 }

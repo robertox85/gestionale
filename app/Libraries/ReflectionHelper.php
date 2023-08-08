@@ -62,20 +62,79 @@ class ReflectionHelper
         return $options;
     }
 
+    /**
+     * @throws ReflectionException
+     */
     public static function getEntityFields($model, $relatedFields): array
     {
         $reflectionClass = new ReflectionClass($model);
-        $shortClassName = (new ReflectionClass($model))->getShortName();
+        $shortClassName = $reflectionClass->getShortName();
         $columnTypes = self::getColumnsType($shortClassName);
-
-
         $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
-
         $primaryKeyName = Helper::getTablePrimaryKeyName($reflectionClass);
 
-        // Escludi i metodi che non devono essere considerati come campi, getIdEntity ad esempio
+        // get properties from model
+        $properties = self::getPropertiesFromModel($reflectionClass);
 
+        // $fields = self::extractFieldsFromMethods($methods, $columnTypes, $primaryKeyName);
+        $relatedFields = self::addRelatedFields($columnTypes, $primaryKeyName, $relatedFields);
+
+        return array_merge($properties, $relatedFields);
+    }
+
+    private static function getPropertiesFromModel($reflectionClass)
+    {
+        $primaryKeyName = Helper::getTablePrimaryKeyName($reflectionClass);
+        $excludeList = [
+            'id',
+            'created_at',
+            'updated_at',
+            'id_' . strtolower($primaryKeyName),
+        ];
+        $properties = $reflectionClass->getProperties();
+        $propertiesTypes = [];
+        foreach ($properties as $property) {
+            // get property's type declaration (if any)
+            $type = $property->getType();
+            if ($type !== null) {
+                $propertiesTypes[$property->getName()] = $type->getName();
+            }
+        }
+        return self::excludeProperties($propertiesTypes, $excludeList);
+    }
+
+    private static function excludeProperties($properties, $excludeList)
+    {
+        $filteredProperties = [];
+        foreach ($properties as $name => $value) {
+            if (!self::shouldBeExcluded($name, $excludeList)) {
+                $filteredProperties[$name] = $value;
+            }
+        }
+        return $filteredProperties;
+    }
+
+    private static function shouldBeExcluded($methodName, $excludeList): bool
+    {
+        return in_array($methodName, $excludeList);
+    }
+
+    private static function addRelatedFields($columnTypes, $primaryKeyName, $relatedFields): array
+    {
+        foreach ($columnTypes as $columnName => $columnType) {
+            if ($columnName != 'id_' . strtolower($primaryKeyName) && str_starts_with($columnName, 'id_')) {
+                $relatedTableName = ucfirst(Helper::getPluralName(substr($columnName, 3)));
+                $relatedFields[$columnName] = ['type' => 'select', 'options' => self::getRelatedData($relatedTableName)];
+            }
+        }
+        return $relatedFields;
+    }
+
+    /* TODO: per ora commento, verificare che serva o meno. È stata sostituita dalla funzione getPropertiesFromModel
+    private static function extractFieldsFromMethods($methods, $columnTypes, $primaryKeyName): array
+    {
         $exclude = [
+            'getId',
             'getId' . $primaryKeyName,
             'getCreatedAt',
             'getUpdatedAt',
@@ -85,70 +144,88 @@ class ReflectionHelper
             'getColumnNames'
         ];
         $fields = [];
+        foreach ($methods as $method) {
+            if (!self::shouldBeExcluded($method->getName(), $exclude)) {
+                $fields = array_merge($fields, self::getFieldFromMethod($method, $columnTypes));
+            }
+        }
+        return $fields;
+    }
+
+    private static function getFieldFromMethod($method, $columnTypes): array
+    {
+        $fields = [];
+        if (str_starts_with($method->getName(), 'get') && $method->getNumberOfParameters() === 0) {
+            $propertyName = self::formatPropertyName($method->getName());
+            if (isset($columnTypes[$propertyName])) {
+                $fields[$propertyName] = self::mapColumnTypeToField($columnTypes[$propertyName]);
+            } else {
+                $fields[$propertyName] = 'text';
+            }
+        }
+        return $fields;
+    }
+    private static function formatPropertyName($methodName): string
+    {
+        $propertyName = lcfirst(substr($methodName, 3));
+        $propertyName = preg_replace('/(?<!^)[A-Z]/', '_$0', $propertyName);
+        return strtolower($propertyName);
+    }
+    private static function mapColumnTypeToField($columnType): array|string
+    {
+        if (str_starts_with($columnType, 'enum')) {
+            $options = explode(',', substr($columnType, 5, -1));
+            return ['type' => 'select', 'options' => $options];
+        }
+        // Add more conditions here...
+        // date
+        // datetime
+
+        if (str_starts_with($columnType, 'int')) {
+            return 'number';
+        }
+
+        if (str_starts_with($columnType, 'varchar')) {
+            return 'text';
+        }
+
+        if (str_starts_with($columnType, 'date')) {
+            return 'date';
+        }
+
+        // time
+        // timestamp
+        if (str_starts_with($columnType, 'time')) {
+            return 'time';
+        }
+
+        return 'text';  // default value
+    }
+    */
+    public static function getEntityValues($model)
+    {
+        $reflectionClass = new ReflectionClass($model);
+        $methods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
         $values = [];
         foreach ($methods as $method) {
-            $methodName = $method->getName();
-
-            if (in_array($methodName, $exclude)) {
-                continue;
-            }
-
-            // Verifica che il metodo sia un getter e non richieda parametri
-            if (str_starts_with($methodName, 'get') && $method->getNumberOfParameters() === 0) {
-                $propertyName = lcfirst(substr($methodName, 3));
-                // add _ to property name if property name is composed by dataOraInizio
-                $propertyName = preg_replace('/(?<!^)[A-Z]/', '_$0', $propertyName);
-                // lowercase property name
-                $propertyName = strtolower($propertyName);
-                // Controlla se il tipo di colonna è definito nel database
-                if (isset($columnTypes[$propertyName])) {
-                    // Utilizza il tipo di colonna per determinare il tipo di campo
-                    // Puoi definire una mappatura dei tipi di colonna a tipi di campo appropriati
-                    $columnType = $columnTypes[$propertyName];
-
-                    // Esempio: se hai una colonna ENUM, crei un campo select con le opzioni possibili
-                    if (str_starts_with($columnType, 'enum')) {
-                        $options = explode(',', substr($columnType, 5, -1));
-                        $fields[$propertyName] = ['type' => 'select', 'options' => $options];
-                    } // Esempio: se hai una colonna di tipo datetime, crei un campo di tipo data
-                    elseif (str_starts_with($columnType, 'datetime')) {
-                        $fields[$propertyName] = 'datetime';
-                    } // Esempio: se hai una colonna di tipo date, crei un campo di tipo data
-                    elseif (str_starts_with($columnType, 'date')) {
-                        $fields[$propertyName] = 'date';
-                    } // Esempio: se hai una colonna di tipo time, crei un campo di tipo data
-                    elseif (str_starts_with($columnType, 'time')) {
-                        $fields[$propertyName] = 'time';
-                    } // Esempio: se hai una colonna di tipo boolean, crei un campo di tipo checkbox
-                    elseif (str_starts_with($columnType, 'tinyint(1)')) {
-                        $fields[$propertyName] = 'boolean';
-                    } // Esempio: se hai una colonna di tipo int, crei un campo di tipo number
-                    elseif (str_starts_with($columnType, 'int')) {
-                        $fields[$propertyName] = 'number';
-                    } else {
-                        // Altrimenti, imposta il tipo di campo a "text" (puoi personalizzare come desideri)
-                        $fields[$propertyName] = 'text';
-                    }
-                } else {
-                    // Se il tipo di colonna non è definito nel database, imposta il tipo di campo a "text" di default
-                    $fields[$propertyName] = 'text';
+            if (str_starts_with($method->getName(), 'get') && $method->getNumberOfParameters() === 0) {
+                $propertyName = self::formatPropertyName($method->getName());
+                // skip if is id_* or _at
+                if (str_starts_with($propertyName, 'id_') || str_ends_with($propertyName, '_at') || $propertyName == 'id') {
+                    continue;
+                } else{
+                    $values[$propertyName] = $method->invoke($model);
                 }
             }
         }
-
-        // Aggiungi qui la gestione dei campi relazionali in modo dinamico
-
-        foreach ($columnTypes as $columnName => $columnType) {
-            // Verifica se il nome della colonna termina con '_id' per individuare i campi relazionali
-            if ($columnName != 'id_' . strtolower($primaryKeyName)) {
-                if (str_starts_with($columnName, 'id_')) {
-                    $relatedTableName = ucfirst(Helper::getPluralName(substr($columnName, 3)));
-                    $relatedFields[$columnName] = ['type' => 'select', 'options' => self::getRelatedData($relatedTableName)];
-                }
-            }
-        }
-
-        // Unisci i campi relativi alle colonne e i campi relativi ai campi relazionali
-        return array_merge($fields, $relatedFields);
+        return $values;
     }
+
+    private static function formatPropertyName(string $getName)
+    {
+        $propertyName = lcfirst(substr($getName, 3));
+        $propertyName = preg_replace('/(?<!^)[A-Z]/', '_$0', $propertyName);
+        return strtolower($propertyName);
+    }
+
 }

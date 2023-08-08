@@ -13,6 +13,7 @@ class RelazioniSaleRisorseApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('RelazioniSaleRisorse');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,7 +26,7 @@ class RelazioniSaleRisorseApiController extends BaseController {
 
 	public function edit($id)
 	{
-		$relazionisalerisorse = RelazioniSaleRisorse::find($id);
+		$relazionisalerisorse = RelazioniSaleRisorse::findById($id);
 		if (!$relazionisalerisorse) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -94,7 +95,7 @@ class RelazioniSaleRisorseApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$relazionisalerisorse = RelazioniSaleRisorse::find($id);
+		$relazionisalerisorse = RelazioniSaleRisorse::findById($id);
 		if (!$relazionisalerisorse) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

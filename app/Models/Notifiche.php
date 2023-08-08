@@ -4,7 +4,7 @@ namespace App\Models;
 
 class Notifiche extends BaseModel {
 
-	private int $id_notifica;
+	private int $id_notifica = 0;
 
 	public function getIdNotifica() {
 		return $this->id_notifica;
@@ -14,7 +14,7 @@ class Notifiche extends BaseModel {
 		$this->id_notifica = $id_notifica;
 	}
 
-	private int $id_utente;
+	private int $id_utente = 0;
 
 	public function getIdUtente() {
 		return $this->id_utente;
@@ -24,7 +24,7 @@ class Notifiche extends BaseModel {
 		$this->id_utente = $id_utente;
 	}
 
-	private string $messaggio;
+	private mixed $messaggio = null;
 
 	public function getMessaggio() {
 		return $this->messaggio;
@@ -34,7 +34,7 @@ class Notifiche extends BaseModel {
 		$this->messaggio = $messaggio;
 	}
 
-	private mixed $data_invio;
+	private mixed $data_invio = null;
 
 	public function getDataInvio() {
 		return $this->data_invio;
@@ -44,7 +44,7 @@ class Notifiche extends BaseModel {
 		$this->data_invio = $data_invio;
 	}
 
-	private mixed $stato;
+	private mixed $stato = null;
 
 	public function getStato() {
 		return $this->stato;
@@ -54,7 +54,7 @@ class Notifiche extends BaseModel {
 		$this->stato = $stato;
 	}
 
-	private mixed $created_at;
+	private mixed $created_at = null;
 
 	public function getCreatedAt() {
 		return $this->created_at;
@@ -64,7 +64,7 @@ class Notifiche extends BaseModel {
 		$this->created_at = $created_at;
 	}
 
-	private mixed $updated_at;
+	private mixed $updated_at = null;
 
 	public function getUpdatedAt() {
 		return $this->updated_at;

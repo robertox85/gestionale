@@ -52,7 +52,6 @@ CREATE TABLE Sale (
 CREATE TABLE DisponibilitaSale (
     id_disponibilita INT AUTO_INCREMENT PRIMARY KEY,
     id_sala INT,
-    giorno_settimana ENUM('lun', 'mar', 'mer', 'gio', 'ven', 'sab', 'dom'),
     orario_apertura TIME,
     orario_chiusura TIME,
     durata_slot INT,
@@ -149,6 +148,21 @@ CREATE TABLE PreferenzeUtenteSale (
     FOREIGN KEY (id_sala) REFERENCES Sale(id_sala)
 
 );
+
+
+
+create table RememberMe
+(
+    id_rememberMe INT AUTO_INCREMENT PRIMARY KEY,
+    id_utente       int                        not null,
+    token         varchar(255)               not null,
+    expires_at    datetime                   not null,
+    created_at    DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at    DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    foreign key (id_utente) references Utenti (id_utente)
+
+);
+
 ");
 
 

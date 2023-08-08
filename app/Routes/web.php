@@ -6,12 +6,27 @@ use FastRoute\RouteCollector;
 return function (RouteCollector $r) {
 
 	// Rotte pubbliche
+    $r->addRoute('GET', '/website/sale', ['App\Controllers\Web\HomeController', 'viewSale']);
+
+    $r->addRoute('GET', '/401', ['App\Controllers\Web\ErrorController', 'unauthorizedView']);
 	$r->addRoute('GET', '/403', ['App\Controllers\Web\ErrorController', 'forbiddenView']);
 	$r->addRoute('GET', '/404', ['App\Controllers\Web\ErrorController', 'notFoundView']);
 	$r->addRoute('GET', '/405', ['App\Controllers\Web\ErrorController', 'notAllowedView']);
 	$r->addRoute('GET', '/500', ['App\Controllers\Web\ErrorController', 'internalErrorView']);
 
-	$r->addRoute('GET', '/', ['App\Controllers\Web\HomeController', 'home']);
+    // Rotte per la gestione dell'autenticazione
+    $r->addRoute('GET', '/sign-in', ['App\Controllers\Web\AuthenticationController', 'signInView']);
+    $r->addRoute('POST', '/sign-in', ['App\Controllers\Web\AuthenticationController', 'signInUser']);
+
+    $r->addRoute('GET', '/sign-up', ['App\Controllers\Web\AuthenticationController', 'signUpView']);
+    $r->addRoute('POST', '/sign-up', ['App\Controllers\Web\AuthenticationController', 'signUpUser']);
+
+    $r->addRoute('GET', '/sign-out', ['App\Controllers\Web\AuthenticationController', 'signOutUser']);
+
+	$r->addRoute('GET', '/', [
+        'middleware' => new \App\Middleware\AuthenticationMiddleware(),
+        'handler' => ['App\Controllers\Web\HomeController', 'home']
+    ]);
 	// Rotte per DisponibilitaSale
 	$r->addRoute('GET', '/disponibilita-sale', ['App\Controllers\Web\DisponibilitaSaleController', 'index']);
 	$r->addRoute('GET', '/disponibilita-sale/create', ['App\Controllers\Web\DisponibilitaSaleController', 'create']);

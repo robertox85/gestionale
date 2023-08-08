@@ -2,87 +2,119 @@
 
 namespace App\Middleware;
 
+use App\Libraries\Database;
 use App\Libraries\Helper;
-use App\Models\Ruolo;
-use App\Models\Utente;
+use App\Libraries\QueryBuilder;
+use App\Models\Utenti;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Psr\Http\Message\ResponseInterface as Response;
 
 class AuthenticationMiddleware
 {
-    protected $roles;
+    protected mixed $roles;
 
-    public function __construct(array|string $roles = [])
+    public function __construct(string|array $roles = null)
     {
-        // Se è stato passato un singolo ruolo, lo trasforma in un array
+        if (empty($roles)) {
+            $roles = ['admin', 'user'];
+        }
+
         if (!is_array($roles)) {
             $roles = [$roles];
         }
-
-        // Se non è stato passato alcun ruolo, l'utente deve essere autenticato con qualsiasi ruolo
-        if (empty($roles)) {
-            $roles = Ruolo::getAll();
-            $roles = array_map(function ($role) {
-                return ($role) ? strtolower($role->getNome()) : null;
-            }, $roles);
-        }
-
         $this->roles = $roles;
     }
 
-    public function __invoke(Request $request, Response $response, $next): Response|null
+    /**
+     * @throws \Exception
+     */
+    public function __invoke(Request $request, Response $response, $next)
     {
-        // Verifica se l'utente è autenticato e ha uno dei ruoli consentiti
         if ($this->isAuthenticatedUser() && $this->hasRequiredRole()) {
-            // Utente autenticato e ruolo corretto, passa alla gestione successiva
             return $next($request, $response);
-        } elseif (!$this->isAuthenticatedUser() && $this->hasGuestRole()) { // forse questo if non serve, perchè le rotte pubbliche non passano da qui
-            // Utente non autenticato ma rotta pubblica, passa alla gestione successiva
-            return $next($request, $response);
-        } else {
-            if (!$this->isAuthenticatedUser()) {
-                // Ruolo non autorizzato o utente non autenticato
-                Helper::addError('Devi essere autenticato per accedere a questa pagina');
-                return Helper::redirect('sign-in?returnUrl=' . urlencode('http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI']));
-            } else {
-                //die('Non hai i permessi per accedere a questa pagina');
-                header('Location: /403');
-                exit;
-            }
-
         }
+
+        if ($this->isGuestUser()) {
+            return $next($request, $response);
+        }
+
+        header('HTTP/1.1 401 Unauthorized');
+        Helper::redirect('/401');
+        exit;
+
     }
 
-    private function isAuthenticatedUser()
+    private function hasRequiredRole(): bool
     {
-        // Aggiungi qui la logica per verificare se l'utente è autenticato
-        // Puoi utilizzare qualsiasi metodo di autenticazione tu abbia implementato nel tuo sistema
-        // Restituisci true se l'utente è autenticato, altrimenti false
+        return in_array($_SESSION['utente']['ruolo'], $this->roles);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    private function isAuthenticatedUser(): bool
+    {
+        if (!isset($_SESSION['utente']) && isset($_COOKIE['remember_me'])) {
+            if ($this->validateCookie($_COOKIE['remember_me'])) {
+                $this->loginWithCookie($_COOKIE['remember_me']);
+            }
+        }
         return isset($_SESSION['utente']);
     }
-
-    private function hasRequiredRole()
+    
+    private function loginWithCookie(string $cookie): void
     {
-
-
-        //$user = Utente::findByIdUtente($_SESSION['utente']['id']);
-        $user = new Utente($_SESSION['utente']['id']);
-        $ruolo = $user->getRuoloObj();
-        if ($ruolo !== null) {
-            $nomeRuolo = $ruolo->getNome();
-            $userRole = strtolower(str_replace(' ', '_', $nomeRuolo));
-        } else {
-            // Gestione quando l'oggetto ruolo è nullo
-            echo 'Errore: l\'utente non ha un ruolo';
-        }
-
-        return in_array($userRole, $this->roles);
+        $_SESSION['utente'] = $this->getUserFromCookie($cookie);
     }
 
-    private function hasGuestRole()
+    private function validateCookie(string $cookie): bool
     {
-        // Aggiungi qui la logica per verificare se la rotta è pubblica (guest)
-        // Restituisci true se la rotta è pubblica, altrimenti false
-        return in_array('guest', $this->roles);
+        $this->deleteExpiredCookies();
+
+        $db = Database::getInstance();
+        $qb = new QueryBuilder($db);
+        $qb->setTable('RememberMe');
+        $qb->select('token');
+        $qb->where('token', $cookie, '=');
+        $qb->where('expires_at', date('Y-m-d H:i:s'), '>=');
+        $qb->limit(1);
+
+        return (bool)$qb->first();
     }
+
+    private function getUserFromCookie(string $cookie): array
+    {
+        $db = Database::getInstance();
+        $qb = new QueryBuilder($db);
+        $qb->setTable('RememberMe');
+        $qb->select('id_utente');
+        $qb->where('token', $cookie, '=');
+        $qb->where('expires_at', date('Y-m-d H:i:s'), '>=');
+        $qb->limit(1);
+        $result = $qb->first();
+        $utente = new Utenti($result['id_utente']);
+
+        return [
+            'id' => $utente->getId(),
+            'email' => $utente->getEmail(),
+            'nome' => $utente->getNome(),
+            'cognome' => $utente->getCognome(),
+            'ruolo' => $utente->getRuolo(),
+        ] ?? [];
+    }
+
+    private function deleteExpiredCookies(): void
+    {
+        $db = Database::getInstance();
+        $qb = new QueryBuilder($db);
+        $qb->setTable('RememberMe');
+        $qb->where('expires_at', date('Y-m-d H:i:s'), '<');
+        $qb->delete();
+    }
+
+    private function isGuestUser(): bool
+    {
+        return !$this->isAuthenticatedUser() && in_array('guest', $this->roles);
+    }
+
 }

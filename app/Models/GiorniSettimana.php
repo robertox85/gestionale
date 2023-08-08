@@ -2,26 +2,26 @@
 
 namespace App\Models;
 
-class Risorse extends BaseModel {
+class GiorniSettimana extends BaseModel {
 
-	private int $id_risorsa = 0;
+	private int $id_giorno = 0;
 
-	public function getIdRisorsa() {
-		return $this->id_risorsa;
+	public function getIdGiorno() {
+		return $this->id_giorno;
 	}
 
-	public function setIdRisorsa($id_risorsa) {
-		$this->id_risorsa = $id_risorsa;
+	public function setIdGiorno($id_giorno) {
+		$this->id_giorno = $id_giorno;
 	}
 
-	private string $nome_risorsa = '';
+	private string $nome_giorno = '';
 
-	public function getNomeRisorsa() {
-		return $this->nome_risorsa;
+	public function getNomeGiorno() {
+		return $this->nome_giorno;
 	}
 
-	public function setNomeRisorsa($nome_risorsa) {
-		$this->nome_risorsa = $nome_risorsa;
+	public function setNomeGiorno($nome_giorno) {
+		$this->nome_giorno = $nome_giorno;
 	}
 
 	private mixed $created_at = null;

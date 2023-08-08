@@ -7,7 +7,7 @@ use Psr\Http\Message\ResponseInterface as Response;
 
 class MiddlewareStack
 {
-    protected $middlewares;
+    protected array $middlewares;
 
     public function __construct(array $middlewares = [])
     {

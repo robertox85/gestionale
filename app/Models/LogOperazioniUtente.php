@@ -4,7 +4,7 @@ namespace App\Models;
 
 class LogOperazioniUtente extends BaseModel {
 
-	private int $id_log;
+	private int $id_log = 0;
 
 	public function getIdLog() {
 		return $this->id_log;
@@ -14,7 +14,7 @@ class LogOperazioniUtente extends BaseModel {
 		$this->id_log = $id_log;
 	}
 
-	private int $id_utente;
+	private int $id_utente = 0;
 
 	public function getIdUtente() {
 		return $this->id_utente;
@@ -24,7 +24,7 @@ class LogOperazioniUtente extends BaseModel {
 		$this->id_utente = $id_utente;
 	}
 
-	private string $azione;
+	private string $azione = '';
 
 	public function getAzione() {
 		return $this->azione;
@@ -34,7 +34,7 @@ class LogOperazioniUtente extends BaseModel {
 		$this->azione = $azione;
 	}
 
-	private mixed $data_azione;
+	private mixed $data_azione = null;
 
 	public function getDataAzione() {
 		return $this->data_azione;
@@ -44,7 +44,7 @@ class LogOperazioniUtente extends BaseModel {
 		$this->data_azione = $data_azione;
 	}
 
-	private string $dettagli;
+	private string $dettagli = '';
 
 	public function getDettagli() {
 		return $this->dettagli;
@@ -54,7 +54,7 @@ class LogOperazioniUtente extends BaseModel {
 		$this->dettagli = $dettagli;
 	}
 
-	private mixed $created_at;
+	private mixed $created_at = null;
 
 	public function getCreatedAt() {
 		return $this->created_at;
@@ -64,7 +64,7 @@ class LogOperazioniUtente extends BaseModel {
 		$this->created_at = $created_at;
 	}
 
-	private mixed $updated_at;
+	private mixed $updated_at = null;
 
 	public function getUpdatedAt() {
 		return $this->updated_at;

@@ -8,23 +8,21 @@ class QueryBuilder
 {
 
     // Protected members holding parts of SQL query
-    protected $db;
-    protected $table;
-    protected $selectColumns = [];
-    protected $joins = [];
-    protected $whereClauses = [];
-    protected $orders = [];
-    protected $parameters = [];
-    protected $insertValues = [];
-    protected $updateValues = [];
-    protected $groupBy = [];
-    protected $havingClauses = [];
-    protected $limit = null;
+    protected Database $db;
+    protected mixed $table;
+    protected array $selectColumns = [];
+    protected array $joins = [];
+    protected array $whereClauses = [];
+    protected array $orders = [];
+    protected array $parameters = [];
+    protected array $insertValues = [];
+    protected array $updateValues = [];
+    protected array $groupBy = [];
+    protected array $havingClauses = [];
+    protected int $limit = 10;
     protected $offset = null;
-    private $currentPage = 1;
-
-    private $totalItems = 0;
-
+    private int $currentPage = 1;
+    private int $totalItems = 0;
 
 
     /**
@@ -36,20 +34,22 @@ class QueryBuilder
         $this->db = $db;
     }
 
-    public function paginate() {
+    public function paginate()
+    {
+        $this->totalItems = $this->count();
 
         // if GET is empty, return
         if (empty($_GET)) return $this;
 
         $orderByColumn = $_GET['sort'] ?? 'created_at';
         $orderByDirection = $_GET['order'] ?? 'ASC';
-        $limit = $_GET['limit'] ?? 10;
-        $page = $_GET['page'] ?? 1;
+        $limit = $_GET['limit'] ?? $this->limit;
+        $page = $_GET['page'] ?? $this->currentPage;
         $this->currentPage = max(1, (int)$page);
         $this->limit($limit);
         $this->offset(($this->currentPage - 1) * $this->limit);
         $this->orderBy($orderByColumn, $orderByDirection);
-        $this->totalItems = $this->count();
+
         return $this;
     }
 
@@ -84,12 +84,13 @@ class QueryBuilder
         $this->selectColumns[] = "$column AS $alias";
         return $this;
     }
+
     /**
      * Select columns
      * @param string $columns Columns to select
      * @return $this
      */
-    public function select($columns = '*')
+    public function select(string $columns = '*')
     {
         if (is_array($columns)) {
             $this->selectColumns = $columns;
@@ -119,7 +120,7 @@ class QueryBuilder
      * @param $condition Join condition
      * @return $this
      */
-    public function leftJoin($table, $condition)
+    public function leftJoin($table, $condition): static
     {
         $this->joins[] = "LEFT JOIN $table ON $condition";
         return $this;
@@ -145,7 +146,7 @@ class QueryBuilder
      * @param string $logicalOperator Logical operator
      * @return $this
      */
-    public function where($column, $value, $operator = '=', $logicalOperator = 'AND')
+    public function where(string $column, string $value, string $operator = '=', string $logicalOperator = 'AND'): static
     {
         $this->whereClauses[] = [
             'clause' => "$column $operator ?",
@@ -371,11 +372,11 @@ class QueryBuilder
      */
     protected function buildLimit(): string
     {
-        if (is_null($this->limit)) {
-            return ' LIMIT 10 OFFSET 0 ';
+        $sql = '';
+        if (!empty($this->limit)) {
+            $sql = ' LIMIT ' . $this->limit;
         }
-        $sql = ' LIMIT ' . $this->limit;
-        if (!is_null($this->offset)) {
+        if (!empty($this->offset)) {
             $sql .= ' OFFSET ' . $this->offset;
         }
         return $sql;
@@ -383,7 +384,7 @@ class QueryBuilder
 
     /**
      * Insert a row
-     * @param array $values  to insert
+     * @param array $values to insert
      * @return \PDOStatement
      */
     public function insert(array $values): array|\PDOStatement
@@ -554,6 +555,16 @@ class QueryBuilder
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
+    public function first(): array
+    {
+        $this->limit(1);
+        $sql = $this->toSql();
+        $stmt = $this->db->prepare($sql);
+        $params = $this->getParameters();
+        $stmt->execute($params);
+        return $stmt->fetch(\PDO::FETCH_ASSOC);
+    }
+
     /**
      * Execute arbitrary SQL
      * @return \PDOStatement|false
@@ -597,7 +608,6 @@ class QueryBuilder
     {
         return $this->db->lastInsertId();
     }
-
 
 
     public function getPagination()

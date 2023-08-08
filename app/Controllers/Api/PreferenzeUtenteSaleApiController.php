@@ -13,6 +13,7 @@ class PreferenzeUtenteSaleApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('PreferenzeUtenteSale');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,7 +26,7 @@ class PreferenzeUtenteSaleApiController extends BaseController {
 
 	public function edit($id)
 	{
-		$preferenzeutentesale = PreferenzeUtenteSale::find($id);
+		$preferenzeutentesale = PreferenzeUtenteSale::findById($id);
 		if (!$preferenzeutentesale) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -94,7 +95,7 @@ class PreferenzeUtenteSaleApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$preferenzeutentesale = PreferenzeUtenteSale::find($id);
+		$preferenzeutentesale = PreferenzeUtenteSale::findById($id);
 		if (!$preferenzeutentesale) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

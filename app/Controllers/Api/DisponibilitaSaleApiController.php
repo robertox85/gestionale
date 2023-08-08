@@ -13,20 +13,20 @@ class DisponibilitaSaleApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('DisponibilitaSale');
-        $qb = $qb->select('*');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
-
 		echo ResponseHelper::jsonResponse([
-            $rows
+			'rows' => $rows,
+			'pagination' => $pagination,
+			'columns' => $columns,
 		]);
-        exit();
 	}
 
 	public function edit($id)
 	{
-		$disponibilitasale = DisponibilitaSale::find($id);
+		$disponibilitasale = DisponibilitaSale::findById($id);
 		if (!$disponibilitasale) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -95,7 +95,7 @@ class DisponibilitaSaleApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$disponibilitasale = DisponibilitaSale::find($id);
+		$disponibilitasale = DisponibilitaSale::findById($id);
 		if (!$disponibilitasale) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

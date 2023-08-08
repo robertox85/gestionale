@@ -4,7 +4,7 @@ namespace App\Models;
 
 class Recensioni extends BaseModel {
 
-	private int $id_recensione;
+	private int $id_recensione = 0;
 
 	public function getIdRecensione() {
 		return $this->id_recensione;
@@ -14,7 +14,7 @@ class Recensioni extends BaseModel {
 		$this->id_recensione = $id_recensione;
 	}
 
-	private int $id_utente;
+	private int $id_utente = 0;
 
 	public function getIdUtente() {
 		return $this->id_utente;
@@ -24,7 +24,7 @@ class Recensioni extends BaseModel {
 		$this->id_utente = $id_utente;
 	}
 
-	private int $id_sala;
+	private int $id_sala = 0;
 
 	public function getIdSala() {
 		return $this->id_sala;
@@ -34,7 +34,7 @@ class Recensioni extends BaseModel {
 		$this->id_sala = $id_sala;
 	}
 
-	private int $valutazione;
+	private int $valutazione = 0;
 
 	public function getValutazione() {
 		return $this->valutazione;
@@ -44,7 +44,7 @@ class Recensioni extends BaseModel {
 		$this->valutazione = $valutazione;
 	}
 
-	private mixed $commento;
+	private mixed $commento = null;
 
 	public function getCommento() {
 		return $this->commento;
@@ -54,7 +54,7 @@ class Recensioni extends BaseModel {
 		$this->commento = $commento;
 	}
 
-	private mixed $created_at;
+	private mixed $created_at = null;
 
 	public function getCreatedAt() {
 		return $this->created_at;
@@ -64,7 +64,7 @@ class Recensioni extends BaseModel {
 		$this->created_at = $created_at;
 	}
 
-	private mixed $updated_at;
+	private mixed $updated_at = null;
 
 	public function getUpdatedAt() {
 		return $this->updated_at;

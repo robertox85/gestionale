@@ -13,6 +13,7 @@ class LogOperazioniUtenteApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('LogOperazioniUtente');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,7 +26,7 @@ class LogOperazioniUtenteApiController extends BaseController {
 
 	public function edit($id)
 	{
-		$logoperazioniutente = LogOperazioniUtente::find($id);
+		$logoperazioniutente = LogOperazioniUtente::findById($id);
 		if (!$logoperazioniutente) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -94,7 +95,7 @@ class LogOperazioniUtenteApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$logoperazioniutente = LogOperazioniUtente::find($id);
+		$logoperazioniutente = LogOperazioniUtente::findById($id);
 		if (!$logoperazioniutente) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

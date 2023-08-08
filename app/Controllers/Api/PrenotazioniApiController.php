@@ -13,6 +13,7 @@ class PrenotazioniApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('Prenotazioni');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,7 +26,7 @@ class PrenotazioniApiController extends BaseController {
 
 	public function edit($id)
 	{
-		$prenotazioni = Prenotazioni::find($id);
+		$prenotazioni = Prenotazioni::findById($id);
 		if (!$prenotazioni) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -94,7 +95,7 @@ class PrenotazioniApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$prenotazioni = Prenotazioni::find($id);
+		$prenotazioni = Prenotazioni::findById($id);
 		if (!$prenotazioni) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

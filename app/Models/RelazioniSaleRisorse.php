@@ -4,7 +4,7 @@ namespace App\Models;
 
 class RelazioniSaleRisorse extends BaseModel {
 
-	private int $id_relazione;
+	private int $id_relazione = 0;
 
 	public function getIdRelazione() {
 		return $this->id_relazione;
@@ -14,7 +14,7 @@ class RelazioniSaleRisorse extends BaseModel {
 		$this->id_relazione = $id_relazione;
 	}
 
-	private int $id_sala;
+	private int $id_sala = 0;
 
 	public function getIdSala() {
 		return $this->id_sala;
@@ -24,7 +24,7 @@ class RelazioniSaleRisorse extends BaseModel {
 		$this->id_sala = $id_sala;
 	}
 
-	private int $id_risorsa;
+	private int $id_risorsa = 0;
 
 	public function getIdRisorsa() {
 		return $this->id_risorsa;
@@ -34,7 +34,7 @@ class RelazioniSaleRisorse extends BaseModel {
 		$this->id_risorsa = $id_risorsa;
 	}
 
-	private int $quantità;
+	private int $quantità = 0;
 
 	public function getQuantità() {
 		return $this->quantità;
@@ -44,7 +44,7 @@ class RelazioniSaleRisorse extends BaseModel {
 		$this->quantità = $quantità;
 	}
 
-	private mixed $created_at;
+	private mixed $created_at = null;
 
 	public function getCreatedAt() {
 		return $this->created_at;
@@ -54,7 +54,7 @@ class RelazioniSaleRisorse extends BaseModel {
 		$this->created_at = $created_at;
 	}
 
-	private mixed $updated_at;
+	private mixed $updated_at = null;
 
 	public function getUpdatedAt() {
 		return $this->updated_at;

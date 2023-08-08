@@ -69,13 +69,13 @@ foreach ($tables as $tableName) {
     $controllerCode .= "\t\t\$formHtml = \$formComponent->renderForm(\$formData);\n";
     $controllerCode .= "\n";
     $controllerCode .= "\t\t// Puoi personalizzare la vista utilizzata per il form di creazione\n";
-    $controllerCode .= "\t\techo \$this->view->render('newform.html.twig', compact('formHtml'));\n";
+    $controllerCode .= "\t\techo \$this->view->render('form.html.twig', compact('formHtml'));\n";
     $controllerCode .= "\t}\n";
 
     // Azione per l'edit di un record
     $controllerCode .= "\n\tpublic function edit(\$id)\n";
     $controllerCode .= "\t{\n";
-    $controllerCode .= "\t\t\$" . strtolower($tableName) . " = " . ucfirst($tableName) . "::find(\$id);\n";
+    $controllerCode .= "\t\t\$" . strtolower($tableName) . " = " . ucfirst($tableName) . "::findById(\$id);\n";
     $controllerCode .= "\t\tif (!\$" . strtolower($tableName) . ") {\n";
     $controllerCode .= "\t\t\tHelper::addError('Record non trovato.');\n";
     $controllerCode .= "\t\t\tHelper::redirect('/" . strtolower($action) . "');\n";
@@ -91,7 +91,7 @@ foreach ($tables as $tableName) {
     $controllerCode .= "\n";
     $controllerCode .= "\t\t\$formHtml = \$formComponent->renderForm(\$formData);\n";
     $controllerCode .= "\n";
-    $controllerCode .= "\t\techo \$this->view->render('newform.html.twig', compact('formHtml'));\n";
+    $controllerCode .= "\t\techo \$this->view->render('form.html.twig', compact('formHtml'));\n";
     $controllerCode .= "\t}\n";
 
     // Azione per lo store

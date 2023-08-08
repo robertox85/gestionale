@@ -13,19 +13,18 @@ class SaleApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('Sale');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
-		echo ResponseHelper::jsonResponse([
-			'rows' => $rows,
-			'pagination' => $pagination,
-			'columns' => $columns,
-		]);
+		echo ResponseHelper::jsonResponse(
+            $rows,
+        );
 	}
 
 	public function edit($id)
 	{
-		$sale = Sale::find($id);
+		$sale = Sale::findById($id);
 		if (!$sale) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -94,7 +93,7 @@ class SaleApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$sale = Sale::find($id);
+		$sale = Sale::findById($id);
 		if (!$sale) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

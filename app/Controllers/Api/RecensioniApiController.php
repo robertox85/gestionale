@@ -13,6 +13,7 @@ class RecensioniApiController extends BaseController {
 	{
 		$qb = new QueryBuilder($this->db);
 		$qb = $qb->setTable('Recensioni');
+		$qb = $qb->select('*');
 		$rows = $qb->get();
 		$pagination = $qb->getPagination();
 		$columns = $qb->getColumns();
@@ -25,7 +26,7 @@ class RecensioniApiController extends BaseController {
 
 	public function edit($id)
 	{
-		$recensioni = Recensioni::find($id);
+		$recensioni = Recensioni::findById($id);
 		if (!$recensioni) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',
@@ -94,7 +95,7 @@ class RecensioniApiController extends BaseController {
 
 	public function delete($id): void
 	{
-		$recensioni = Recensioni::find($id);
+		$recensioni = Recensioni::findById($id);
 		if (!$recensioni) {
 			echo ResponseHelper::jsonResponse([
 				'error' => 'Record non trovato.',

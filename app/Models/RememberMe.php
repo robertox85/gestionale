@@ -2,16 +2,16 @@
 
 namespace App\Models;
 
-class PreferenzeUtenteSale extends BaseModel {
+class RememberMe extends BaseModel {
 
-	private int $id_preferenza = 0;
+	private int $id_remember = 0;
 
-	public function getIdPreferenza() {
-		return $this->id_preferenza;
+	public function getIdRemember() {
+		return $this->id_remember;
 	}
 
-	public function setIdPreferenza($id_preferenza) {
-		$this->id_preferenza = $id_preferenza;
+	public function setIdRemember($id_remember) {
+		$this->id_remember = $id_remember;
 	}
 
 	private int $id_utente = 0;
@@ -24,14 +24,24 @@ class PreferenzeUtenteSale extends BaseModel {
 		$this->id_utente = $id_utente;
 	}
 
-	private int $id_sala = 0;
+	private string $token = '';
 
-	public function getIdSala() {
-		return $this->id_sala;
+	public function getToken() {
+		return $this->token;
 	}
 
-	public function setIdSala($id_sala) {
-		$this->id_sala = $id_sala;
+	public function setToken($token) {
+		$this->token = $token;
+	}
+
+	private mixed $expires_at = null;
+
+	public function getExpiresAt() {
+		return $this->expires_at;
+	}
+
+	public function setExpiresAt($expires_at) {
+		$this->expires_at = $expires_at;
 	}
 
 	private mixed $created_at = null;

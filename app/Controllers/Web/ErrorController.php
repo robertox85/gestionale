@@ -24,4 +24,8 @@ class ErrorController extends BaseController
         echo $this->view->render('403.html.twig');
     }
 
+    public function unauthorizedView()
+    {
+        echo $this->view->render('401.html.twig');
+    }
 }

@@ -6,163 +6,65 @@ use App\Models\DisponibilitaSale;
 use App\Libraries\QueryBuilder;
 use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
+use Twig\Error\LoaderError;
+use Twig\Error\RuntimeError;
+use Twig\Error\SyntaxError;
 
-class DisponibilitaSaleController extends BaseController {
+class DisponibilitaSaleController extends BaseController
+{
 
-	public function index() {
-		$qb = new QueryBuilder($this->db);
-		$qb = $qb->setTable('DisponibilitaSale');
-		// Seleziona tutte le colonne dalla tabella con alias per l'ID
-		$qb = $qb->select('*');
-		$qb = $qb->setAlias('id_disponibilita', 'id');
-		$rows = $qb->get();
-		$pagination = $qb->getPagination();
-		$columns = $qb->getColumns();
-		// Puoi personalizzare la vista utilizzata per l'elenco
-		echo $this->view->render('list.html.twig', compact('columns', 'rows', 'pagination'));
-		exit();
-	}
+    public function create(): void
+    {
+        $entity = new DisponibilitaSale();
+        $giorni_disponibili = $this->getGiorniDisponibili();
+        $entity->setGiorniDisponibili($giorni_disponibili);
 
-	public function create(): void
-	{
-		$entity = new DisponibilitaSale();
-		$formComponent = new DynamicFormComponent($entity);
+        $formComponent = new DynamicFormComponent($entity);
+        $formData = [];
+        $formData['action'] = $this->url('store');
+        $formData['csrf_token'] = Helper::generateToken('DisponibilitaSale');
+        $formData['button_label'] = 'Crea';
 
-		$formData = [];
-		$formData['action'] = $this->url('disponibilita-sale/store');
-		$formData['csrf_token'] = Helper::generateToken('DisponibilitaSale');
-		$formData['button_label'] = 'Crea';
+        $formHtml = $formComponent->renderForm($formData);
 
-		$formHtml = $formComponent->renderForm($formData);
+        // Puoi personalizzare la vista utilizzata per il form di creazione
+        echo $this->view->render('form.html.twig', compact('formHtml'));
+    }
 
-		// Puoi personalizzare la vista utilizzata per il form di creazione
-		echo $this->view->render('newform.html.twig', compact('formHtml'));
-	}
+    public function edit($id)
+    {
+        $disponibilitasale = DisponibilitaSale::findById($id);
+        if (!$disponibilitasale) {
+            Helper::addError('Record non trovato.');
+            Helper::redirect('/disponibilita-sale');
+            exit();
+        }
+        $giorni_disponibili = $this->getGiorniDisponibili();
+        $disponibilitasale->setGiorniDisponibili($giorni_disponibili);
+        $formComponent = new DynamicFormComponent($disponibilitasale);
 
-	public function edit($id)
-	{
-		$disponibilitasale = DisponibilitaSale::find($id);
-		if (!$disponibilitasale) {
-			Helper::addError('Record non trovato.');
-			Helper::redirect('/disponibilita-sale');
-			exit();
-		}
-		$formComponent = new DynamicFormComponent($disponibilitasale);
+        $formData = [];
+        $formData['action'] = $this->url('/update');
+        $formData['csrf_token'] = Helper::generateToken('DisponibilitaSale');
+        $formData['id_disponibilita'] = $id;
+        $formData['button_label'] = 'Edit';
 
-		$formData = [];
-		$formData['action'] = $this->url('disponibilita-sale/update');
-		$formData['csrf_token'] = Helper::generateToken('DisponibilitaSale');
-		$formData['id_disponibilita'] = $id;
-		$formData['button_label'] = 'Edit';
+        $formHtml = $formComponent->renderForm($formData);
 
-		$formHtml = $formComponent->renderForm($formData);
+        echo $this->view->render('form.html.twig', compact('formHtml'));
+    }
 
-		echo $this->view->render('newform.html.twig', compact('formHtml'));
-	}
 
-	public function store()
-	{
-		try {
-			$post = $_POST;
-
-			// Verifica il token CSRF
-			if (!Helper::validateToken('DisponibilitaSale', $post['csrf_token'])) {
-				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/disponibilita-sale');
-				exit();
-			}
-
-			unset($post['csrf_token']);
-
-			$post = Helper::sanificaInput($post);
-
-			$newId = DisponibilitaSale::create($post);
-
-			if ($newId !== false) {
-				Helper::addSuccess('Nuovo record creato con successo.');
-			} else {
-				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
-			}
-
-			Helper::redirect('/disponibilita-sale');
-			exit();
-		} catch (\Exception $e) {
-			Helper::addError($e->getMessage());
-			Helper::redirect('/disponibilita-sale');
-			exit();
-		}
-	}
-
-	public function update()
-	{
-		try {
-			$post = $_POST;
-
-			// Verifica il token CSRF
-			if (!Helper::validateToken('DisponibilitaSale', $post['csrf_token'])) {
-				Helper::addError('Token CSRF non valido.');
-				Helper::redirect('/disponibilita-sale');
-				exit();
-			}
-
-			unset($post['csrf_token']);
-
-			$post = Helper::sanificaInput($post);
-
-			$newId = DisponibilitaSale::update($post);
-
-			if ($newId !== false) {
-				Helper::addSuccess('Record aggiornato con successo.');
-			} else {
-				Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
-			}
-
-			Helper::redirect('/disponibilita-sale');
-			exit();
-		} catch (\Exception $e) {
-			Helper::addError($e->getMessage());
-			Helper::redirect('/disponibilita-sale');
-			exit();
-		}
-	}
-
-	public function delete($id) {
-		try {
-			(new DisponibilitaSale)->delete($id);
-			Helper::addSuccess('Record eliminato con successo!');
-			$current_page = Helper::getCurrentPage();
-			Helper::redirect('/' . $current_page);
-			exit();
-		} catch (\Exception $e) {
-			Helper::addError($e->getMessage());
-			Helper::redirect('/disponibilita-sale');
-			exit();
-		}
-	}
-
-	public function bulkDelete() {
-		try {
-			$qb = new QueryBuilder($this->db);
-			$qb = $qb->setTable('DisponibilitaSale');
-			$ids = $_POST['ids'];
-			// Turn into array if not already
-			if (!is_array($ids)) {
-				$ids = explode(',', $ids);
-				$ids = array_filter($ids);
-				$ids = array_map('intval', $ids);
-			}
-			$qb = $qb->whereIn('id_disponibilita', $ids);
-			$qb = $qb->delete();
-			$qb->execute();
-			Helper::addSuccess('Record eliminati con successo!');
-			$current_page = Helper::getCurrentPage();
-			Helper::redirect('/' . $current_page);
-			exit();
-		} catch (\Exception $e) {
-			Helper::addError($e->getMessage());
-			$current_page = Helper::getCurrentPage();
-			Helper::redirect('/' . $current_page);
-			exit();
-		}
-	}
+    public function getGiorniDisponibili()
+    {
+        $queryBuilder = new QueryBuilder($this->db);
+        $queryBuilder = $queryBuilder->setTable('GiorniSettimana');
+        $queryBuilder = $queryBuilder->select('*');
+        $giorni = $queryBuilder->get();
+        $giorni_disponibili = [];
+        foreach ($giorni as $index => $giorno) {
+            $giorni_disponibili[$index] = $giorno['nome_giorno'];
+        }
+        return $giorni_disponibili;
+    }
 }
