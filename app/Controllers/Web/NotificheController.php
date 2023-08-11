@@ -8,6 +8,4 @@ use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
 
 class NotificheController extends BaseController {
-
-
 }

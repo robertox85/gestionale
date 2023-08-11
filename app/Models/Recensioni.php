@@ -2,75 +2,45 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class Recensioni extends BaseModel {
 
-	private int $id_recensione = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdRecensione() {
-		return $this->id_recensione;
-	}
+	protected int $id_recensione;
 
-	public function setIdRecensione($id_recensione) {
-		$this->id_recensione = $id_recensione;
-	}
+	#[ForeignKey, Required]
 
-	private int $id_utente = 0;
+	protected int $id_utente;
 
-	public function getIdUtente() {
-		return $this->id_utente;
-	}
+	#[ForeignKey, Required]
 
-	public function setIdUtente($id_utente) {
-		$this->id_utente = $id_utente;
-	}
+	protected int $id_sala;
 
-	private int $id_sala = 0;
+	#[DropDown]
 
-	public function getIdSala() {
-		return $this->id_sala;
-	}
+	protected array $valutazione = ['1', '2', '3', '4', '5'];
 
-	public function setIdSala($id_sala) {
-		$this->id_sala = $id_sala;
-	}
+	#[LabelColumn]
 
-	private int $valutazione = 0;
+	protected string $commento;
 
-	public function getValutazione() {
-		return $this->valutazione;
-	}
+	protected mixed $pubblicata;
 
-	public function setValutazione($valutazione) {
-		$this->valutazione = $valutazione;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	private mixed $commento = null;
+	protected ?\DateTime $created_at;
 
-	public function getCommento() {
-		return $this->commento;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function setCommento($commento) {
-		$this->commento = $commento;
-	}
-
-	private mixed $created_at = null;
-
-	public function getCreatedAt() {
-		return $this->created_at;
-	}
-
-	public function setCreatedAt($created_at) {
-		$this->created_at = $created_at;
-	}
-
-	private mixed $updated_at = null;
-
-	public function getUpdatedAt() {
-		return $this->updated_at;
-	}
-
-	public function setUpdatedAt($updated_at) {
-		$this->updated_at = $updated_at;
-	}
+	protected ?\DateTime $updated_at;
 }

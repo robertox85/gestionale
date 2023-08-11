@@ -103,7 +103,7 @@ class AuthenticationController extends BaseController
             Helper::redirect();
         }
 
-        $user = $utente::findById($user_id);
+        $user = $utente::get($user_id);
 
         $this->initUserSession($user, false);
 

@@ -34,9 +34,9 @@ class Database
         }
     }
 
-    public static function beginTransaction()
+    public static function beginTransaction(): bool
     {
-        self::getInstance()->db->beginTransaction();
+        return self::getInstance()->db->beginTransaction();
     }
 
     public static function getInstance(): Database
@@ -48,14 +48,14 @@ class Database
         return self::$instance;
     }
 
-    public static function rollBack()
+    public static function rollBack(): bool
     {
-        self::getInstance()->db->rollBack();
+        return self::getInstance()->db->rollBack();
     }
 
-    public static function commit()
+    public static function commit(): bool
     {
-        self::getInstance()->db->commit();
+        return self::getInstance()->db->commit();
     }
 
     public function getConnection(): PDO
@@ -68,99 +68,6 @@ class Database
     {
         $this->db = null;
     }
-
-
-    /*
-    public function query(array $options): array|bool|int|null|object
-    {
-        // opzioni predefinite
-        $default_options = [
-            'query' => '',
-            'params' => [],
-            'limit' => null,
-            'offset' => null,
-            'order_by' => null,
-            'order_dir' => 'ASC',
-            'where' => '1',
-        ];
-
-        // unisce le opzioni predefinite con quelle passate dall'utente
-        $options = array_merge($default_options, $options);
-
-        // costruisce la query
-        $sql = $options['query'];
-
-
-
-        if ($options['where'] !== null && is_array($options['where'])) {
-            $whereConditions = [];
-            foreach ($options['where'] as $key => $value) {
-                if(is_array($value)) {
-                    $operator = $value[0];
-                    $actualValue = $value[1];
-                } else {
-                    $operator = '=';
-                    $actualValue = $value;
-                }
-                $whereConditions[] = "{$key} {$operator} '{$actualValue}'";
-            }
-            $whereClause = implode(' AND ', $whereConditions);
-            $sql .= " WHERE {$whereClause}";
-        }
-
-
-
-        if ($options['order_by'] !== null) {
-            $sql .= " ORDER BY {$options['order_by']} {$options['order_dir']}";
-        }
-
-        if ($options['limit'] !== null) {
-            $sql .= " LIMIT {$options['limit']}";
-        }
-
-        if ($options['offset'] !== null) {
-            $sql .= " OFFSET {$options['offset']}";
-        }
-
-        try {
-            if ($this->db === null) {
-                $errorHandler = ErrorHandler::getInstance();
-                $errorHandler->handleException(new Exception('Database not found'));
-                echo 'Database not found';
-                exit;
-            } else {
-                $stmt = $this->db->prepare($sql);
-                $stmt->execute($options['params']);
-
-                if (explode(' ', $sql)[0] == 'SELECT') {
-                    if ($options['limit'] == 1) {
-                        return $stmt->fetch(PDO::FETCH_OBJ);
-                    }
-                    return $stmt->fetchAll(PDO::FETCH_OBJ);
-                }
-
-                if (explode(' ', $sql)[0] == 'INSERT') {
-                    return $this->db->lastInsertId();
-                }
-
-                if (explode(' ', $sql)[0] == 'UPDATE' || explode(' ', $sql)[0] == 'DELETE') {
-                    return $stmt->rowCount();
-                }
-
-                return $stmt->fetchAll(PDO::FETCH_OBJ);
-            }
-        } catch (PDOException $e) {
-            $errorHandler = ErrorHandler::getInstance();
-            $errorHandler->handleException($e);
-        } catch (\Exception $e) {
-            $errorHandler = ErrorHandler::getInstance();
-            $errorHandler->handleException($e);
-        }
-
-        return false;
-
-    }
-    */
 
     public function query(array $options): array|bool|int|null|object
     {

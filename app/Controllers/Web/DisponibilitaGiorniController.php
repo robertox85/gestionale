@@ -2,10 +2,10 @@
 
 namespace App\Controllers\Web;
 
-use App\Models\EccezioniSale;
+use App\Models\DisponibilitaGiorni;
 use App\Libraries\QueryBuilder;
 use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
 
-class EccezioniSaleController extends BaseController {
+class DisponibilitaGiorniController extends BaseController {
 }

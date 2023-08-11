@@ -2,25 +2,30 @@
 
 namespace App\Models;
 
+use App\Attributes\ForeignKey;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
 use App\Libraries\Database;
-use App\Libraries\Helper;
+
 use App\Libraries\QueryBuilder;
 use Exception;
 
 class BaseModel
 {
-    protected $db;
-    protected $tableName;
-    protected $primaryKey;
+    private ?string $shortClassName = null;
+    private Database $db;
+    private string $primaryKey;
 
-    public function __get($name) {
+    public function __get($name)
+    {
         if (property_exists($this, $name)) {
             return $this->$name;
         }
         throw new Exception("Proprietà {$name} non esiste.");
     }
 
-    public function __set($name, $value) {
+    public function __set($name, $value)
+    {
         if (property_exists($this, $name)) {
             $this->$name = $value;
         } else {
@@ -31,124 +36,176 @@ class BaseModel
     public function __construct($id = null)
     {
         $this->db = Database::getInstance();
-        $this->tableName = $this->getShortClassName();
+        $this->primaryKey = $this->getPrimaryKey();
 
-        $this->primaryKey = 'id_' . strtolower(Helper::getTablePrimaryKeyName($this->getShortClassName()));
+        // Inizializza tutte le proprietà nelle classi figlie
+        $this->initializeProperties();
+
 
         if ($id !== null) {
             $this->load([':id' => $id]);
         }
     }
 
-    public function getId()
+    private function initializeProperties()
     {
-        $getter = 'getId' . ucfirst(Helper::getTablePrimaryKeyName($this->getShortClassName()));
-        return $this->$getter();
+        $reflectionClass = new \ReflectionClass(static::class);
+        foreach ($reflectionClass->getProperties() as $property) {
+            $propertyName = $property->getName();
+            $this->$propertyName = $this->getDefaultPropertyValue($property);
+        }
     }
 
-    // Load by id
-    public function load($params = [])
+    private function initQueryBuilder(): QueryBuilder
     {
         $qb = new QueryBuilder($this->db);
-        $qb = $qb->setTable($this->tableName);
+        return $qb->setTable($this->getShortClassName());
+    }
+
+    private function getShortClassName(): string
+    {
+        if ($this->shortClassName === null) {
+            $this->shortClassName = (new \ReflectionClass($this))->getShortName();
+        }
+        return $this->shortClassName;
+    }
+
+    public function getId()
+    {
+        return $this->{$this->primaryKey};
+    }
+
+    public function load(array $params)
+    {
+        $qb = $this->initQueryBuilder();
         $qb = $qb->select('*');
         $qb = $qb->where($this->primaryKey, $params[':id'], '=');
         $result = $qb->first();
-
         if ($result) {
             $this->setProperties($result);
         }
-
         return false;
     }
 
-    public function delete(int $id = null): void
+    public function delete(int $id = null): \PDOStatement|bool
     {
         if ($id === null) {
             $id = $this->getId();
         }
-        $qb = new QueryBuilder($this->db);
-        $tableName = $this->getShortClassName();
-        $qb = $qb->setTable($tableName);
+        $qb = $this->initQueryBuilder();
         $qb = $qb->where($this->primaryKey, $id, '=');
-        $qb->delete();
+        return $qb->delete();
     }
 
-    public function store(array $post): int|bool
+    public function bulkDelete(array $ids): \PDOStatement|bool
     {
-        $primaryKey = (new static())->getPrimaryKeyName();
-        // Se è presente l'id_notifica, eseguire l'aggiornamento, altrimenti esegui l'inserimento
-        return isset($post[$primaryKey]) ? self::update($post) : self::create($post);
+        $qb = $this->initQueryBuilder();
+        $qb = $qb->whereIn($this->primaryKey, $ids);
+        return $qb->delete();
     }
 
-
-    public static function create(array $post): bool|string
+    public function store(): int|bool
     {
-        $db = Database::getInstance();
-        $qb = new QueryBuilder($db);
-        $tableName = (new \ReflectionClass(static::class))->getShortName();
-        $qb->setTable($tableName);
+        $data = $this->getModelAttributes();
+        $data = $this->formatAndCastData($data);
+
+        $this->setProperties($data);
+        if (isset($data[$this->primaryKey]) && $data[$this->primaryKey] !== 0) {
+            return $this->update();
+        } else {
+            return $this->create();
+        }
+    }
+
+    public function create(): bool|string
+    {
+        $post = $this->getModelAttributes();
+        $qb = $this->initQueryBuilder();
         $qb->insert($post);
-        return $db->lastInsertId();
+        return $this->db->lastInsertId();
     }
 
-    public static function update(array $post)
+    public function update(): bool
     {
-        $qb = new QueryBuilder(Database::getInstance());
-        $tableName = (new \ReflectionClass(static::class))->getShortName();
-        $qb->setTable($tableName);
-        $primaryKey = (new static())->getPrimaryKeyName();
-        $qb->where($primaryKey, $post[$primaryKey], '=');
-        unset($post[$primaryKey]);
+        $post = $this->getModelAttributes();
+        $qb = $this->initQueryBuilder();
+        $qb->where($this->primaryKey, $post[$this->primaryKey], '=');
+        unset($post[$this->primaryKey]);
         return $qb->update($post);
-
     }
 
-    public static function findById($id): ?BaseModel
+    public static function get($id): ?BaseModel
     {
+        $instance = new static();
         $qb = new QueryBuilder(Database::getInstance());
-        $tableName = (new \ReflectionClass(static::class))->getShortName();
-        $primaryKeyName = (new static())->getPrimaryKeyName();
+        $tableName = $instance->getShortClassName();
         $qb = $qb->setTable($tableName);
         $qb = $qb->select('*');
-        $qb = $qb->where($primaryKeyName, $id, '=');
+        $qb = $qb->where($instance->primaryKey, $id, '=');
         $result = $qb->first();
         if ($result) {
-            $className = static::class;
-            $id = $result[$primaryKeyName];
-            return new $className($id);
-        } else {
-            return null;
+            return new static($id);
         }
+        return null;
     }
 
-    private function getShortClassName()
+    public function setProperties(array $properties): void
     {
-        $className = static::class;
-        return (new \ReflectionClass($className))->getShortName();
-    }
-
-    private function setProperties(mixed $int)
-    {
-        foreach ($int as $key => $value) {
-            // Formatta il nome della colonna per utilizzarlo come nome della proprietà
-            $propertyName = lcfirst(str_replace('_', '', ucwords($key, '_')));
-            $setter = 'set' . ucfirst($propertyName);
-            $value = $this->castValue($propertyName, $value);
-            if (method_exists($this, $setter)) {
-                $this->$setter($value);
-            } else {
-                $this->$propertyName = $value;
+        $messages = [];
+        foreach ($properties as $key => $value) {
+            $key = strtolower($key);
+            $isRequired = false;
+            if (property_exists($this, $key)) {
+                $reflectionProperty = new \ReflectionProperty($this, $key);
+                if ($this->getRequiredProperty($reflectionProperty)) {
+                    $isRequired = true;
+                }
+                // if is empty and is required, throw exception
+                if ($isRequired && empty($value)) {
+                    //throw new Exception("Required: Il campo {$key} è obbligatorio.");
+                    $messages[] = "Required: Il campo {$key} è obbligatorio.";
+                }
+                // setter
+                $setter = 'set' . ucfirst($key);
+                if (method_exists($this, $setter)) {
+                    $this->$setter($value);
+                } else {
+                    $this->$key = $this->castValue($key, $value);
+                }
             }
         }
+
+        if (count($messages) > 0) {
+            throw new Exception(implode('<br>', $messages));
+        }
     }
 
-    /**
-     * @throws \ReflectionException
-     */
+    private function castValue(string $propertyName, mixed $value)
+    {
+        $type = $this->getPropertyType($propertyName);
+        switch ($type) {
+            case 'int':
+                return (int)$value;
+            case 'string':
+                return (string)$value;
+            case 'bool':
+                return (bool)$value;
+            case 'array':
+                return (array)$value;
+            case 'float':
+                return (float)$value;
+            case 'DateTime':
+                if (is_string($value))
+                    return new \DateTime($value);
+                else
+                    return $value->format('Y-m-d H:i:s');
+            default:
+                return $value;
+        }
+    }
+
     private function getPropertyType(string $propertyName): string
     {
-        $propertyName = $this->formatPropertyName($propertyName);
         $reflection = new \ReflectionClass(static::class);
         $property = $reflection->getProperty($propertyName);
         $type = $property->getType();
@@ -158,107 +215,6 @@ class BaseModel
         return $type;
     }
 
-    private function castValue(string $propertyName, mixed $value)
-    {
-        $type = $this->getPropertyType($propertyName);
-        if ($type === 'int') {
-            return (int)$value;
-        } elseif ($type === 'string') {
-            return (string)$value;
-        } elseif ($type === 'bool') {
-            return (bool)$value;
-        } elseif ($type === 'array') {
-            return (array)$value;
-        } elseif ($type === 'float') {
-            return (float)$value;
-        } elseif ($type === 'object') {
-            return (object)$value;
-        } elseif ($type === 'null') {
-            return null;
-        } else {
-            return $value;
-        }
-    }
-
-
-    public function getAll()
-    {
-        $qb = new QueryBuilder(Database::getInstance());
-        $tableName = (new \ReflectionClass(static::class))->getShortName();
-        $qb = $qb->setTable($tableName);
-        $qb = $qb->select('*');
-        return $qb->get();
-    }
-
-    public function getPrimaryKeyName()
-    {
-        return $this->primaryKey;
-    }
-
-    public function getDisplayFieldName(): string
-    {
-        // Puoi definire qui la logica per ottenere il nome del campo appropriato.
-        // Ad esempio, se vuoi il primo campo dopo l'id (primary key), puoi ottenere l'elenco dei nomi delle colonne della tabella
-        // e selezionare il secondo elemento dell'array (il primo dopo l'id).
-        $columnNames = $this->getColumnNames();
-        if (empty($columnNames)) {
-            return '';
-        }
-        return $columnNames[1]; // Restituisce il nome del campo appropriato
-    }
-
-    public function getColumnNames(): array
-    {
-        $qb = new QueryBuilder(Database::getInstance());
-        $tableName = (new \ReflectionClass(static::class))->getShortName();
-        $qb = $qb->setTable($tableName);
-        $qb = $qb->select('*');
-        $result = $qb->get();
-        if (empty($result)) {
-            return [];
-        }
-        return array_keys($result[0]);
-    }
-
-    // getByField
-    public function getByField($field, $value)
-    {
-        $qb = new QueryBuilder(Database::getInstance());
-        $tableName = (new \ReflectionClass(static::class))->getShortName();
-        $qb = $qb->setTable($tableName);
-        $qb = $qb->select('*');
-        $qb = $qb->where($field, $value, '=');
-        $result = $qb->first();
-        if ($result) {
-            $className = static::class;
-            $id = $result[$this->primaryKey];
-            return new $className($id);
-        } else {
-            return null;
-        }
-    }
-
-    //toArray
-    public function toArray()
-    {
-        $array = [];
-        // Ottieni tutti i nomi delle proprietà
-        $properties = (new \ReflectionClass($this))->getProperties();
-        foreach ($properties as $property) {
-            // Formatta il nome della colonna per utilizzarlo come nome della proprietà
-            $propertyName = $this->formatPropertyName($property->getName());
-            $_propertyName = str_replace('_', '', ucwords($propertyName, '_'));
-            $getter = 'get' . ucfirst($_propertyName);
-            if (method_exists($this, $getter)) {
-                $array[$propertyName] = $this->$getter();
-            } else {
-                $array[$propertyName] = $this->$propertyName;
-            }
-        }
-        return $array;
-    }
-
-    // format property name
     private function formatPropertyName(string $propertyName): string
     {
         // if is camelCase, convert to snake_case
@@ -269,5 +225,175 @@ class BaseModel
         return $propertyName;
     }
 
+    public function getPrimaryKey($reflectionClass = null): ?string
+    {
+        if ($reflectionClass === null) {
+            $reflectionClass = new \ReflectionClass(static::class);
+        }
 
+        foreach ($reflectionClass->getProperties() as $property) {
+            if ($property->getAttributes(PrimaryKey::class)) {
+                return $property->getName();
+            }
+        }
+        return null;
+    }
+
+    public function getLabelColumn($reflectionClass = null): ?string
+    {
+        if ($reflectionClass === null) {
+            $reflectionClass = new \ReflectionClass(static::class);
+        }
+        foreach ($reflectionClass->getProperties() as $property) {
+            if ($property->getAttributes(LabelColumn::class)) {
+                return $property->getName();
+            }
+        }
+        return null;
+    }
+
+    public function getForeignKeys($reflectionClass = null): array
+    {
+        if ($reflectionClass === null) {
+            $reflectionClass = new \ReflectionClass(static::class);
+        }
+        $foreignKeys = [];
+        foreach ($reflectionClass->getProperties() as $property) {
+            if ($property->getAttributes(ForeignKey::class)) {
+                $foreignKeys[] = $property->getName();
+            }
+        }
+        return $foreignKeys;
+    }
+
+    public function getVisibleProperties($reflectionClass = null): array
+    {
+        if ($reflectionClass === null) {
+            $reflectionClass = new \ReflectionClass(static::class);
+        }
+
+        $properties = $reflectionClass->getProperties();
+
+        $visibleProperties = [];
+        foreach ($properties as $property) {
+            if (!$property->getAttributes(\App\Attributes\Hidden::class)) {
+                // get type of property
+                $type = $property->getType();
+                $typeName = $type ? $type->getName() : 'mixed';
+                $visibleProperties[$property->getName()] = $typeName;
+            }
+        }
+        return $visibleProperties;
+    }
+
+    public function getDateFormat(\ReflectionProperty $property): ?string
+    {
+        $attributes = $property->getAttributes(\App\Attributes\DateFormat::class);
+        if ($attributes && count($attributes) > 0) {
+            /** @var \App\Attributes\DateFormat $dateFormat */
+            $dateFormat = $attributes[0]->newInstance();
+
+            // return date, datetime or time based on format
+            if ($dateFormat->format === 'd/m/Y') {
+                return 'date';
+            } else if ($dateFormat->format === 'd/m/Y H:i:s') {
+                return 'datetime';
+            } else if ($dateFormat->format === 'H:i:s') {
+                return 'time';
+            }
+
+            // return default format
+            return $dateFormat->format;
+
+
+        }
+        return null;
+    }
+
+    public function getDropDownProperty(\ReflectionProperty $property)
+    {
+        $attributes = $property->getAttributes(\App\Attributes\DropDown::class);
+        if ($attributes && count($attributes) > 0) {
+            /** @var \App\Attributes\DropDown $dropDown */
+            $dropDown = $attributes[0]->newInstance();
+            return $dropDown;
+        }
+        return null;
+    }
+
+    public function getRequiredProperty(\ReflectionProperty $property)
+    {
+        $attributes = $property->getAttributes(\App\Attributes\Required::class);
+        if ($attributes && count($attributes) > 0) {
+            /** @var \App\Attributes\Required $required */
+            $required = $attributes[0]->newInstance();
+            return $required;
+        }
+        return null;
+    }
+
+    public function getByField($field, $value)
+    {
+        $qb = $this->initQueryBuilder();
+        $qb = $qb->select('*');
+        $qb = $qb->where($field, $value, '=');
+        $result = $qb->first();
+        if ($result) {
+            $className = static::class;
+            $id = $result[$this->primaryKey];
+            return new $className($id);
+        }
+
+        return null;
+    }
+
+    public function getModelAttributes(): array
+    {
+        $array = [];
+        $reflectionClass = (new \ReflectionClass($this));
+        $properties = $this->getVisibleProperties($reflectionClass);
+        $primaryKey = $this->getPrimaryKey($reflectionClass);
+        foreach ($properties as $key => $value) {
+            $array[$key] = $this->$key;
+        }
+        $array[$primaryKey] = $this->$primaryKey;
+        return $array;
+    }
+
+    public function getAll(): array
+    {
+        $qb = $this->initQueryBuilder();
+        $qb = $qb->select('*');
+        return $qb->get();
+    }
+
+
+    protected function formatAndCastData(array $data): array
+    {
+        $formattedAndCastedPost = [];
+
+        foreach ($data as $key => $value) {
+            $formattedKey = $this->formatPropertyName($key);
+            $formattedAndCastedPost[$formattedKey] = $this->castValue($key, $value);
+        }
+
+        return $formattedAndCastedPost;
+    }
+
+    protected function getDefaultPropertyValue(\ReflectionProperty $property)
+    {
+        if ($property->isInitialized($this)) {
+            return $property->getValue($this);
+        }
+
+        return match ($this->getPropertyType($property->getName())) {
+            'int' => 0,
+            'string' => '',
+            'bool' => false,
+            'array' => [],
+            'float' => 0.0,
+            'DateTime' => null,
+            default => null,
+        };
+    }
 }

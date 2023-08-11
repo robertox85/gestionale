@@ -6,27 +6,23 @@ use FastRoute\RouteCollector;
 return function (RouteCollector $r) {
 
 	// Rotte pubbliche
-    $r->addRoute('GET', '/website/sale', ['App\Controllers\Web\HomeController', 'viewSale']);
-
-    $r->addRoute('GET', '/401', ['App\Controllers\Web\ErrorController', 'unauthorizedView']);
+	$r->addRoute('GET', '/401', ['App\Controllers\Web\ErrorController', 'unauthorizedView']);
 	$r->addRoute('GET', '/403', ['App\Controllers\Web\ErrorController', 'forbiddenView']);
 	$r->addRoute('GET', '/404', ['App\Controllers\Web\ErrorController', 'notFoundView']);
 	$r->addRoute('GET', '/405', ['App\Controllers\Web\ErrorController', 'notAllowedView']);
 	$r->addRoute('GET', '/500', ['App\Controllers\Web\ErrorController', 'internalErrorView']);
 
-    // Rotte per la gestione dell'autenticazione
-    $r->addRoute('GET', '/sign-in', ['App\Controllers\Web\AuthenticationController', 'signInView']);
-    $r->addRoute('POST', '/sign-in', ['App\Controllers\Web\AuthenticationController', 'signInUser']);
+	$r->addRoute('GET', '/', ['App\Controllers\Web\HomeController', 'home']);
+	// Rotte per DisponibilitaGiorni
+	$r->addRoute('GET', '/disponibilita-giorni', ['App\Controllers\Web\DisponibilitaGiorniController', 'index']);
+	$r->addRoute('GET', '/disponibilita-giorni/create', ['App\Controllers\Web\DisponibilitaGiorniController', 'create']);
+	$r->addRoute('POST', '/disponibilita-giorni/store', ['App\Controllers\Web\DisponibilitaGiorniController', 'store']);
 
-    $r->addRoute('GET', '/sign-up', ['App\Controllers\Web\AuthenticationController', 'signUpView']);
-    $r->addRoute('POST', '/sign-up', ['App\Controllers\Web\AuthenticationController', 'signUpUser']);
+	$r->addRoute('GET', '/disponibilita-giorni/edit/{id:\d+}', ['App\Controllers\Web\DisponibilitaGiorniController', 'edit']);
+	$r->addRoute('POST', '/disponibilita-giorni/update', ['App\Controllers\Web\DisponibilitaGiorniController', 'update']);
+	$r->addRoute('GET', '/disponibilita-giorni/delete/{id:\d+}', ['App\Controllers\Web\DisponibilitaGiorniController', 'delete']);
+	$r->addRoute('POST', '/disponibilita-giorni/bulk-delete', ['App\Controllers\Web\DisponibilitaGiorniController', 'bulkDelete']);
 
-    $r->addRoute('GET', '/sign-out', ['App\Controllers\Web\AuthenticationController', 'signOutUser']);
-
-	$r->addRoute('GET', '/', [
-        'middleware' => new \App\Middleware\AuthenticationMiddleware(),
-        'handler' => ['App\Controllers\Web\HomeController', 'home']
-    ]);
 	// Rotte per DisponibilitaSale
 	$r->addRoute('GET', '/disponibilita-sale', ['App\Controllers\Web\DisponibilitaSaleController', 'index']);
 	$r->addRoute('GET', '/disponibilita-sale/create', ['App\Controllers\Web\DisponibilitaSaleController', 'create']);
@@ -47,15 +43,25 @@ return function (RouteCollector $r) {
 	$r->addRoute('GET', '/eccezioni-sale/delete/{id:\d+}', ['App\Controllers\Web\EccezioniSaleController', 'delete']);
 	$r->addRoute('POST', '/eccezioni-sale/bulk-delete', ['App\Controllers\Web\EccezioniSaleController', 'bulkDelete']);
 
-	// Rotte per LogOperazioniUtente
-	$r->addRoute('GET', '/log-operazioni-utente', ['App\Controllers\Web\LogOperazioniUtenteController', 'index']);
-	$r->addRoute('GET', '/log-operazioni-utente/create', ['App\Controllers\Web\LogOperazioniUtenteController', 'create']);
-	$r->addRoute('POST', '/log-operazioni-utente/store', ['App\Controllers\Web\LogOperazioniUtenteController', 'store']);
+	// Rotte per GiorniSettimana
+	$r->addRoute('GET', '/giorni-settimana', ['App\Controllers\Web\GiorniSettimanaController', 'index']);
+	$r->addRoute('GET', '/giorni-settimana/create', ['App\Controllers\Web\GiorniSettimanaController', 'create']);
+	$r->addRoute('POST', '/giorni-settimana/store', ['App\Controllers\Web\GiorniSettimanaController', 'store']);
 
-	$r->addRoute('GET', '/log-operazioni-utente/edit/{id:\d+}', ['App\Controllers\Web\LogOperazioniUtenteController', 'edit']);
-	$r->addRoute('POST', '/log-operazioni-utente/update', ['App\Controllers\Web\LogOperazioniUtenteController', 'update']);
-	$r->addRoute('GET', '/log-operazioni-utente/delete/{id:\d+}', ['App\Controllers\Web\LogOperazioniUtenteController', 'delete']);
-	$r->addRoute('POST', '/log-operazioni-utente/bulk-delete', ['App\Controllers\Web\LogOperazioniUtenteController', 'bulkDelete']);
+	$r->addRoute('GET', '/giorni-settimana/edit/{id:\d+}', ['App\Controllers\Web\GiorniSettimanaController', 'edit']);
+	$r->addRoute('POST', '/giorni-settimana/update', ['App\Controllers\Web\GiorniSettimanaController', 'update']);
+	$r->addRoute('GET', '/giorni-settimana/delete/{id:\d+}', ['App\Controllers\Web\GiorniSettimanaController', 'delete']);
+	$r->addRoute('POST', '/giorni-settimana/bulk-delete', ['App\Controllers\Web\GiorniSettimanaController', 'bulkDelete']);
+
+	// Rotte per LogUtente
+	$r->addRoute('GET', '/log-utente', ['App\Controllers\Web\LogUtenteController', 'index']);
+	$r->addRoute('GET', '/log-utente/create', ['App\Controllers\Web\LogUtenteController', 'create']);
+	$r->addRoute('POST', '/log-utente/store', ['App\Controllers\Web\LogUtenteController', 'store']);
+
+	$r->addRoute('GET', '/log-utente/edit/{id:\d+}', ['App\Controllers\Web\LogUtenteController', 'edit']);
+	$r->addRoute('POST', '/log-utente/update', ['App\Controllers\Web\LogUtenteController', 'update']);
+	$r->addRoute('GET', '/log-utente/delete/{id:\d+}', ['App\Controllers\Web\LogUtenteController', 'delete']);
+	$r->addRoute('POST', '/log-utente/bulk-delete', ['App\Controllers\Web\LogUtenteController', 'bulkDelete']);
 
 	// Rotte per Notifiche
 	$r->addRoute('GET', '/notifiche', ['App\Controllers\Web\NotificheController', 'index']);
@@ -107,6 +113,16 @@ return function (RouteCollector $r) {
 	$r->addRoute('GET', '/relazioni-sale-risorse/delete/{id:\d+}', ['App\Controllers\Web\RelazioniSaleRisorseController', 'delete']);
 	$r->addRoute('POST', '/relazioni-sale-risorse/bulk-delete', ['App\Controllers\Web\RelazioniSaleRisorseController', 'bulkDelete']);
 
+	// Rotte per RememberMe
+	$r->addRoute('GET', '/remember-me', ['App\Controllers\Web\RememberMeController', 'index']);
+	$r->addRoute('GET', '/remember-me/create', ['App\Controllers\Web\RememberMeController', 'create']);
+	$r->addRoute('POST', '/remember-me/store', ['App\Controllers\Web\RememberMeController', 'store']);
+
+	$r->addRoute('GET', '/remember-me/edit/{id:\d+}', ['App\Controllers\Web\RememberMeController', 'edit']);
+	$r->addRoute('POST', '/remember-me/update', ['App\Controllers\Web\RememberMeController', 'update']);
+	$r->addRoute('GET', '/remember-me/delete/{id:\d+}', ['App\Controllers\Web\RememberMeController', 'delete']);
+	$r->addRoute('POST', '/remember-me/bulk-delete', ['App\Controllers\Web\RememberMeController', 'bulkDelete']);
+
 	// Rotte per Risorse
 	$r->addRoute('GET', '/risorse', ['App\Controllers\Web\RisorseController', 'index']);
 	$r->addRoute('GET', '/risorse/create', ['App\Controllers\Web\RisorseController', 'create']);
@@ -136,7 +152,6 @@ return function (RouteCollector $r) {
 	$r->addRoute('POST', '/utenti/update', ['App\Controllers\Web\UtentiController', 'update']);
 	$r->addRoute('GET', '/utenti/delete/{id:\d+}', ['App\Controllers\Web\UtentiController', 'delete']);
 	$r->addRoute('POST', '/utenti/bulk-delete', ['App\Controllers\Web\UtentiController', 'bulkDelete']);
-
 
 };
 

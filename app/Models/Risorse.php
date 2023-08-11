@@ -2,45 +2,33 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class Risorse extends BaseModel {
 
-	private int $id_risorsa = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdRisorsa() {
-		return $this->id_risorsa;
-	}
+	protected int $id_risorsa;
 
-	public function setIdRisorsa($id_risorsa) {
-		$this->id_risorsa = $id_risorsa;
-	}
+	#[LabelColumn]
 
-	private string $nome_risorsa = '';
+	protected string $nome_risorsa;
 
-	public function getNomeRisorsa() {
-		return $this->nome_risorsa;
-	}
+	protected string $descrizione;
 
-	public function setNomeRisorsa($nome_risorsa) {
-		$this->nome_risorsa = $nome_risorsa;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	private mixed $created_at = null;
+	protected ?\DateTime $created_at;
 
-	public function getCreatedAt() {
-		return $this->created_at;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function setCreatedAt($created_at) {
-		$this->created_at = $created_at;
-	}
-
-	private mixed $updated_at = null;
-
-	public function getUpdatedAt() {
-		return $this->updated_at;
-	}
-
-	public function setUpdatedAt($updated_at) {
-		$this->updated_at = $updated_at;
-	}
+	protected ?\DateTime $updated_at;
 }

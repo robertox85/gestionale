@@ -2,45 +2,31 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class GiorniSettimana extends BaseModel {
 
-	private int $id_giorno = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdGiorno() {
-		return $this->id_giorno;
-	}
+	protected int $id_giorno;
 
-	public function setIdGiorno($id_giorno) {
-		$this->id_giorno = $id_giorno;
-	}
+	#[LabelColumn]
 
-	private string $nome_giorno = '';
+	protected string $nome_giorno;
 
-	public function getNomeGiorno() {
-		return $this->nome_giorno;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function setNomeGiorno($nome_giorno) {
-		$this->nome_giorno = $nome_giorno;
-	}
+	protected ?\DateTime $created_at;
 
-	private mixed $created_at = null;
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function getCreatedAt() {
-		return $this->created_at;
-	}
-
-	public function setCreatedAt($created_at) {
-		$this->created_at = $created_at;
-	}
-
-	private mixed $updated_at = null;
-
-	public function getUpdatedAt() {
-		return $this->updated_at;
-	}
-
-	public function setUpdatedAt($updated_at) {
-		$this->updated_at = $updated_at;
-	}
+	protected ?\DateTime $updated_at;
 }

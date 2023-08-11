@@ -8,5 +8,4 @@ use App\Libraries\DynamicFormComponent;
 use App\Libraries\Helper;
 
 class PreferenzeUtenteSaleController extends BaseController {
-
 }

@@ -10,9 +10,6 @@ use App\Libraries\QueryBuilder;
 use App\Libraries\TwigConfigurator;
 
 use Twig\Environment;
-use Twig\Error\LoaderError;
-use Twig\Error\RuntimeError;
-use Twig\Error\SyntaxError;
 
 abstract class BaseController
 {
@@ -22,6 +19,7 @@ abstract class BaseController
     protected Auth $auth;
     protected Database $db;
     protected string $tableName;
+    protected string $primaryKey;
 
     public function __construct()
     {
@@ -36,38 +34,27 @@ abstract class BaseController
         $this->auth = new Auth();
         $this->db = Database::getInstance();
         $this->tableName = $this->getShortClassName();
+        $this->primaryKey = $this->getPrimaryKey();
 
     }
-
     public function index()
     {
-        $primaryKey = 'id_' . strtolower(Helper::getTablePrimaryKeyName($this->tableName));
         $qb = new QueryBuilder($this->db);
         $qb = $qb->setTable($this->tableName);
         $qb = $qb->select('*');
-        $qb = $qb->setAlias($primaryKey, 'id');
+        $qb = $qb->setAlias($this->primaryKey, 'id');
         $rows = $qb->get();
         $pagination = $qb->getPagination();
         $columns = $qb->getColumns();
         echo $this->view->render('list.html.twig', compact('columns', 'rows', 'pagination'));
         exit();
     }
-
-    /**
-     * @throws SyntaxError
-     * @throws \ReflectionException
-     * @throws RuntimeError
-     * @throws LoaderError
-     */
     public function create(): void
     {
-        $entity = 'App\Models\\' . $this->tableName;
-        $entity = new $entity();
+        $entity = $this->getEntity();
         $formComponent = new DynamicFormComponent($entity);
-
         $formData = [];
-
-        $formData['action'] = $this->url( '/store');
+        $formData['action'] = $this->url('/store');
         $formData['csrf_token'] = Helper::generateToken($this->tableName);
         $formData['button_label'] = 'Crea';
 
@@ -76,122 +63,110 @@ abstract class BaseController
         // Puoi personalizzare la vista utilizzata per il form di creazione
         echo $this->view->render('form.html.twig', compact('formHtml'));
     }
-
     public function store()
     {
         $post = $_POST;
-        // Verifica il token CSRF
-        if (!Helper::validateToken($this->tableName, $post['csrf_token'])) {
-            Helper::addError('Token CSRF non valido.');
-            Helper::redirect($this->url('/create'));
-            exit();
-        }
-
+        $this->verifyToken($post['csrf_token']);
         unset($post['csrf_token']);
 
         $post = Helper::sanificaInput($post);
         $entity = 'App\Models\\' . $this->tableName;
         $entity = new $entity();
-        $newId = $entity->store($post);
 
-        if ($newId !== false) {
-            Helper::addSuccess('Nuovo record creato con successo.');
-        } else {
-            Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
+        // set the properties of the entity
+        $entity->setProperties($post);
+        try {
+            $entity->store();
+            Helper::addSuccess('Record aggiornato con successo!');
+            Helper::redirect($this->url('/'));
+        } catch (\PDOException $e) {
+            throw new \PDOException($e->getMessage());
         }
-
-        Helper::redirect($this->url('/'));
     }
+    public function update()
+    {
+        $entity = $this->getEntity();
+        $this->verifyToken($_POST['csrf_token']);
+        unset($_POST['csrf_token']);
+        $post = Helper::sanificaInput($_POST);
+        $entity->setProperties($post);
 
-
+        try {
+            $entity->store();
+            Helper::addSuccess('Record aggiornato con successo!');
+            Helper::redirect($this->url('/'));
+        }
+        catch (\PDOException $e) {
+            throw new \PDOException($e->getMessage());
+        }
+    }
     public function edit($id)
     {
-        $entityName = 'App\Models\\' . $this->tableName;
-        $entity = new $entityName();
-        $entity = $entity::findById($id);
-        $primaryKey = 'id_' . strtolower(Helper::getTablePrimaryKeyName($this->tableName));
+        $entity = $this->getEntity();
+        $entity = $entity::get($id);
+
         if (!$entity) {
             Helper::addError('Record non trovato.');
             Helper::redirect($this->url('/'));
             exit();
         }
         $formComponent = new DynamicFormComponent($entity);
+        $args = [];
+        $args['action'] = $this->url('/update');
 
-        $formData = [];
-        $formData['action'] = $this->url('/update');
-        $formData['csrf_token'] = Helper::generateToken($this->tableName);
-        $formData[$primaryKey] = $id;
-        $formData['button_label'] = 'Edit';
+        $args['csrf_token'] = Helper::generateToken($this->tableName);
+        $args['primary_key'] = [
+            'name' => $this->primaryKey,
+            'value' => $id
+        ];
+        $args['button_label'] = 'Edit';
 
-        $formHtml = $formComponent->renderForm($formData);
+        $formHtml = $formComponent->renderForm($args);
 
         echo $this->view->render('form.html.twig', compact('formHtml'));
     }
-
-    public function update()
+    public function delete($id)
     {
-        $entityName = 'App\Models\\' . $this->tableName;
-        $entity = new $entityName();
-        $post = $_POST;
-
-        // Verifica il token CSRF
-        if (!Helper::validateToken($this->tableName, $post['csrf_token'])) {
-            Helper::addError('Token CSRF non valido.');
-            Helper::redirect('/eccezioni-sale');
-            exit();
+        $entity = $this->getEntity();
+        try {
+            $entity->delete($id);
+            Helper::addSuccess('Record eliminato con successo!');
+            Helper::redirect($this->url('/'));
+        } catch (\PDOException $e) {
+            throw new \PDOException($e->getMessage());
         }
-
-        unset($post['csrf_token']);
-
-        $post = Helper::sanificaInput($post);
-
-        $newId = $entity::update($post);
-
-        if ($newId !== false) {
-            Helper::addSuccess('Record aggiornato con successo.');
-        } else {
-            Helper::addError('Errore durante la creazione o l\'aggiornamento del record.');
-        }
-
-        Helper::redirect($this->url('/'));
-        exit();
     }
-
-    public function delete($id) {
+    private function getEntity()
+    {
         $entity = 'App\Models\\' . $this->tableName;
-        $entity = new $entity();
-        $entity->delete($id);
-        Helper::addSuccess('Record eliminato con successo!');
-        Helper::redirect($this->url('/'));
-        exit();
+        return new $entity();
     }
-
-    public function bulkDelete() {
-        $primaryKey = 'id_' . strtolower(Helper::getTablePrimaryKeyName($this->tableName));
-        $qb = new QueryBuilder($this->db);
-        $qb = $qb->setTable($this->tableName);
+    public function bulkDelete()
+    {
         $ids = $_POST['ids'];
-        // Turn into array if not already
         if (!is_array($ids)) {
             $ids = explode(',', $ids);
             $ids = array_filter($ids);
             $ids = array_map('intval', $ids);
         }
-        $qb = $qb->whereIn($primaryKey, $ids);
-        $qb = $qb->delete();
-        $qb->execute();
-        Helper::addSuccess('Record eliminati con successo!');
-        Helper::redirect($this->url('/'));
-        exit();
+        $entity = $this->getEntity();
+        try {
+            $entity->bulkDelete($ids);
+            Helper::addSuccess('Record eliminati con successo!');
+            Helper::redirect($this->url('/'));
+        } catch (\PDOException $e) {
+            throw new \PDOException($e->getMessage());
+        }
     }
-
-    /**
-     * Genera l'URL completo per una determinata rotta.
-     *
-     * @param string $route Nome della rotta (es. 'utenti.index')
-     * @param array $params Parametri aggiuntivi per la rotta (opzionale)
-     * @return string URL completo per la rotta specificata
-     */
+    private function verifyToken($token)
+    {
+        if (!Helper::validateToken($this->tableName, $token)) {
+            Helper::addError('Token CSRF non valido.');
+            Helper::redirect($this->url('/create'));
+            exit();
+        }
+        return true;
+    }
     function url(string $route, array $params = []): string
     {
         $fullUrl = $_SERVER['REQUEST_URI'];
@@ -217,12 +192,15 @@ abstract class BaseController
 
         return $url;
     }
-
     private function getShortClassName()
     {
         $shortClassName = (new \ReflectionClass(static::class))->getShortName();
-        $shortClassName = str_replace('Controller', '', $shortClassName);
-        return $shortClassName;
+        return str_replace('Controller', '', $shortClassName);
     }
 
+    private function getPrimaryKey()
+    {
+        $entity = $this->getEntity();
+        return $entity->getPrimaryKey();
+    }
 }

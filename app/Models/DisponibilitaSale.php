@@ -2,104 +2,43 @@
 
 namespace App\Models;
 
-class DisponibilitaSale extends BaseModel
-{
-
-    private int $id_disponibilita = 0;
-
-    public function getIdDisponibilita()
-    {
-        return $this->id_disponibilita;
-    }
-
-    public function setIdDisponibilita($id_disponibilita)
-    {
-        $this->id_disponibilita = $id_disponibilita;
-    }
-
-    private int $id_sala = 0;
-
-    public function getIdSala()
-    {
-        return $this->id_sala;
-    }
-
-    public function setIdSala($id_sala)
-    {
-        $this->id_sala = $id_sala;
-    }
-
-    private array $giorni_disponibili = [];
-
-    public function getGiorniDisponibili()
-    {
-        return $this->giorni_disponibili;
-    }
-
-    public function setGiorniDisponibili($giorni_disponibili)
-    {
-        $this->giorni_disponibili = $giorni_disponibili;
-    }
-
-    private mixed $orario_apertura = null;
-
-    public function getOrarioApertura()
-    {
-        return $this->orario_apertura;
-    }
-
-    public function setOrarioApertura($orario_apertura)
-    {
-        $this->orario_apertura = $orario_apertura;
-    }
-
-    private mixed $orario_chiusura = null;
-
-    public function getOrarioChiusura()
-    {
-        return $this->orario_chiusura;
-    }
-
-    public function setOrarioChiusura($orario_chiusura)
-    {
-        $this->orario_chiusura = $orario_chiusura;
-    }
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
 
 
-    private int $durata_slot = 0;
+class DisponibilitaSale extends BaseModel {
 
-    public function getDurataSlot()
-    {
-        return $this->durata_slot;
-    }
+	#[PrimaryKey, Hidden]
 
-    public function setDurataSlot($durata_slot)
-    {
-        $this->durata_slot = $durata_slot;
-    }
+	protected int $id_disponibilita;
 
+	#[ForeignKey, Required]
 
-    private mixed $created_at = null;
+	protected int $id_sala;
 
-    public function getCreatedAt()
-    {
-        return $this->created_at;
-    }
+	#[DateFormat("H:i:s")]
 
-    public function setCreatedAt($created_at)
-    {
-        $this->created_at = $created_at;
-    }
+	protected ?\DateTime $orario_apertura;
 
-    private mixed $updated_at = null;
+	#[DateFormat("H:i:s")]
 
-    public function getUpdatedAt()
-    {
-        return $this->updated_at;
-    }
+	protected ?\DateTime $orario_chiusura;
 
-    public function setUpdatedAt($updated_at)
-    {
-        $this->updated_at = $updated_at;
-    }
+	#[DropDown]
+
+	protected array $durata_slot_minuti = ['15', '30', '45', '60', '90', '120'];
+
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
+
+	protected ?\DateTime $created_at;
+
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
+
+	protected ?\DateTime $updated_at;
 }

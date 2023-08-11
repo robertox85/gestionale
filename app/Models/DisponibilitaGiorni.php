@@ -2,25 +2,31 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class DisponibilitaGiorni extends BaseModel {
 
-	private int $id_disponibilita = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdDisponibilita() {
-		return $this->id_disponibilita;
-	}
+	protected int $id_disponibilita;
 
-	public function setIdDisponibilita($id_disponibilita) {
-		$this->id_disponibilita = $id_disponibilita;
-	}
+	#[PrimaryKey, Hidden]
 
-	private int $id_giorno = 0;
+	protected int $id_giorno;
 
-	public function getIdGiorno() {
-		return $this->id_giorno;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function setIdGiorno($id_giorno) {
-		$this->id_giorno = $id_giorno;
-	}
+	protected ?\DateTime $created_at;
+
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
+
+	protected ?\DateTime $updated_at;
 }

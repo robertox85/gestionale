@@ -1,6 +1,9 @@
 <?php
 
 namespace App\Libraries;
+
+use PhpParser\Node\Expr\Cast\Bool_;
+
 /**
  * QueryBuilder is a SQL query builder class that provides a fluent interface for constructing SQL queries.
  */
@@ -19,7 +22,7 @@ class QueryBuilder
     protected array $updateValues = [];
     protected array $groupBy = [];
     protected array $havingClauses = [];
-    protected int $limit = 10;
+    protected $limit = 10;
     protected $offset = null;
     private int $currentPage = 1;
     private int $totalItems = 0;
@@ -322,15 +325,10 @@ class QueryBuilder
     {
         $sql = $this->toSql();
         $this->logQuery($sql);
-        try {
-            $stmt = $this->db->prepare($sql);
-            $stmt->execute($this->getParameters());
-            $this->reset();
-            return $stmt;
-        } catch (\PDOException $e) {
-            // Qui potresti scegliere di rilanciare l'eccezione o gestirla in altro modo
-            throw $e;
-        }
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($this->getParameters());
+        $this->reset();
+        return $stmt;
     }
 
     /**
@@ -340,7 +338,7 @@ class QueryBuilder
     protected function buildOrderBy(): string
     {
         if (empty($this->orders)) {
-            return ' ORDER BY created_at ASC';
+            return ' ';
         }
         return ' ORDER BY ' . implode(', ', $this->orders);
     }
@@ -389,8 +387,7 @@ class QueryBuilder
      */
     public function insert(array $values): array|\PDOStatement
     {
-        $columns = implode(", ", array_keys($values));
-        $values = array_intersect_key($values, array_flip($this->getColumns()));
+        $values = $this->filterValues($values);
         $placeholders = implode(", ", array_fill(0, count($values), "?"));
         $columns = implode(", ", array_keys($values));
         $sql = "INSERT INTO $this->table ($columns) VALUES ($placeholders)";
@@ -406,6 +403,7 @@ class QueryBuilder
      */
     public function update($values, $conditions = []): int
     {
+        $values = $this->filterValues($values);
         $setClauses = [];
         $this->parameters = [];
         foreach ($values as $column => $value) {
@@ -439,9 +437,9 @@ class QueryBuilder
 
     /**
      * Delete rows
-     * @return \PDOStatement
+     * @return false
      */
-    public function delete(): array|\PDOStatement
+    public function delete(): \PDOStatement|bool
     {
         $sql = "DELETE FROM $this->table" . $this->buildWhere();
         return $this->execute($sql);
@@ -465,10 +463,6 @@ class QueryBuilder
         return $this->db->commit();
     }
 
-    /**
-     * Rollback a transaction
-     * @return bool
-     */
     public function rollback(): bool
     {
         return $this->db->rollback();
@@ -476,13 +470,33 @@ class QueryBuilder
 
     /**
      * Log a query
-     * @param $sql SQL query
+     * @param $sql
      */
-    public function logQuery(SQL $sql)
+    public function logQuery($sql)
     {
 
     }
 
+    private function filterValues(array $values): array
+    {
+        // Filter the input values to only include keys that match the table columns
+        $filteredValues = array_intersect_key($values, array_flip($this->getColumns()));
+
+        // Flatten any array values into comma-separated strings
+        foreach ($filteredValues as $key => $value) {
+            if (is_array($value)) {
+                $filteredValues[$key] = implode(',', $value);
+            }
+
+            // handle DateTime objects
+            if ($value instanceof \DateTime) {
+                $filteredValues[$key] = $value->format('Y-m-d H:i:s');
+            }
+
+        }
+
+        return $filteredValues;
+    }
 
     /**
      * Count the number of rows
@@ -527,7 +541,7 @@ class QueryBuilder
         $this->updateValues = [];
         $this->groupBy = [];
         $this->havingClauses = [];
-        $this->limit = null;
+        $this->limit = 10;
         $this->offset = null;
         return $this;
     }
@@ -569,12 +583,11 @@ class QueryBuilder
      * Execute arbitrary SQL
      * @return \PDOStatement|false
      */
-    public function execute($sql): bool|\PDOStatement
+    public function execute($sql): \PDOStatement|false
     {
         $stmt = $this->db->prepare($sql);
 
         for ($i = 0; $i < count($this->parameters); $i++) {
-            // Nota: PDOStatement::bindParam è uno-based, non zero-based.
             $stmt->bindParam($i + 1, $this->parameters[$i]);
         }
 
@@ -621,6 +634,13 @@ class QueryBuilder
             'endItem' => min($this->totalItems, $this->currentPage * $this->limit),
             'query' => $_GET,
         ];
+    }
+
+    public function rawSQL($sql)
+    {
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
 

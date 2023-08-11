@@ -52,7 +52,7 @@ foreach ($tables as $tableName) {
     // Azione per l'edit di un record
     $controllerCode .= "\n\tpublic function edit(\$id)\n";
     $controllerCode .= "\t{\n";
-    $controllerCode .= "\t\t\$" . strtolower($tableName) . " = " . ucfirst($tableName) . "::findById(\$id);\n";
+    $controllerCode .= "\t\t\$" . strtolower($tableName) . " = " . ucfirst($tableName) . "::get(\$id);\n";
     $controllerCode .= "\t\tif (!\$" . strtolower($tableName) . ") {\n";
     $controllerCode .= "\t\t\techo ResponseHelper::jsonResponse([\n";
     $controllerCode .= "\t\t\t\t'error' => 'Record non trovato.',\n";
@@ -125,7 +125,7 @@ foreach ($tables as $tableName) {
     // Azione per il delete (eliminazione di un record)
     $controllerCode .= "\n\tpublic function delete(\$id): void\n";
     $controllerCode .= "\t{\n";
-    $controllerCode .= "\t\t\$" . strtolower($tableName) . " = " . ucfirst($tableName) . "::findById(\$id);\n";
+    $controllerCode .= "\t\t\$" . strtolower($tableName) . " = " . ucfirst($tableName) . "::get(\$id);\n";
     $controllerCode .= "\t\tif (!\$" . strtolower($tableName) . ") {\n";
     $controllerCode .= "\t\t\techo ResponseHelper::jsonResponse([\n";
     $controllerCode .= "\t\t\t\t'error' => 'Record non trovato.',\n";

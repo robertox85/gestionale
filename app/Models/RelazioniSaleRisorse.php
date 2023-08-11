@@ -2,65 +2,37 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class RelazioniSaleRisorse extends BaseModel {
 
-	private int $id_relazione = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdRelazione() {
-		return $this->id_relazione;
-	}
+	protected int $id_relazione;
 
-	public function setIdRelazione($id_relazione) {
-		$this->id_relazione = $id_relazione;
-	}
+	#[ForeignKey, Required]
 
-	private int $id_sala = 0;
+	protected int $id_sala;
 
-	public function getIdSala() {
-		return $this->id_sala;
-	}
+	#[ForeignKey, Required]
 
-	public function setIdSala($id_sala) {
-		$this->id_sala = $id_sala;
-	}
+	protected int $id_risorsa;
 
-	private int $id_risorsa = 0;
+	protected int $quantita;
 
-	public function getIdRisorsa() {
-		return $this->id_risorsa;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function setIdRisorsa($id_risorsa) {
-		$this->id_risorsa = $id_risorsa;
-	}
+	protected ?\DateTime $created_at;
 
-	private int $quantità = 0;
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function getQuantità() {
-		return $this->quantità;
-	}
-
-	public function setQuantità($quantità) {
-		$this->quantità = $quantità;
-	}
-
-	private mixed $created_at = null;
-
-	public function getCreatedAt() {
-		return $this->created_at;
-	}
-
-	public function setCreatedAt($created_at) {
-		$this->created_at = $created_at;
-	}
-
-	private mixed $updated_at = null;
-
-	public function getUpdatedAt() {
-		return $this->updated_at;
-	}
-
-	public function setUpdatedAt($updated_at) {
-		$this->updated_at = $updated_at;
-	}
+	protected ?\DateTime $updated_at;
 }

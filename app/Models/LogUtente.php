@@ -12,11 +12,11 @@ use App\Attributes\PrimaryKey;
 use App\Attributes\Required;
 
 
-class Notifiche extends BaseModel {
+class LogUtente extends BaseModel {
 
 	#[PrimaryKey, Hidden]
 
-	protected int $id_notifica;
+	protected int $id_log;
 
 	#[ForeignKey, Required]
 
@@ -24,15 +24,13 @@ class Notifiche extends BaseModel {
 
 	#[LabelColumn]
 
-	protected string $messaggio;
+	protected string $azione;
 
 	#[DateFormat("d/m/Y H:i:s")]
 
-	protected ?\DateTime $data_invio;
+	protected ?\DateTime $data_azione;
 
-	#[DropDown]
-
-	protected array $stato = ['letto', 'non letto'];
+	protected string $dettagli;
 
 	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 

@@ -2,55 +2,35 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class PreferenzeUtenteSale extends BaseModel {
 
-	private int $id_preferenza = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdPreferenza() {
-		return $this->id_preferenza;
-	}
+	protected int $id_preferenza;
 
-	public function setIdPreferenza($id_preferenza) {
-		$this->id_preferenza = $id_preferenza;
-	}
+	#[ForeignKey, Required]
 
-	private int $id_utente = 0;
+	protected int $id_utente;
 
-	public function getIdUtente() {
-		return $this->id_utente;
-	}
+	#[ForeignKey, Required]
 
-	public function setIdUtente($id_utente) {
-		$this->id_utente = $id_utente;
-	}
+	protected int $id_sala;
 
-	private int $id_sala = 0;
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function getIdSala() {
-		return $this->id_sala;
-	}
+	protected ?\DateTime $created_at;
 
-	public function setIdSala($id_sala) {
-		$this->id_sala = $id_sala;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	private mixed $created_at = null;
-
-	public function getCreatedAt() {
-		return $this->created_at;
-	}
-
-	public function setCreatedAt($created_at) {
-		$this->created_at = $created_at;
-	}
-
-	private mixed $updated_at = null;
-
-	public function getUpdatedAt() {
-		return $this->updated_at;
-	}
-
-	public function setUpdatedAt($updated_at) {
-		$this->updated_at = $updated_at;
-	}
+	protected ?\DateTime $updated_at;
 }

@@ -2,75 +2,41 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class LogOperazioniUtente extends BaseModel {
 
-	private int $id_log = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdLog() {
-		return $this->id_log;
-	}
+	protected int $id_log;
 
-	public function setIdLog($id_log) {
-		$this->id_log = $id_log;
-	}
+	#[ForeignKey, Required]
 
-	private int $id_utente = 0;
+	protected int $id_utente;
 
-	public function getIdUtente() {
-		return $this->id_utente;
-	}
+	#[LabelColumn]
 
-	public function setIdUtente($id_utente) {
-		$this->id_utente = $id_utente;
-	}
+	protected string $azione;
 
-	private string $azione = '';
+	#[DateFormat("d/m/Y H:i:s")]
 
-	public function getAzione() {
-		return $this->azione;
-	}
+	protected ?\DateTime $data_azione;
 
-	public function setAzione($azione) {
-		$this->azione = $azione;
-	}
+	protected string $dettagli;
 
-	private mixed $data_azione = null;
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function getDataAzione() {
-		return $this->data_azione;
-	}
+	protected ?\DateTime $created_at;
 
-	public function setDataAzione($data_azione) {
-		$this->data_azione = $data_azione;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	private string $dettagli = '';
-
-	public function getDettagli() {
-		return $this->dettagli;
-	}
-
-	public function setDettagli($dettagli) {
-		$this->dettagli = $dettagli;
-	}
-
-	private mixed $created_at = null;
-
-	public function getCreatedAt() {
-		return $this->created_at;
-	}
-
-	public function setCreatedAt($created_at) {
-		$this->created_at = $created_at;
-	}
-
-	private mixed $updated_at = null;
-
-	public function getUpdatedAt() {
-		return $this->updated_at;
-	}
-
-	public function setUpdatedAt($updated_at) {
-		$this->updated_at = $updated_at;
-	}
+	protected ?\DateTime $updated_at;
 }

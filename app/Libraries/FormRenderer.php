@@ -2,117 +2,91 @@
 
 namespace App\Libraries;
 
-use Cassandra\Date;
 
 class FormRenderer
 {
-    private $model;
-    private array $formData;
-    private array $entityFields;
-    private  array $entityValues = [];
-    private string $primaryKeyName;
 
-    public function __construct($args)
+    public function render($args): string
     {
-        $this->model = $args['model'];
-        $this->formData = $args['formData'];
-        $this->entityFields = $args['entityFields'];
-        $this->entityValues = $args['entityValues'];
-        $this->primaryKeyName = $args['primaryKeyName'];
-    }
+        $form = $this->openFormTag($args['action'], 'post', 'edit-form', 'mb-4 grid grid-cols-2 gap-4');
+        $form .= '<input type="hidden" name="csrf_token" value="' . $args['csrf_token'] . '">';
 
-    public function renderField(string $fieldName, mixed $fieldType, mixed $fieldValue = ''): string
-    {
-
-        // if fielName is 'password' or 'password_confirmation', $fieldType is 'password'
-        if (in_array($fieldName, ['password', 'password_confirmation'])) {
-            $fieldType = 'password';
+        if (isset($args['primary_key'])) {
+            $form .= '<input type="hidden" name="' . $args['primary_key']['name'] . '" value="' . $args['primary_key']['value'] . '">';
         }
 
-        switch ($fieldType) {
-            case 'text':
-                return $this->renderTextField($fieldName, $fieldValue);
-            case 'textarea':
-                return $this->renderTextAreaField($fieldName, $fieldValue);
-            case 'number':
-                return $this->renderNumberField($fieldName, $fieldValue);
-            case 'DateTime':
-            case 'datetime':
-            case 'date':
-                return $this->renderDateField($fieldName, $fieldValue);
-            case 'time':
-                return $this->renderTimeField($fieldName, $fieldValue);
-            case 'boolean':
-                return $this->renderBooleanField($fieldName, $fieldValue);
-            case 'password':
-                return $this->renderPasswordField($fieldName, $fieldValue);
-            case 'array':
-                return $this->renderCheckboxesField($fieldName, $fieldValue);
-            default:
-                if (is_array($fieldType)) {
-                    return $this->renderSelectField($fieldName, $fieldType['options'], $fieldValue);
-                }
-                return $this->renderTextField($fieldName, $fieldValue);
-        }
-    }
-
-    public function renderForm(): string
-    {
-        $form = $this->openFormTag($this->formData['action'], 'post', 'edit-form', 'mb-4 grid grid-cols-2 gap-4');
-        $form .= '<input type="hidden" name="csrf_token" value="' . $this->formData['csrf_token'] . '">';
-
-        if (isset($this->formData[$this->primaryKeyName])) {
-            $form .= '<input type="hidden" name="' . $this->primaryKeyName . '" value="' . $this->formData[$this->primaryKeyName] . '">';
+        foreach ($args['entities'] as $key => $field) {
+            $field['name'] = $this->getInputName($key);
+            $form .= $this->renderField($field);
         }
 
-        foreach ($this->entityFields as $fieldName => $fieldType) {
-            //$fieldValue = $this->getFieldValue($fieldName, $this->formData, $this->primaryKeyName);
-            $fieldValue = $this->entityValues[$fieldName] ?? '';
-            $fieldName = $this->splitCamelCase($fieldName);
-            $form .= $this->renderField($fieldName, $fieldType, $fieldValue);
-        }
-
-        $form .= $this->getSubmitButton($formData['button_label'] ?? 'Submit');
+        $form .= $this->getSubmitButton($args['button_label'] ?? 'Submit');
         $form .= $this->closeFormTag();
         return $form;
     }
 
-    // Aggiungi altri metodi di rendering del form qui, se necessario
-    private function renderTextField($fieldLabel, $fieldValue): string
+    public function renderField($field): string
     {
-        $name = $this->getInputName($fieldLabel);
+        $name = $field['name'];
+        $type = $field['type'];
+        $options = [];
+        if ($type == 'select' || $type == 'checkboxes') {
+            $options = $field['options'];
+        }
+        $value = $field['value'] ?? '';
+        // if fielName is 'password' or 'password_confirmation', $fieldType is 'password'
+        if (in_array(strtolower($name), ['password', 'password_confirmation'])) {
+            $type = 'password';
+        }
+
+        return match ($type) {
+            'textarea' => $this->renderTextAreaField($name, $value),
+            'number', 'int' => $this->renderNumberField($name, $value),
+            'datetime' => $this->renderDateTimeField($name, $value),
+            'date' => $this->renderDateField($name, $value),
+            'time' => $this->renderTimeField($name, $value),
+            'boolean' => $this->renderBooleanField($name, $value),
+            'password' => $this->renderPasswordField($name, $value),
+            'checkboxes' => $this->renderCheckboxesField($name, $options),
+            'select' => $this->renderSelectField($name, $options, $value),
+            default => $this->renderTextField($name, $value),
+        };
+    }
+
+    // Aggiungi altri metodi di rendering del form qui, se necessario
+    private function renderTextField($name, $fieldValue): string
+    {
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
+                    for="' . strtolower(str_replace(' ', '_', $name)) . '">' . ucfirst($name) . ':</label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    type="text" name="' . $name . '" id="' . $name . '" value="' . $fieldValue . '">
+                    type="text" name="' . strtolower(str_replace(' ', '_', $name)) . '" id="' . strtolower(str_replace(' ', '_', $name)) . '" value="' . $fieldValue . '">
                 </div>';
     }
 
-    private function renderTextAreaField($fieldLabel, $fieldValue): string
+    private function renderTextAreaField($name, $fieldValue): string
     {
-        $name = $this->getInputName($fieldLabel);
         return '<div class="mb-4 col-span-2">
                     <label 
                     class="block text-gray-700 text-sm font-bold mb-2"
-                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
+                    for="' . strtolower(str_replace(' ', '_', $name)) . '">' . ucfirst($name) . ':</label>
                     <textarea
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    name="' . $name . '" id="' . $name . '">' . $fieldValue . '</textarea>
+                    name="' . strtolower(str_replace(' ', '_', $name)) . '" id="' . strtolower(str_replace(' ', '_', $name)) . '">' . $fieldValue . '</textarea>
                 </div>';
     }
 
-    private function renderSelectField($fieldLabel, mixed $fieldOptions, ?string $fieldValue = ''): string
+    private function renderSelectField($name, mixed $fieldOptions, $fieldValue = ''): string
     {
-        $name = $this->getInputName($fieldLabel);
+
         $options = '';
 
         foreach ($fieldOptions as $value_arr) {
             // replace ' with \' in $value
             if (is_array($value_arr)) {
-                $value = str_replace("'", "", $value_arr['value']);
+                $value = $value_arr['value'];
                 $isSelect = $value === $fieldValue ? 'selected' : '';
                 $options .= '<option
                     ' . $isSelect . '
@@ -130,65 +104,76 @@ class FormRenderer
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
+                    for="' . strtolower(str_replace(' ', '_', $name)) . '">' . ucfirst($name) . ':</label>
                     <select
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    name="' . $name . '" id="' . $name . '">' . $options . '</select>
+                    name="' . strtolower(str_replace(' ', '_', $name)) . '" id="' . strtolower(str_replace(' ', '_', $name)) . '">' . $options . '</select>
                 </div>';
     }
 
-    private function renderDateField($fieldLabel, \DateTime|string $fieldValue): string
+    private function renderDateField($name, \DateTime|string $fieldValue): string
     {
-        $name = $this->getInputName($fieldLabel);
-        $fieldValue = $fieldValue ? $fieldValue->format('Y-m-d') : date('Y-m-d');
+
+        if ($fieldValue === '') {
+            // now in local timezone MYSQL. There is a 2 hour difference between the MySQL server and the local timezone
+            $fieldValue = (new \DateTime('Europe/Rome'))->format('Y-m-d');
+        }
+
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
+                    for="' . strtolower(str_replace(' ', '_', $name)) . '">' . ucfirst($name) . ':</label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    type="date" name="' . $name . '" id="' . $name . '" value="' . $fieldValue . '">
+                    type="date" name="' . strtolower(str_replace(' ', '_', $name)) . '" id="' . strtolower(str_replace(' ', '_', $name)) . '" value="' . $fieldValue . '">
                 </div>';
     }
 
-    private function renderBooleanField($fieldLabel, mixed $fieldValue): string
+    private function renderBooleanField($name, mixed $fieldValue): string
     {
-        $name = $this->getInputName($fieldLabel);
+
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
+                    for="' . strtolower(str_replace(' ', '_', $name)) . '">' . ucfirst($name) . ':</label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    type="checkbox" name="' . $name . '" id="' . $name . '" value="' . $fieldValue . '">
+                    type="checkbox" name="' . strtolower(str_replace(' ', '_', $name)) . '" id="' . strtolower(str_replace(' ', '_', $name)) . '" value="' . $fieldValue . '">
                 </div>';
     }
 
-    private function renderTimeField($fieldLabel, mixed $fieldValue): string
+    private function renderTimeField($name, mixed $fieldValue): string
     {
-        $name = $this->getInputName($fieldLabel);
+        if ($fieldValue instanceof \DateTime) {
+            $fieldValue = $fieldValue->format('H:i');
+        }
+
+        if ($fieldValue === '') {
+            // now in local timezone MYSQL. There is a 2 hour difference between the MySQL server and the local timezone
+            $fieldValue = (new \DateTime('Europe/Rome'))->format('H:i');
+        }
+
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
+                    for="' . strtolower(str_replace(' ', '_', $name)) . '">' . ucfirst($name) . ':</label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    type="time" name="' . $name . '" id="' . $name . '" value="' . $fieldValue . '">
+                    type="time" name="' . strtolower(str_replace(' ', '_', $name)) . '" id="' . strtolower(str_replace(' ', '_', $name)) . '" value="' . $fieldValue . '">
                 </div>';
     }
 
-    private function renderNumberField($fieldLabel, mixed $fieldValue): string
+    private function renderNumberField($name, mixed $fieldValue): string
     {
-        $name = $this->getInputName($fieldLabel);
         return '<div class="mb-4 col-span-2">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '">' . ucfirst($fieldLabel) . ':</label>
+                    for="' . strtolower(str_replace(' ', '_', $name)) . '">' . ucfirst($name) . ':</label>
                     <input
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                     type="number"
                     min="0" 
-                    name="' . $name . '" id="' . $name . '" value="' . $fieldValue . '">
+                    name="' . strtolower(str_replace(' ', '_', $name)) . '" id="' . strtolower(str_replace(' ', '_', $name)) . '" value="' . $fieldValue . '">
                 </div>';
     }
 
@@ -223,8 +208,8 @@ class FormRenderer
 
     private function getInputName($fieldName)
     {
-        $fieldName = str_replace(" ", "_", $fieldName);
-        return strtolower($fieldName);
+        $fieldName = $this->splitCamelCase($fieldName);
+        return ucwords($fieldName);
     }
 
     private function getGetterName($fieldName)
@@ -238,8 +223,7 @@ class FormRenderer
     private function renderPasswordField(string $fieldName): string
     {
         $name = $this->getInputName($fieldName);
-        $html = '<div class="flex justify-between mb-4 col-span-2">';
-        $html .= '<div class="mb-4 w-1/2 mr-2">
+        $html = '<div class="mb-4">
                     <label
                     class="block text-gray-700 text-sm font-bold mb-2" 
                     for="' . $name . '">' . ucfirst($fieldName) . ':</label>
@@ -247,15 +231,6 @@ class FormRenderer
                     class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
                     type="password" name="' . $name . '" id="' . $name . '">
                 </div>';
-        $html .= '<div class="mb-4 w-1/2 ml-2">
-                    <label
-                    class="block text-gray-700 text-sm font-bold mb-2" 
-                    for="' . $name . '_confirm">' . ucfirst($fieldName) . ' Confirmation:</label>
-                    <input
-                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
-                    type="password" name="' . $name . '_confirm" id="' . $name . '_confirm">
-                </div>';
-        $html .= '</div>';
         return $html;
     }
 
@@ -280,6 +255,27 @@ class FormRenderer
 
         $html .= '</div>';
         return $html;
+    }
+
+    private function renderDateTimeField(mixed $name, mixed $value)
+    {
+        if ($value instanceof \DateTime) {
+            $value = $value->format('Y-m-d\TH:i');
+        }
+
+        if ($value === '') {
+            // now in local timezone MYSQL. There is a 2 hour difference between the MySQL server and the local timezone
+            $value = (new \DateTime('Europe/Rome'))->format('Y-m-d\TH:i');
+        }
+
+        return '<div class="mb-4 col-span-2">
+                    <label
+                    class="block text-gray-700 text-sm font-bold mb-2" 
+                    for="' . $name . '">' . ucfirst($name) . ':</label>
+                    <input
+                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" 
+                    type="datetime-local" name="' . $name . '" id="' . $name . '" value="' . $value . '">
+                </div>';
     }
 
 }

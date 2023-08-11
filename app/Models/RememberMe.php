@@ -2,65 +2,39 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class RememberMe extends BaseModel {
 
-	private int $id_remember = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdRemember() {
-		return $this->id_remember;
-	}
+	protected int $id_remember;
 
-	public function setIdRemember($id_remember) {
-		$this->id_remember = $id_remember;
-	}
+	#[ForeignKey, Required]
 
-	private int $id_utente = 0;
+	protected int $id_utente;
 
-	public function getIdUtente() {
-		return $this->id_utente;
-	}
+	#[LabelColumn]
 
-	public function setIdUtente($id_utente) {
-		$this->id_utente = $id_utente;
-	}
+	protected string $token;
 
-	private string $token = '';
+	#[DateFormat("d/m/Y H:i:s")]
 
-	public function getToken() {
-		return $this->token;
-	}
+	protected ?\DateTime $expires_at;
 
-	public function setToken($token) {
-		$this->token = $token;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	private mixed $expires_at = null;
+	protected ?\DateTime $created_at;
 
-	public function getExpiresAt() {
-		return $this->expires_at;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function setExpiresAt($expires_at) {
-		$this->expires_at = $expires_at;
-	}
-
-	private mixed $created_at = null;
-
-	public function getCreatedAt() {
-		return $this->created_at;
-	}
-
-	public function setCreatedAt($created_at) {
-		$this->created_at = $created_at;
-	}
-
-	private mixed $updated_at = null;
-
-	public function getUpdatedAt() {
-		return $this->updated_at;
-	}
-
-	public function setUpdatedAt($updated_at) {
-		$this->updated_at = $updated_at;
-	}
+	protected ?\DateTime $updated_at;
 }

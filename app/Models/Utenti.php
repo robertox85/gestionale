@@ -2,85 +2,41 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class Utenti extends BaseModel {
 
-	private int $id_utente = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdUtente() {
-		return $this->id_utente;
-	}
+	protected int $id_utente;
 
-	public function setIdUtente($id_utente) {
-		$this->id_utente = $id_utente;
-	}
+	#[LabelColumn]
 
-	private string $nome = '';
+	protected string $nome;
 
-	public function getNome() {
-		return $this->nome;
-	}
+	protected string $cognome;
 
-	public function setNome($nome) {
-		$this->nome = $nome;
-	}
+	protected string $email;
 
-	private string $cognome = '';
+	protected string $password;
 
-	public function getCognome() {
-		return $this->cognome;
-	}
+	#[DropDown]
 
-	public function setCognome($cognome) {
-		$this->cognome = $cognome;
-	}
+	protected array $ruolo = ['admin', 'dipendente', 'guest'];
 
-	private string $email = '';
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function getEmail() {
-		return $this->email;
-	}
+	protected ?\DateTime $created_at;
 
-	public function setEmail($email) {
-		$this->email = $email;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	private string $password = '';
-
-	public function getPassword() {
-		return $this->password;
-	}
-
-	public function setPassword($password) {
-		$this->password = $password;
-	}
-
-	private mixed $ruolo = null;
-
-	public function getRuolo() {
-		return $this->ruolo;
-	}
-
-	public function setRuolo($ruolo) {
-		$this->ruolo = $ruolo;
-	}
-
-	private mixed $created_at = null;
-
-	public function getCreatedAt() {
-		return $this->created_at;
-	}
-
-	public function setCreatedAt($created_at) {
-		$this->created_at = $created_at;
-	}
-
-	private mixed $updated_at = null;
-
-	public function getUpdatedAt() {
-		return $this->updated_at;
-	}
-
-	public function setUpdatedAt($updated_at) {
-		$this->updated_at = $updated_at;
-	}
+	protected ?\DateTime $updated_at;
 }

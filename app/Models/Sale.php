@@ -2,55 +2,33 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class Sale extends BaseModel {
 
-	private int $id_sala = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdSala() {
-		return $this->id_sala;
-	}
+	protected int $id_sala;
 
-	public function setIdSala($id_sala) {
-		$this->id_sala = $id_sala;
-	}
+	#[LabelColumn]
 
-	private string $nome_sala = '';
+	protected string $nome_sala;
 
-	public function getNomeSala() {
-		return $this->nome_sala;
-	}
+	protected int $capacita;
 
-	public function setNomeSala($nome_sala) {
-		$this->nome_sala = $nome_sala;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	private int $capacita = 0;
+	protected ?\DateTime $created_at;
 
-	public function getCapacita() {
-		return $this->capacita;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function setCapacita($capacita) {
-		$this->capacita = $capacita;
-	}
-
-	private mixed $created_at = null;
-
-	public function getCreatedAt() {
-		return $this->created_at;
-	}
-
-	public function setCreatedAt($created_at) {
-		$this->created_at = $created_at;
-	}
-
-	private mixed $updated_at = null;
-
-	public function getUpdatedAt() {
-		return $this->updated_at;
-	}
-
-	public function setUpdatedAt($updated_at) {
-		$this->updated_at = $updated_at;
-	}
+	protected ?\DateTime $updated_at;
 }

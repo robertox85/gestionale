@@ -2,95 +2,55 @@
 
 namespace App\Models;
 
+use App\Attributes\Checboxes;
+use App\Attributes\DateFormat;
+use App\Attributes\DropDown;
+use App\Attributes\ForeignKey;
+use App\Attributes\Hidden;
+use App\Attributes\LabelColumn;
+use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
+
+
 class Prenotazioni extends BaseModel {
 
-	private int $id_prenotazione = 0;
+	#[PrimaryKey, Hidden]
 
-	public function getIdPrenotazione() {
-		return $this->id_prenotazione;
-	}
+	protected int $id_prenotazione;
 
-	public function setIdPrenotazione($id_prenotazione) {
-		$this->id_prenotazione = $id_prenotazione;
-	}
+	#[ForeignKey, Required]
 
-	private int $id_utente = 0;
+	protected int $id_utente;
 
-	public function getIdUtente() {
-		return $this->id_utente;
-	}
+	#[ForeignKey, Required]
 
-	public function setIdUtente($id_utente) {
-		$this->id_utente = $id_utente;
-	}
+	protected int $id_sala;
 
-	private int $id_sala = 0;
+	#[DateFormat("d/m/Y")]
 
-	public function getIdSala() {
-		return $this->id_sala;
-	}
+	protected ?\DateTime $giorno;
 
-	public function setIdSala($id_sala) {
-		$this->id_sala = $id_sala;
-	}
+	#[DateFormat("H:i:s")]
 
-	private mixed $data_ora_inizio = null;
+	protected ?\DateTime $data_ora_inizio;
 
-	public function getDataOraInizio() {
-		return $this->data_ora_inizio;
-	}
+	#[DateFormat("H:i:s")]
 
-	public function setDataOraInizio($data_ora_inizio) {
-		$this->data_ora_inizio = $data_ora_inizio;
-	}
+	protected ?\DateTime $data_ora_fine;
 
-	private mixed $data_ora_fine = null;
+	#[DropDown]
 
-	public function getDataOraFine() {
-		return $this->data_ora_fine;
-	}
+	protected array $ricorrenza = ['settimanale', 'mensile', 'nessuna'];
 
-	public function setDataOraFine($data_ora_fine) {
-		$this->data_ora_fine = $data_ora_fine;
-	}
+	#[Required, DateFormat("d/m/Y")]
 
-	private mixed $ricorrenza = null;
+	protected ?\DateTime $fine_ricorrenza;
 
-	public function getRicorrenza() {
-		return $this->ricorrenza;
-	}
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function setRicorrenza($ricorrenza) {
-		$this->ricorrenza = $ricorrenza;
-	}
+	protected ?\DateTime $created_at;
 
-	private mixed $fine_ricorrenza = null;
+	#[Required, Hidden, DateFormat("d/m/Y H:i:s")]
 
-	public function getFineRicorrenza() {
-		return $this->fine_ricorrenza;
-	}
-
-	public function setFineRicorrenza($fine_ricorrenza) {
-		$this->fine_ricorrenza = $fine_ricorrenza;
-	}
-
-	private mixed $created_at = null;
-
-	public function getCreatedAt() {
-		return $this->created_at;
-	}
-
-	public function setCreatedAt($created_at) {
-		$this->created_at = $created_at;
-	}
-
-	private mixed $updated_at = null;
-
-	public function getUpdatedAt() {
-		return $this->updated_at;
-	}
-
-	public function setUpdatedAt($updated_at) {
-		$this->updated_at = $updated_at;
-	}
+	protected ?\DateTime $updated_at;
 }

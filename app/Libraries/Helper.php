@@ -50,8 +50,8 @@ class Helper
 
     public static function getCurrentPage(): string
     {
-        $queryString = parse_url($_SERVER['HTTP_REFERER'], PHP_URL_QUERY);
-        $lastPage = basename(parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH));
+        $queryString = (isset($_SERVER['HTTP_REFERER']) && parse_url($_SERVER['HTTP_REFERER'], PHP_URL_QUERY) ? parse_url($_SERVER['HTTP_REFERER'], PHP_URL_QUERY) : '');
+        $lastPage = (isset($_SERVER['HTTP_REFERER']) ? parse_url($_SERVER['HTTP_REFERER'], PHP_URL_PATH) : '');
         if ($queryString) {
             $lastPage .= '?' . $queryString;
         }
@@ -65,7 +65,9 @@ class Helper
 
         // remove / from $page if exists and is not the only character
         if (strlen($page) > 1)
+        {
             $page = rtrim($page, '/');
+        }
 
 
         // remove base url from $page if exists
@@ -131,84 +133,6 @@ class Helper
         return $pageTitle;
     }
 
-    public static function getSingularName(string $pluralClassName)
-    {
-        // Espressioni regolari per individuare le terminazioni comuni dei nomi plurali
-        $pluralEndings = [
-            '/i$/' => 'e',         // es. "Utenti" diventa "Utente"
-            '/che$/' => 'ca',      // es. "DisponibilitaSale" diventa "DisponibilitaSala"
-            '/zi$/' => 'zio',         // es. "Servizi" diventa "Servizio"
-            '/le$/' => 'la',         // es. "DisponibilitaSale" diventa "DisponibilitaSala"
-            '/e$/' => 'a',         // es. "DisponibilitaSale" diventa "DisponibilitaSala"
-            // Aggiungi altre regole se necessario
-        ];
-
-        // Verifica se il nome plurale corrisponde a una delle regole
-        foreach ($pluralEndings as $pattern => $singularEnding) {
-            if (preg_match($pattern, $pluralClassName)) {
-                return preg_replace($pattern, $singularEnding, $pluralClassName);
-            }
-        }
-
-        // Se nessuna corrispondenza con le regole, rimuovi una "s" finale (implementazione fallback)
-        if (substr($pluralClassName, -1) === 's') {
-            return substr($pluralClassName, 0, -1);
-        }
-
-        // Se non è possibile trovare il nome singolare, ritorna semplicemente il nome plurale
-        return $pluralClassName;
-    }
-
-    public static function getPluralName(string $shortClassName)
-    {
-        // in Italiano
-        if (substr($shortClassName, -2) === 'ca') {
-            return substr($shortClassName, 0, -2) . 'che';
-        } elseif (substr($shortClassName, -1) === 'o') {
-            return substr($shortClassName, 0, -1) . 'i';
-        } elseif (substr($shortClassName, -1) === 'e') {
-            return substr($shortClassName, 0, -1) . 'i';
-        } elseif (substr($shortClassName, -1) === 'a') {
-            return substr($shortClassName, 0, -1) . 'e';
-        } elseif (substr($shortClassName, -1) === 'i') {
-            return substr($shortClassName, 0, -1) . 'i';
-        } elseif (substr($shortClassName, -1) === 'u') {
-            return substr($shortClassName, 0, -1) . 'i';
-        } elseif (substr($shortClassName, -1) === 's') {
-            return $shortClassName;
-        } else {
-            return $shortClassName . 's';
-        }
-    }
-
-    public static function getFullTableName(string $shortClassName)
-    {
-        // $shortClassName can be Utenti, or LogOperazioni. When is CamelCase, split into words
-        return preg_replace('/(?<!^)([A-Z])/', ' $1', $shortClassName);
-    }
-
-    public static function getTablePrimaryKeyName($fullTableName): string
-    {
-
-        // if $fullTableName is a ReflectionClass, get the short name
-        if (is_object($fullTableName)) {
-            $fullTableName = $fullTableName->getShortName();
-        }
-
-        $fullTableName = self::getFullTableName($fullTableName);
-
-
-        $fullTableName = explode(' ', $fullTableName);
-
-        // if the table name is a single word, return the singular name
-        if (count($fullTableName) === 1) {
-            return self::getSingularName($fullTableName[0]);
-        }
-
-        // if the table name is multiple words, return the singular name of the start word
-        return self::getSingularName($fullTableName[0]);
-    }
-
     public static function sanificaInput(array|null $dati = null, array $ignore_keys = [])
     {
         if (is_null($dati)) {
@@ -225,5 +149,25 @@ class Helper
             }
         }
         return $sanitized;
+    }
+
+    public static function getTableNameFromForeignKey(string $tableName, string $foreignKey)
+    {
+        $sql = "SELECT REFERENCED_TABLE_NAME ";
+        $sql .= "FROM INFORMATION_SCHEMA.KEY_COLUMN_USAGE ";
+        $sql .= "WHERE TABLE_NAME = '$tableName' ";
+        $sql .= "AND COLUMN_NAME = '$foreignKey' ";
+        $sql .= "AND REFERENCED_TABLE_NAME IS NOT NULL;";
+
+        $qb = new QueryBuilder(Database::getInstance());
+        $qb->setTable('INFORMATION_SCHEMA.KEY_COLUMN_USAGE');
+        $qb->select('REFERENCED_TABLE_NAME');
+        $qb->where('TABLE_NAME', $tableName, '=');
+        $qb->where('COLUMN_NAME', $foreignKey, '=');
+        $qb->where('REFERENCED_TABLE_NAME', 'NULL', 'IS NOT');
+        $result = $qb->rawSQL($sql);
+
+
+        return (count($result) > 0) ? $result[0]['REFERENCED_TABLE_NAME'] : null;
     }
 }
