@@ -2,6 +2,7 @@
 
 namespace App\Libraries;
 
+use App\Attributes\PrimaryKey;
 use PDO;
 use ReflectionClass;
 use ReflectionException;
@@ -22,7 +23,8 @@ class ReflectionHelper
         // Crea un'istanza del modello relazionale. Svuoto il costruttore per evitare errori
         $relatedModel = new $relatedModelClassName();
 
-        $keyField = $relatedModel->getPrimaryKey();
+        //$keyField = $relatedModel->getEntityPrimaryKey();
+        $keyField = $relatedModel->getEntityProperty(PrimaryKey::class); // Definisci il nome del campo da utilizzare come chiave per l'opzione select
         $valueField = $relatedModel->getLabelColumn(); // Definisci il nome del campo da utilizzare come valore per l'opzione select
         $relatedData = $relatedModel->getAll(); // Implementa il metodo per ottenere tutti i record dalla tabella relazionale
 

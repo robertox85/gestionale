@@ -18,7 +18,7 @@ class Risorse extends BaseModel {
 
 	protected int $id_risorsa;
 
-	#[LabelColumn]
+	#[LabelColumn, Required]
 
 	protected string $nome_risorsa;
 

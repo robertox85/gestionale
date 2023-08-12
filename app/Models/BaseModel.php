@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Attributes\ForeignKey;
 use App\Attributes\LabelColumn;
 use App\Attributes\PrimaryKey;
+use App\Attributes\Required;
 use App\Libraries\Database;
 
 use App\Libraries\QueryBuilder;
@@ -15,6 +16,8 @@ class BaseModel
     private ?string $shortClassName = null;
     private Database $db;
     private string $primaryKey;
+
+    private QueryBuilder $qb;
 
     public function __get($name)
     {
@@ -35,12 +38,12 @@ class BaseModel
 
     public function __construct($id = null)
     {
-        $this->db = Database::getInstance();
-        $this->primaryKey = $this->getPrimaryKey();
-
         // Inizializza tutte le proprietà nelle classi figlie
         $this->initializeProperties();
 
+        $this->db = Database::getInstance();
+        $this->qb = $this->initQueryBuilder();
+        $this->primaryKey = $this->getEntityProperty(PrimaryKey::class);
 
         if ($id !== null) {
             $this->load([':id' => $id]);
@@ -62,7 +65,7 @@ class BaseModel
         return $qb->setTable($this->getShortClassName());
     }
 
-    private function getShortClassName(): string
+    public function getShortClassName(): string
     {
         if ($this->shortClassName === null) {
             $this->shortClassName = (new \ReflectionClass($this))->getShortName();
@@ -77,7 +80,7 @@ class BaseModel
 
     public function load(array $params)
     {
-        $qb = $this->initQueryBuilder();
+        $qb = $this->qb;
         $qb = $qb->select('*');
         $qb = $qb->where($this->primaryKey, $params[':id'], '=');
         $result = $qb->first();
@@ -92,14 +95,14 @@ class BaseModel
         if ($id === null) {
             $id = $this->getId();
         }
-        $qb = $this->initQueryBuilder();
+        $qb = $this->qb;
         $qb = $qb->where($this->primaryKey, $id, '=');
         return $qb->delete();
     }
 
     public function bulkDelete(array $ids): \PDOStatement|bool
     {
-        $qb = $this->initQueryBuilder();
+        $qb = $this->qb;
         $qb = $qb->whereIn($this->primaryKey, $ids);
         return $qb->delete();
     }
@@ -120,7 +123,7 @@ class BaseModel
     public function create(): bool|string
     {
         $post = $this->getModelAttributes();
-        $qb = $this->initQueryBuilder();
+        $qb = $this->qb;
         $qb->insert($post);
         return $this->db->lastInsertId();
     }
@@ -128,7 +131,7 @@ class BaseModel
     public function update(): bool
     {
         $post = $this->getModelAttributes();
-        $qb = $this->initQueryBuilder();
+        $qb = $this->qb;
         $qb->where($this->primaryKey, $post[$this->primaryKey], '=');
         unset($post[$this->primaryKey]);
         return $qb->update($post);
@@ -154,15 +157,10 @@ class BaseModel
         $messages = [];
         foreach ($properties as $key => $value) {
             $key = strtolower($key);
-            $isRequired = false;
             if (property_exists($this, $key)) {
                 $reflectionProperty = new \ReflectionProperty($this, $key);
-                if ($this->getRequiredProperty($reflectionProperty)) {
-                    $isRequired = true;
-                }
-                // if is empty and is required, throw exception
+                $isRequired = $this->getPropertyAttribute($reflectionProperty, Required::class);
                 if ($isRequired && empty($value)) {
-                    //throw new Exception("Required: Il campo {$key} è obbligatorio.");
                     $messages[] = "Required: Il campo {$key} è obbligatorio.";
                 }
                 // setter
@@ -225,14 +223,24 @@ class BaseModel
         return $propertyName;
     }
 
-    public function getPrimaryKey($reflectionClass = null): ?string
+    // TODO: usare questa funzione per prendere gli attributi, al posto di getDateFormat e getDropDownProperty, ecc...
+    public function getPropertyAttribute($reflectionProperty, $attributeClass)
+    {
+        $attributes = $reflectionProperty->getAttributes($attributeClass);
+        if ($attributes && count($attributes) > 0) {
+            return $attributes[0]->newInstance();
+        }
+        return null;
+    }
+
+    public function getEntityProperty($attributeClass, $reflectionClass = null)
     {
         if ($reflectionClass === null) {
             $reflectionClass = new \ReflectionClass(static::class);
         }
-
         foreach ($reflectionClass->getProperties() as $property) {
-            if ($property->getAttributes(PrimaryKey::class)) {
+            $attributes = $property->getAttributes($attributeClass);
+            if ($attributes && count($attributes) > 0) {
                 return $property->getName();
             }
         }
@@ -321,6 +329,7 @@ class BaseModel
         return null;
     }
 
+
     public function getRequiredProperty(\ReflectionProperty $property)
     {
         $attributes = $property->getAttributes(\App\Attributes\Required::class);
@@ -334,7 +343,7 @@ class BaseModel
 
     public function getByField($field, $value)
     {
-        $qb = $this->initQueryBuilder();
+        $qb = $this->qb;
         $qb = $qb->select('*');
         $qb = $qb->where($field, $value, '=');
         $result = $qb->first();
@@ -352,18 +361,19 @@ class BaseModel
         $array = [];
         $reflectionClass = (new \ReflectionClass($this));
         $properties = $this->getVisibleProperties($reflectionClass);
-        $primaryKey = $this->getPrimaryKey($reflectionClass);
+        $primaryKey = $this->getEntityProperty(PrimaryKey::class, $reflectionClass);
+        $array[$primaryKey] = $this->$primaryKey;
         foreach ($properties as $key => $value) {
             $array[$key] = $this->$key;
         }
-        $array[$primaryKey] = $this->$primaryKey;
         return $array;
     }
 
     public function getAll(): array
     {
-        $qb = $this->initQueryBuilder();
+        $qb = $this->qb;
         $qb = $qb->select('*');
+        $qb = $qb->setAlias($this->primaryKey, 'id');
         return $qb->get();
     }
 
@@ -396,4 +406,5 @@ class BaseModel
             default => null,
         };
     }
+
 }
